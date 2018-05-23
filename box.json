@@ -1,0 +1,6 @@
+{
+    "directories": ["src"],
+    "main": "dktl.php",
+    "output": "dktl.phar",
+    "stub": true
+}
