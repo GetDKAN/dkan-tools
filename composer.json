@@ -1,0 +1,11 @@
+{
+    "name": "dafeder/dkan-tools",
+    "require": {
+        "consolidation/Robo": "~1"
+    },
+    "autoload": {
+        "psr-4": {
+            "DkanTools\\": "src"
+        }
+    }
+}
