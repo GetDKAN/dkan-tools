@@ -4,6 +4,8 @@ namespace DkanTools\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class TestCommand extends Command
 {
@@ -15,11 +17,14 @@ class TestCommand extends Command
       ->setName('test')
       ->setDescription('Tests the app.')
       ->setHelp('This command is just a test')
+      ->addArgument('thing')
     ;
   }
 
   protected function execute(InputInterface $input, OutputInterface $output)
   {
-    echo "yay!";
+    $things = $input->getArgument('thing');
+    // $thingstring = implode(' ', $things);
+    $output->writeln("Yay $things");
   }
 }

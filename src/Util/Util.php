@@ -9,26 +9,26 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
-class Util {
-    define("TMP_DIR", "./tmp");
+class Util
+{
+    const TMP_DIR = "./tmp";
 
-    public function prepare_tmp() {
-      $tmp_dir = TMP_DIR;
-      if(!file_exists($tmp_dir)) {
-        mkdir($tmp_dir);
+    public static function prepare_tmp() {
+      if(!file_exists(self::TMP_DIR)) {
+        mkdir(self::TMP_DIR);
       }
     }
 
-    public function bool_to_str($bool) {
+    public static function bool_to_str($bool) {
       return ($bool) ? 'true' : 'false';
     }
 
-    public function url_exists($url) {
+    public static function url_exists($url) {
       $headers = @get_headers($url);
       return (substr_count($headers[0], "404") > 0) ? FALSE : TRUE;
     }
 
-    public function get_all_files_with_extension($path, $ext) {
+    public static function get_all_files_with_extension($path, $ext) {
       $files_with_extension = [];
       $subs = get_all_subdirectories($path);
       foreach ($subs as $sub) {
@@ -38,7 +38,7 @@ class Util {
       return $files_with_extension;
     }
 
-    public function get_files_with_extension($path, $ext) {
+    public static function get_files_with_extension($path, $ext) {
       $files_with_extension = [];
       $files = get_files($path);
       foreach ($files as $file) {
@@ -50,7 +50,7 @@ class Util {
       return $files_with_extension;
     }
 
-    public function get_all_subdirectories($path) {
+    public static function get_all_subdirectories($path) {
       $all_subs = [];
       $stack = [$path];
       while (!empty($stack)) {
@@ -63,7 +63,7 @@ class Util {
     }
 
 
-    public function get_subdirectories($path) {
+    public static function get_subdirectories($path) {
       $directories_info = shell_table_to_array(`ls {$path} -lha | grep '^dr'`);
       $subs = [];
       foreach ($directories_info as $di) {
@@ -77,7 +77,7 @@ class Util {
       return $subs;
     }
 
-    public function get_files($path) {
+    public static function get_files($path) {
       $files_info = shell_table_to_array(`ls {$path} -lha | grep -v '^dr'`);
       $files = [];
       foreach ($files_info as $fi) {
@@ -90,7 +90,7 @@ class Util {
     }
 
 
-    public function shell_table_to_array($shell_table) {
+    public static function shell_table_to_array($shell_table) {
       $final = [];
       $lines = explode(PHP_EOL, $shell_table);
 
