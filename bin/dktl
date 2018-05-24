@@ -9,7 +9,7 @@ echo $pharPath;
 if ($pharPath) {
     require_once "$pharPath/vendor/autoload.php";
 } else {
-    require_once __DIR__.'/vendor/autoload.php';
+    require_once __DIR__.'/../vendor/autoload.php';
 }
 
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
