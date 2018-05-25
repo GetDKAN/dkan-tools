@@ -7,5 +7,7 @@
         "psr-4": {
             "DkanTools\\": "src"
         }
+    },
+    "require-dev": {
     }
 }
