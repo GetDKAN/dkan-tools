@@ -7,7 +7,7 @@ namespace DkanTools\Commands;
  *
  * @see http://robo.li/
  */
-class RoboFile extends \Robo\Tasks
+class BuildCommands extends \Robo\Tasks
 {
     /**
      * Say hello.
@@ -21,5 +21,13 @@ class RoboFile extends \Robo\Tasks
         }
         $worlds = implode(' ', $world);
         $this->say("Hello, $worlds");
+    }
+
+    /**
+     * Test some things.
+     */
+    function test()
+    {
+        $this->taskExec('pwd')->run();
     }
 }

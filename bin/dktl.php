@@ -14,7 +14,10 @@ if ($pharPath) {
 
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
-$commandClasses = [ \DkanTools\Commands\BuildCommands::class ];
+$commandClasses = [
+    \DkanTools\Commands\BuildCommands::class,
+    \DkanTools\Commands\DockerCommands::class
+];
 $statusCode = \Robo\Robo::run(
     $_SERVER['argv'],
     $commandClasses,
