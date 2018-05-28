@@ -10,6 +10,9 @@ class DockerCommands extends \Robo\Tasks
 {
     /**
      * Arbitrary docker compose command.
+     *
+     * @param string $cmd The command string to execute after "docker-compose"
+     * @param bool $printOutput Whether to set printOutput to true or false.
      */
     function dockerCompose(string $cmd, $printOutput = TRUE)
     {
@@ -56,24 +59,37 @@ class DockerCommands extends \Robo\Tasks
         return $this->dockerCompose("exec $service $cmdStr");
     }
 
+    /**
+     * Runs docker-compose ps to list project containers.
+     */
     function dockerPs()
     {
         return $this->dockerCompose('ps');
     }
 
-
+    /**
+     * Stop and remove all docker containers
+     */
     function dockerDestroy()
     {
         $this->dockerStop();
         return $this->dockerCompose('rm');
     }
 
+    /**
+     * Stop, destroy then rebuild project containers.
+     */
     function dockerReset()
     {
         $this->dockerDestroy();
         return $this->dockerUp();
     }
 
+    /**
+     * Open current project site in the browser.
+     *
+     * @param string $protocol Must be "http" or "https"
+     */
     function dockerUrl($protocol = 'http')
     {
         if (!in_array($protocol, ['http', 'https'])) {
@@ -88,6 +104,9 @@ class DockerCommands extends \Robo\Tasks
         return $this->taskOpenBrowser("{$protocol}://{$host}:{$port}")->run();
     }
 
+    /**
+     * Opens secure URL for project site in the browser.
+     */
     function dockerSurl()
     {
         return $this->dockerUrl('https');
