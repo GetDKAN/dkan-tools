@@ -2,7 +2,8 @@
     "name": "dafeder/dkan-tools",
     "require": {
         "consolidation/Robo": "~1",
-        "pear/archive_tar": "^1.4"
+        "pear/archive_tar": "^1.4",
+        "symfony/console": "3"
     },
     "autoload": {
         "psr-4": {
