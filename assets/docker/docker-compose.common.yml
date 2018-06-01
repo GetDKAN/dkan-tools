@@ -15,9 +15,9 @@ services:
       - solr
     volumes:
       # PHP configuration overrides
-      - "${DKTL_DIRECTORY}/docker/etc/php5/php.ini:/etc/php5/fpm/conf.d/z_php.ini"
-      - "${DKTL_DIRECTORY}/docker/etc/php5/xdebug-linux.ini:/etc/php5/xdebug-linux.ini"
-      - "${DKTL_DIRECTORY}/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/php.ini:/etc/php5/fpm/conf.d/z_php.ini"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-linux.ini:/etc/php5/xdebug-linux.ini"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
     network_mode: bridge
     labels:
       - "traefik.frontend.rule=Host:${SLUG}.${PROXY_DOMAIN}"
@@ -27,7 +27,7 @@ services:
       # Linked containers to browser will also need this setting.
       - no_proxy=""
     env_file:
-      - mysql.env
+      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
 
   # DB node
   db:
@@ -37,10 +37,10 @@ services:
       - "3306"
     # MYSQL Credentials in mysql.env
     env_file:
-      - mysql.env
+      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     volumes:
        # MySQL configuration overrides
-       - "${DKTL_DIRECTORY}/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
+       - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
        # Permanent DB data storage
        - /var/lib/mysql
     labels:
@@ -55,7 +55,7 @@ services:
     environment:
       - XDEBUG_CONFIG=idekey=PHPSTORM
     env_file:
-      - mysql.env
+      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
       - db
       - web
@@ -67,10 +67,9 @@ services:
       - "8888"
     volumes:
       # PHP configuration overrides
-      - "${DKTL_DIRECTORY}/docker/etc/php5/php-cli.ini:/etc/php5/cli/conf.d/z_php.ini"
-      - "${DKTL_DIRECTORY}/docker/etc/php5/xdebug-linux.ini:/etc/php5/xdebug-linux.ini"
-      - "${DKTL_DIRECTORY}/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
-      - "${DKTL_DIRECTORY}/scripts:/dktl/"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/php-cli.ini:/etc/php5/cli/conf.d/z_php.ini"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-linux.ini:/etc/php5/xdebug-linux.ini"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
       # Host SSH keys mapping. Uncomment one of the lines below based on your setup.
       - ~/.ssh:/.ssh
     labels:
@@ -128,7 +127,7 @@ services:
     ports:
       - "8983"
     volumes:
-      - "${DKTL_DIRECTORY}/docker/etc/solr/3.x:/var/lib/solr/conf"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
     labels:
       - "traefik.frontend.rule=Host:${SLUG}-solr.${PROXY_DOMAIN}"
     network_mode: bridge
