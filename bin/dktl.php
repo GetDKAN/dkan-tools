@@ -16,7 +16,9 @@ $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
 $commandClasses = [
     \DkanTools\Commands\BuildCommands::class,
-    \DkanTools\Commands\DockerCommands::class
+    \DkanTools\Commands\DockerCommands::class,
+    \DkanTools\Commands\DrupalCommands::class,
+    \DkanTools\Commands\DkanCommands::class
 ];
 $statusCode = \Robo\Robo::run(
     $_SERVER['argv'],

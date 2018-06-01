@@ -1,6 +1,8 @@
 <?php
 namespace DkanTools\Commands;
 
+use DkanTools\Util\Docker;
+
 /**
  * This is project's console commands configuration for Robo task runner.
  *
@@ -16,21 +18,8 @@ class DockerCommands extends \Robo\Tasks
      */
     function dockerCompose(string $cmd, $printOutput = TRUE)
     {
-        $confMain = dirname(__DIR__, 2) . '/assets/docker/docker-compose.common.yml';
-        $confVolume = dirname(__DIR__, 2) . '/assets/docker/docker-compose.nosync.yml';
-        // $confProxy = dirname(__DIR__, 2) . '/assets/docker/docker-compose.noproxy.yml';
-
-        $dockerCommand = "docker-compose -f $confMain -f $confVolume $cmd";
-        $slug = str_replace(['-', '_'], '', basename(getcwd()));
-
-        return $this->taskExecStack()
+        return $this->taskExec(Docker::cmd($cmd))
             ->printOutput($printOutput)
-            ->exec("export SLUG=$slug")
-            ->exec("export COMPOSE_PROJECT_NAME=$slug")
-            ->exec('export DKTL_DIRECTORY=' . __DIR__)
-            ->exec('export DKTL_CURRENT_DIRECTORY=' . getcwd())
-            ->exec('export PROXY_DOMAIN='. $this->getDockerProxy())
-            ->exec($dockerCommand)
             ->run();
     }
 
@@ -53,10 +42,10 @@ class DockerCommands extends \Robo\Tasks
     /**
      * Docker exec command.
      */
-    function dockerExec(string $service = 'cli', array $cmd = ['bash'])
+    function dockerExec(string $service, string $cmd)
     {
         $cmdStr = implode(' ', $cmd);
-        return $this->dockerCompose("exec $service $cmdStr");
+        return $this->dockerCompose("exec $service bash -c '$cmdStr'");
     }
 
     /**
@@ -102,6 +91,15 @@ class DockerCommands extends \Robo\Tasks
         $port = $this->dockerCompose("port web $intPort|cut -d ':' -f2", FALSE)
             ->getMessage();
         return $this->taskOpenBrowser("{$protocol}://{$host}:{$port}")->run();
+    }
+
+    function getDockerContainer($service)
+    {
+        return $this->dockerCompose("ps -q $service", FALSE)->getMessage();
+    }
+
+    function dockerContainer($service) {
+        $this->say($this->getDockerContainer($service));
     }
 
     /**

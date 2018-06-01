@@ -1,5 +1,5 @@
 <?php
-namespace DkanTools;
+namespace DkanTools\Util;
 
 /**
  * Misc utilities used throughout the application.
@@ -19,7 +19,7 @@ class Util
 
     public static function urlExists($url) {
       $headers = @get_headers($url);
-      return (substr_count($headers[0], "404") > 0) ? FALSE : TRUE;
+      return (count(preg_grep('/^HTTP.*404/', $headers)) > 0) ? FALSE : TRUE;
     }
 
     public static function getAllFilesWithExtension($path, $ext) {
