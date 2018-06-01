@@ -7,16 +7,12 @@ if [ -z `which docker-compose` ]; then
 fi
 
 dktl_symlink_location=$(which dktl)
-echo $dktl_symlink_location
-
 dktl_executable_location=$(readlink -f $dktl_symlink_location)
-echo $dktl_executable_location
 
 DKTL_DIRECTORY=$(dirname $(dirname $dktl_executable_location))
 export DKTL_DIRECTORY
 
 DKTL_CURRENT_DIRECTORY=$(pwd)
-# echo $DKTL_CURRENT_DIRECTORY
 export DKTL_CURRENT_DIRECTORY
 
 SLUG=${PWD##*/}
@@ -51,8 +47,6 @@ export PROXY_DOMAIN=$PROXY_DOMAIN
 
 if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
-elif [  -z "$1" ]; then
-    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/dktl.php --help
 else
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/dktl.php ${@:2}
 fi
