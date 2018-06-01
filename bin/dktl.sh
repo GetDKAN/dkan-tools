@@ -48,5 +48,5 @@ export PROXY_DOMAIN=$PROXY_DOMAIN
 if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
 else
-    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/dktl.php ${@:2}
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php ${@:2}
 fi
