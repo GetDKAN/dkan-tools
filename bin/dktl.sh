@@ -1,17 +1,4 @@
 #!/bin/bash
-
-function myHelp () {
-cat <<-END
-DKAN Tools
-----------
-
-More info to come!
-END
-}
-
-if [ -z "$1" ]; then
-    myHelp; exit 0
-fi
 if [ -z `which docker` ]; then
     echo "You don't seem to have docker installed. Exiting."; exit 1
 fi
@@ -51,9 +38,6 @@ else
     BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $DOCKER_COMPOSE_COMMON_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${SLUG}" --project-directory $DKTL_CURRENT_DIRECTORY"
 fi
 
-
-echo "DOCKER COMPOSE COMMAND: ${BASE_DOCKER_COMPOSE_COMMAND}"
-
 #Check for proxy container, get domain from that.
 PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
 
@@ -67,17 +51,8 @@ export PROXY_DOMAIN=$PROXY_DOMAIN
 
 if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
+elif [  -z "$1" ]; then
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/dktl.php --help
 else
-    script_file=$1.php
-    script_file_exists=$(docker-compose -f $DOCKER_COMPOSE_COMMON_CONF -f $VOLUME_CONF -f $PROXY_CONF -f $CUSTOM_CONF -p "${SLUG}" --project-directory $DKTL_CURRENT_DIRECTORY exec cli ls /dktl | grep $script_file)
-    echo $script_file_exists
-
-    $BASE_DOCKER_COMPOSE_COMMAND up -d
-    if [ -n "$script_file_exists" ]
-    then
-        $BASE_DOCKER_COMPOSE_COMMAND exec cli composer --working-dir=/dktl install
-        $BASE_DOCKER_COMPOSE_COMMAND exec cli php /dktl/$script_file ${@:2}
-    else
-        $BASE_DOCKER_COMPOSE_COMMAND exec cli $@
-    fi
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/dktl.php ${@:2}
 fi
