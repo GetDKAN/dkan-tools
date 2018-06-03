@@ -1,7 +1,7 @@
 <?php
 namespace DkanTools\Commands;
 
-use DkanTools\Util\Docker;
+use DkanTools\Util\Util;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -10,26 +10,78 @@ use DkanTools\Util\Docker;
  */
 class DrupalCommands extends \Robo\Tasks
 {
-    function DrupalRebuild(string $db = NULL)
+    /**
+     * Run make for Drupal core.
+     */
+    function drupalMake($opts = ['yes|y' => false])
     {
-        if (!isset($db)) {
-            $db = Docker::getDbUrl();
+        if (file_exists('docroot')) {
+            if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. Delete it and reinstall drupal?')) {
+                $this->io()->warning('Make aborted');
+                exit;
+            }
+            $this->_deleteDir('docroot');
         }
-        $this->say($db);
-        $dbContainer = Docker::getDbContainer();
-        $this->say($dbContainer);
-        $dbContainer = Docker::getDbContainer();
-        $this->say($dbContainer);
-        $dbContainer = Docker::getDbContainer();
-        $this->say($dbContainer);
-        die();
-        $concurrency=`grep -c ^processor /proc/cpuinfo`;
+
+        $result = $this->taskExec('drush make -y dkan/drupal-org-core.make')
+            ->arg('--root=docroot')
+            ->arg('--concurrency=' . Util::drushConcurrency())
+            ->arg('--prepare-install')
+            ->arg('--overrides=../config/drupal-org-core.make')
+            ->arg('docroot')
+            ->run();
+
+        if ($this->say($result->getExitCode()) == 0 && file_exists('docroot')) {
+            $this->io()->success('Drupal core successfully downloaded to docroot folder.');
+        }
+
+        $this->drupalDkanLink();
+    }
+
+    function drupalDkanLink()
+    {
+        if (file_exists('dkan') && file_exists('docroot')) {
+            $this->_exec('ln -s ../../dkan docroot/profiles/dkan');
+            $this->io()->success('Successfully linked DKAN to docroot/profiles');
+        }
+        else {
+            throw new \Exception("Could not link profile folder. Folders 'dkan' and 'docroot' must both be present to create link.");
+        }
+    }
+
+    /**
+     * Run Drupal minimal installation script. Takes mysql url as optional
+     * argument.
+     *
+     * @todo Implement settings.php rewrite function from ahoy.
+     *
+     * @param string $db Mysql connection string.
+     */
+    function drupalInstallMin($db = NULL)
+    {
+        $db = $db ? $db : $this->getDbUrl();
         $update = "install_configure_form.update_status_module='array(false,false)'";
 
-        return $this->taskExecStack()
-            ->exec("drush --root=docroot  make --concurrency=$concurrency --prepare-install dkan/drupal-org-core.make docroot --yes")
-            ->exec("drush --root=docroot -y --verbose si minimal --sites-subdir=default --account-pass='admin' --db-url=$db $update")
-            ->exec('ln -s ../../dkan docroot/profiles/dkan')
+        $result = $this->taskExec('drush -y si minimal')->dir('docroot')
+            ->arg('--verbose')
+            ->arg('--sites-subdir=default')
+            ->arg('--account-pass=admin')
+            ->arg("--db-url=$db")
+            ->rawArg($update)
             ->run();
+        if ($result->getExitCode() == 0) {
+            $this->io()->success('Drupal successfully installed with minimal profile. Type "dktl docker:url" to test.');
+        }
     }
+
+    /**
+     * Get the mysql connection string.
+     *
+     * @todo Stop hardcoding and get from env or make dynamic.
+     */
+    function getDbUrl()
+    {
+        return 'mysql://drupal:123@db/drupal';
+    }
+
 }

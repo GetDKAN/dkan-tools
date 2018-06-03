@@ -10,6 +10,16 @@ class Util
 {
     const TMP_DIR = "./tmp";
 
+    public static function drushConcurrency() {
+        if (`uname` == "Darwin") {
+            $concurrency = trim(`sysctl -n hw.ncpu`);
+        }
+        else {
+            $concurrency = trim(`grep -c ^processor /proc/cpuinfo`);
+        }
+        return is_numeric($concurrency) ? $concurrency : '';
+    }
+
     public static function prepareTmp() {
       $tmp_dir = self::TMP_DIR;
       if(!file_exists($tmp_dir)) {
