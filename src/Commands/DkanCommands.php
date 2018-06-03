@@ -12,6 +12,82 @@ class DkanCommands extends \Robo\Tasks
 {
     const DKAN_TMP_DIR = Util::TMP_DIR . "/dkan";
 
+    function dkanMake()
+    {
+        // if (!file_exists('docroot')) {
+        //   throw new \Exception("A Drupal docroot must be present before running DKAN make.");
+        // }
+        // Discover proper concurrency setting for system.
+
+        $this->_deleteDir(['dkan/modules/contrib', 'dkan/themes/contrib', 'dkan/libraries']);
+
+        $this->taskExec('drush -y make dkan/drupal-org.make')
+            ->arg('--contrib-destination=./')
+            ->arg('--no-core')
+            ->arg('--root=docroot')
+            ->arg('--no-recursion')
+            ->arg('--no-cache')
+            ->arg('--verbose')
+            ->arg('--concurrency=' . Utils::drushConcurrency())
+            ->arg('dkan')
+            ->run();
+    }
+
+    /**
+     * Run DKAN DB installation. Pass --backup (-b) to restore from last backup.
+     *
+     * @todo Use Robo config system to load options, allow overrides.
+     */
+    function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'dkan'])
+    {
+        if ($opts['backup']) {
+            $this->restoreFromBackup();
+            exit;
+        }
+        $result = $this->taskExec('drush -y si dkan')
+            ->dir('docroot')
+            ->arg('--verbose')
+            ->arg("account-pass={$opts['account-pass']}")
+            ->arg("--site-name={$opts['site-name']}")
+            ->rawArg('install_configure_form.update_status_module=\'array(FALSE,FALSE)\'')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Installation command failed.');
+            return $result;
+        }
+        $this->io()->success('Installation completed successfully.');
+
+        if (!file_exists('backups')) {
+            $this->_mkdir('backups');
+        }
+        $result = $this->taskExec('drush sql-dump > ../backups/last_install.sql')
+            ->dir('docroot')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->success('Backup created in "backups" folder.');
+        }
+    }
+
+    private function restoreFromBackup()
+    {
+        if (!file_exists('backups') || !file_exists('backups/last_install.sql')) {
+            throw new \Exception('Last DB backup could not be found.');
+        }
+        $result = $this->taskExec('drush -y sql-drop')->dir('docroot')->run();
+        if ($result->getExitCode() != 0) {
+            return $result;
+        }
+        $this->say("Removed tables, restoring DB");
+        $result = $this->taskExec('drush sqlc <')
+            ->arg('../backups/last_install.sql')
+            ->dir('docroot')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->success('Database backup restored.');
+            return $result;
+        }
+    }
+
     function dkanGet(string $version = NULL, $opts = ['source' => FALSE])
     {
 
@@ -71,7 +147,7 @@ class DkanCommands extends \Robo\Tasks
         $dkanPermanent = getcwd() . '/dkan';
         $replaced = FALSE;
         if (file_exists($dkanPermanent)) {
-            if ($this->confirm("Are you sure you want to replace your current DKAN profile directory?")) {
+            if ($this->io()->confirm("Are you sure you want to replace your current DKAN profile directory?")) {
                 $this->_deleteDir($dkanPermanent);
                 $replaced = TRUE;
             }
