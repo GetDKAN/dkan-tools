@@ -47,6 +47,13 @@ export PROXY_DOMAIN=$PROXY_DOMAIN
 
 if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
+# @todo Need to get proxy support working again at some point.
+elif [ "$1" = "docker:url" ]; then
+    echo -n "http://$PROXY_DOMAIN"
+    echo -n ":`$BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2`"
+elif [ "$1" = "docker:surl" ]; then
+    echo -n "https://$PROXY_DOMAIN"
+      echo -n ":`$BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2`"
 else
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 ${@:2}
 fi
