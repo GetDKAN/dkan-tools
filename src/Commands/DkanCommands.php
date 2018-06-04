@@ -12,13 +12,11 @@ class DkanCommands extends \Robo\Tasks
 {
     const DKAN_TMP_DIR = Util::TMP_DIR . "/dkan";
 
+    /**
+     * Run the DKAN make file and apply any overrides from /config.
+     */
     function dkanMake()
     {
-        // if (!file_exists('docroot')) {
-        //   throw new \Exception("A Drupal docroot must be present before running DKAN make.");
-        // }
-        // Discover proper concurrency setting for system.
-
         $this->_deleteDir(['dkan/modules/contrib', 'dkan/themes/contrib', 'dkan/libraries']);
 
         $this->taskExec('drush -y make dkan/drupal-org.make')
@@ -28,7 +26,8 @@ class DkanCommands extends \Robo\Tasks
             ->arg('--no-recursion')
             ->arg('--no-cache')
             ->arg('--verbose')
-            ->arg('--concurrency=' . Utils::drushConcurrency())
+            ->arg('--overrides=../config/dkan-override.make')
+            ->arg('--concurrency=' . Util::drushConcurrency())
             ->arg('dkan')
             ->run();
     }
