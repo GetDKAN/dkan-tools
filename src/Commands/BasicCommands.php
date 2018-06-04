@@ -9,7 +9,7 @@ use DkanTools\Util\Util;
  *
  * @see http://robo.li/
  */
-class BuildCommands extends \Robo\Tasks
+class BasicCommands extends \Robo\Tasks
 {
     /**
      * Test some things.
