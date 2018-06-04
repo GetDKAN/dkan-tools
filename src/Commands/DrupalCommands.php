@@ -27,27 +27,52 @@ class DrupalCommands extends \Robo\Tasks
             ->arg('--root=docroot')
             ->arg('--concurrency=' . Util::drushConcurrency())
             ->arg('--prepare-install')
-            ->arg('--overrides=../config/drupal-org-core.make')
+            ->arg('--overrides=../config/drupal-override.make')
             ->arg('docroot')
             ->run();
 
-        if ($this->say($result->getExitCode()) == 0 && file_exists('docroot')) {
+        if ($result->getExitCode() == 0 && file_exists('docroot')) {
             $this->io()->success('Drupal core successfully downloaded to docroot folder.');
         }
 
         $this->drupalDkanLink();
+        $this->drupalCustomLink();
     }
 
+    /**
+     * Link the DKAN folder. Runs automatically with drupal:make
+     */
     function drupalDkanLink()
     {
-        if (file_exists('dkan') && file_exists('docroot')) {
-            $this->_exec('ln -s ../../dkan docroot/profiles/dkan');
-            $this->io()->success('Successfully linked DKAN to docroot/profiles');
-        }
-        else {
+        if (!file_exists('dkan') || !file_exists('docroot')) {
             throw new \Exception("Could not link profile folder. Folders 'dkan' and 'docroot' must both be present to create link.");
+            return;
         }
+        $result = $this->_exec('ln -s ../../dkan docroot/profiles/dkan');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not crete link');
+            return $result;
+        }
+        $this->io()->success('Successfully linked DKAN to docroot/profiles');
     }
+
+    /**
+     * Link the modules/custom folder. Runs automatically with drupal:make
+     */
+    function drupalCustomLink()
+    {
+        if (!file_exists('config/modules/custom') || !file_exists('docroot')) {
+            throw new \Exception("Could not link custom folder. Folders 'config/modules/custom' and 'docroot' must both be present to create link.");
+            return;
+        }
+        $result = $this->_exec('ln -s ../../config/modules/custom docroot/sites/all/modules/custom');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not crete link');
+            return $result;
+        }
+        $this->io()->success('Successfully linked DKAN to docroot/profiles');
+    }
+
 
     /**
      * Run Drupal minimal installation script. Takes mysql url as optional
