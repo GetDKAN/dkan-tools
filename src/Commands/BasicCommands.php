@@ -14,9 +14,10 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Test some things.
      */
-    function test()
+    function test(array $cmd)
     {
-        $this->say(Util::getDktlRoot());
+        $cmdStr = implode(' ', $cmd);
+        $this->say($cmdStr);
     }
 
     /**
@@ -61,5 +62,20 @@ class BasicCommands extends \Robo\Tasks
                 $this->io()->success("Config directory successfully initialized.");
             }
         }
+    }
+
+    /**
+     * Run drush command on current site.
+     *
+     * Run drush command on current site. If you get errors for passing
+     * arguments starting with dashes (for instance, "uri=") add a double dash
+     * before the drush command string. E.g. "dktl drush -- uli --uri=my-uri".
+      */
+    function drush(array $cmd) {
+        $drushExec = $this->taskExec('drush')->dir('docroot');
+        foreach ($cmd as $arg) {
+            $drushExec->arg($arg);
+        }
+        $drushExec->run();
     }
 }

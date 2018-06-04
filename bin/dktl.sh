@@ -1,4 +1,12 @@
 #!/bin/bash
+find-up () {
+  path=$(pwd)
+  while [[ "$path" != "" && ! -e "$path/$1" ]]; do
+    path=${path%/*}
+  done
+  echo "$path"
+}
+
 if [ -z `which docker` ]; then
     echo "You don't seem to have docker installed. Exiting."; exit 1
 fi
@@ -12,10 +20,13 @@ dktl_executable_location=$(readlink -f $dktl_symlink_location)
 DKTL_DIRECTORY=$(dirname $(dirname $dktl_executable_location))
 export DKTL_DIRECTORY
 
-DKTL_CURRENT_DIRECTORY=$(pwd)
+DKTL_CURRENT_DIRECTORY=$(find-up dktl.yml)
+if [ -z $DKTL_CURRENT_DIRECTORY ]; then
+    DKTL_CURRENT_DIRECTORY=$(pwd)
+fi
 export DKTL_CURRENT_DIRECTORY
 
-SLUG=${PWD##*/}
+SLUG=${DKTL_CURRENT_DIRECTORY##*/}
 SLUG=${SLUG//-/}
 SLUG=${SLUG//_/}
 SLUG=$(echo ${SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]") # Mixed case dirs cause issue with docker image names

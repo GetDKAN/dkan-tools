@@ -20,11 +20,11 @@ That's it! All other dependencies are included in the Docker containers that dka
 ln -s /my/dktl/location/bin/dktl.sh ~/bin/dktl
 ```
 
-_Composer-based installation coming soon!_ 
+_Composer-based installation coming soon!_
 
 ## Usage
 
-The `dktl` script assumes that it is being run from the root directory of a DKAN project. A DKAN project will ultimately have the following contents:
+The `dktl` script assumes that it is being run from inside a DKAN project. A DKAN project will ultimately have the following contents:
 
 * `dkan/` dir: The DKAN code, cloned or downloaded from https://github.com/GetDKAN/dkan
 * `docroot/`: The full Drupal codebase. The `dkan/` dir will be symlinked into `docroot/profiles/`.
