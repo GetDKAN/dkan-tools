@@ -10,6 +10,10 @@ class Util
 {
     const TMP_DIR = "./tmp";
 
+    public static function getDktlRoot() {
+        return dirname(__DIR__, 2);
+    }
+
     public static function drushConcurrency() {
         if (`uname` == "Darwin") {
             $concurrency = trim(`sysctl -n hw.ncpu`);
