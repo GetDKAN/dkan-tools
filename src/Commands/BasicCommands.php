@@ -23,10 +23,10 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Initialize DKAN project directory.
      */
-    function init()
+    function init($opts = ['host' => ''])
     {
         $dktlRoot = Util::getDktlRoot();
-        if (file_exists('dktl.yml') && file_exists('config')) {
+        if (file_exists('dktl.yml') && file_exists('config') && file_exists('site')) {
             throw new \Exception("This project has already been initialized.");
             exit;
         }
@@ -62,6 +62,49 @@ class BasicCommands extends \Robo\Tasks
                 $this->io()->success("Config directory successfully initialized.");
             }
         }
+        if (file_exists('site')) {
+            $this->io()->warning('The site directory already exists in this directory; skipping.');
+        }
+        else {
+            // Create the site directory. This will get symlinked into
+            // docroot/sites/all/default.
+            $this->_mkdir('site');
+            $result = $this->taskWriteToFile('site/settings.docker.php')
+                ->textFromFile("$dktlRoot/assets/site/settings.docker.php")
+                ->run();
+            if ($opts['host']) {
+                $this->initHost($opts['host']);
+            }
+        }
+    }
+
+    /**
+     * Initialize host settings.
+     *
+     * @todo Fix opts, make required.
+     */
+    function initHost($host = NULL) {
+        $dktlRoot = Util::getDktlRoot();
+        $settingsFile = "settings.$host.php";
+        if (!$host) {
+            throw new \Exception("Host not specified.");
+            exit;
+        }
+        if (!file_exists("$dktlRoot/assets/site/$settingsFile")) {
+            $this->io()->warning("Host settings for '$host' not supported; skipping.");
+            exit;
+        }
+        if (!file_exists('site')) {
+            throw new \Exception("The project's site directory must be initialized before adding host settings.");
+            exit;
+        }
+        if (file_exists("site/$settingsFile")) {
+            $this->io()->warning("Host settings for '$host' already initialized; skipping.");
+            exit;
+        }
+        $result = $this->taskWriteToFile("site/settings.$host.php")
+            ->textFromFile("$dktlRoot/assets/site/settings.$host.php")
+            ->run();
     }
 
     /**
