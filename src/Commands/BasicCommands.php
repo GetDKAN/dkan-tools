@@ -73,7 +73,7 @@ class BasicCommands extends \Robo\Tasks
             // docroot/sites/all/default.
             $this->_mkdir('assets/sites/default');
             $this->_mkdir('assets/sites/default/files');
-            $this->_mkdir('chmod 777 assets/sites/default/files');
+            $this->_exec('chmod 777 assets/sites/default/files');
             $result = $this->taskWriteToFile('assets/sites/default/settings.php')
                 ->textFromFile("$dktlRoot/assets/site/settings.php")
                 ->run();
