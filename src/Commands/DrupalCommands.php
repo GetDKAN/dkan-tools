@@ -37,6 +37,7 @@ class DrupalCommands extends \Robo\Tasks
 
         $this->drupalDkanLink();
         $this->drupalCustomLink();
+        $this->drupalSitesDefaultLink();
     }
 
     /**
@@ -56,6 +57,27 @@ class DrupalCommands extends \Robo\Tasks
         $this->io()->success('Successfully linked DKAN to docroot/profiles');
     }
 
+
+    /**
+     * Link the DKAN folder. Runs automatically with drupal:make
+     */
+    function drupalSitesDefaultLink()
+    {
+        if (!file_exists('assets') || !file_exists('docroot')) {
+            throw new \Exception("Could not link sites/default folder. Folders 'assets' and 'docroot' must both be present to create link.");
+            return;
+        }
+        $result = $this->taskExecStack()
+            ->stopOnFail()
+            ->exec('rm -rf docroot/sites/default')
+            ->exec('ln -s ../../assets/sites/default docroot/sites/default');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not crete link');
+            return $result;
+        }
+        $this->io()->success('Successfully linked assets/sites/default folder to docroot/sites/default');
+    }
+
     /**
      * Link the modules/custom folder. Runs automatically with drupal:make
      */
@@ -70,7 +92,7 @@ class DrupalCommands extends \Robo\Tasks
             $this->io()->error('Could not crete link');
             return $result;
         }
-        $this->io()->success('Successfully linked DKAN to docroot/profiles');
+        $this->io()->success('Successfully linked custom/modules to docroot/sites/all/modules/custom');
     }
 
 
