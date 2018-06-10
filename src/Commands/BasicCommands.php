@@ -26,7 +26,8 @@ class BasicCommands extends \Robo\Tasks
     function init($opts = ['host' => ''])
     {
         $dktlRoot = Util::getDktlRoot();
-        if (file_exists('dktl.yml') && file_exists('config') && file_exists('site')) {
+        $this->io()->section('Initializing dktl configuration');
+        if (file_exists('dktl.yml') && file_exists('config') && file_exists('assets')) {
             throw new \Exception("This project has already been initialized.");
             exit;
         }
@@ -42,6 +43,7 @@ class BasicCommands extends \Robo\Tasks
                 $this->io()->success("dktl.yml file successfully initialized.");
             }
         }
+        $this->io()->section('Initializing config directory');
         if (file_exists('config')) {
             $this->io()->warning('The config directory already exists in this directory; skipping.');
         }
@@ -62,14 +64,20 @@ class BasicCommands extends \Robo\Tasks
                 $this->io()->success("Config directory successfully initialized.");
             }
         }
-        if (file_exists('site')) {
-            $this->io()->warning('The site directory already exists in this directory; skipping.');
+        $this->io()->section('Initializing assets directory');
+        if (file_exists('assets')) {
+            $this->io()->warning('The assets directory already exists in this directory; skipping.');
         }
         else {
             // Create the site directory. This will get symlinked into
             // docroot/sites/all/default.
-            $this->_mkdir('site');
-            $result = $this->taskWriteToFile('site/settings.docker.php')
+            $this->_mkdir('assets/sites/default');
+            $this->_mkdir('assets/sites/default/files');
+            $this->_mkdir('chmod 777 assets/sites/default/files');
+            $result = $this->taskWriteToFile('assets/sites/default/settings.php')
+                ->textFromFile("$dktlRoot/assets/site/settings.php")
+                ->run();
+            $result = $this->taskWriteToFile('assets/sites/default/settings.docker.php')
                 ->textFromFile("$dktlRoot/assets/site/settings.docker.php")
                 ->run();
             if ($opts['host']) {
