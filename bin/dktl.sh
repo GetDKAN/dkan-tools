@@ -68,3 +68,10 @@ elif [ "$1" = "drush" ]; then
 else
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 ${@:2}
 fi
+
+# Docker creates files that appear as owned by root on host. Fix:
+if [ ! -z `find $DKTL_CURRENT_DIRECTORY -user root -print -quit` ]; then
+    CHOWN_CMD="sudo chown -R $USER:$USER ./"
+    echo "➜  Changing ownership of new files to host user"
+    echo -e "\e[32m$CHOWN_CMD\e[39m" && $CHOWN_CMD
+fi
