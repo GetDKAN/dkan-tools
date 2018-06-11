@@ -11,6 +11,14 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class TestCommands extends \Robo\Tasks
 {
+    /**
+     * Initialize test folders and install dependencies for running tests.
+     *
+     * Initialize test folders and install dependencies for running tests. This
+     * command will run composer install, and create an "assets" folder under
+     * "dkan/test" for output. Usually this command does not need to be run on
+     * its own as all other test commands run it first.
+     */
     function testInit()
     {
         if (!file_exists('docroot/profiles/dkan/test/vendor')) {
@@ -21,11 +29,25 @@ class TestCommands extends \Robo\Tasks
         }
         if (!file_exists('docroot/profiles/dkan/test/assets')) {
             $this->io()->section('Creating test subdirectories.');
-            $this->_mkdir('docroot/profiles/dkan/test/assets/junit');            
+            $this->_mkdir('docroot/profiles/dkan/test/assets/junit');
         }
     }
 
-    function testBehat(array $opts = ['name' => InputOption::VALUE_REQUIRED])
+    /**
+     * Runs DKAN core Behat tests.
+     *
+     * Runs DKAN core Behat tests. Pass any additional behat options as
+     * arguments. For example:
+     *
+     * dktl test:behat --name="Datastore API"
+     *
+     * or
+     *
+     * dktl test:behat features/workflow.feature
+     *
+     * @param array $args  Array of arguments to create a full Drush command.
+     */
+    function testBehat(array $args)
     {
         $this->testInit();
         $behatExec = $this->taskExec('bin/behat')
@@ -37,9 +59,23 @@ class TestCommands extends \Robo\Tasks
             ->arg('--format=junit')
             ->arg('--out=assets/junit')
             ->arg('--config=behat.docker.yml');
-        if ($opts['name']) {
-            $behatExec->arg("--name={$opts['name']}");
+
+        foreach ($args as $arg) {
+            $behatExec->arg($arg);
         }
-        $behatExec->run();
+        return $behatExec->run();
+    }
+
+    function testPhpunit(array $args)
+    {
+        $this->testInit();
+        $phpunitExec = $this->taskExec('bin/phpunit')
+            ->dir('docroot/profiles/dkan/test')
+            ->arg('--configuration=phpunit');
+
+        foreach ($args as $arg) {
+            $phpunitExec->arg($arg);
+        }
+        return $phpunitExec->run();
     }
 }
