@@ -40,8 +40,8 @@ class DkanCommands extends \Robo\Tasks
     function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'DKAN'])
     {
         if ($opts['backup']) {
-            $this->restoreFromBackup();
-            exit;
+            $result = $this->restoreFromBackup();
+            return $result;
         }
         if (!file_exists('docroot/modules') || !file_exists('dkan/modules/contrib')) {
             throw new \Exception('Codebase not fully built, install could not procede.');
