@@ -56,6 +56,8 @@ fi
 
 export PROXY_DOMAIN=$PROXY_DOMAIN
 
+# We do a little parsing of the args and perform a few transformations before
+# sending to docker. Try to keep this section from bloating out of control.
 if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
 # @todo Need to get proxy support working again at some point.
@@ -63,8 +65,12 @@ elif [ "$1" = "docker:url" ]; then
     echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2)"
 elif [ "$1" = "docker:surl" ]; then
     echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
-elif [ "$1" = "drush" ]; then
-    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 -- "${@:2}" --uri=`dktl docker:surl`
+elif [ "$1" = "drush:uli" ]; then
+    # For drush commands, we also add the URI argument in case it's useful
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php drush -- uli --uri=`dktl docker:surl`
+elif [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "test:phpunit" ]; then
+    # For several commands, we want to insert a "--" to pass all arguments as an array.
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 -- "${@:2}"
 else
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 "${@:2}"
 fi
