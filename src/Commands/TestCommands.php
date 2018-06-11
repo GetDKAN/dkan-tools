@@ -21,15 +21,15 @@ class TestCommands extends \Robo\Tasks
      */
     function testInit()
     {
-        if (!file_exists('docroot/profiles/dkan/test/vendor')) {
+        if (!file_exists('dkan/test/vendor')) {
             $this->io()->section('Installing test dependencies.');
             $this->taskExec('composer install --prefer-source --no-interaction')
-                ->dir('docroot/profiles/dkan/test')
+                ->dir('dkan/test')
                 ->run();
         }
-        if (!file_exists('docroot/profiles/dkan/test/assets')) {
+        if (!file_exists('dkan/test/assets')) {
             $this->io()->section('Creating test subdirectories.');
-            $this->_mkdir('docroot/profiles/dkan/test/assets/junit');
+            $this->_mkdir('dkan/test/assets/junit');
         }
     }
 
@@ -51,7 +51,7 @@ class TestCommands extends \Robo\Tasks
     {
         $this->testInit();
         $behatExec = $this->taskExec('bin/behat')
-            ->dir('docroot/profiles/dkan/test')
+            ->dir('dkan/test')
             ->arg('--colors')
             ->arg('--suite=dkan')
             ->arg('--format=pretty')
@@ -70,7 +70,7 @@ class TestCommands extends \Robo\Tasks
     {
         $this->testInit();
         $phpunitExec = $this->taskExec('bin/phpunit')
-            ->dir('docroot/profiles/dkan/test')
+            ->dir('dkan/test')
             ->arg('--configuration=phpunit');
 
         foreach ($args as $arg) {
