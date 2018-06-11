@@ -66,10 +66,22 @@ class TestCommands extends \Robo\Tasks
         return $behatExec->run();
     }
 
+    /**
+     * Runs DKAN core PhpUnit tests.
+     *
+     * Runs DKAN core PhpUnit tests. Pass any additional PhpUnit options as
+     * arguments. For example:
+     *
+     * dktl test:phpunit --testsuite="DKAN Harvest Test Suite"
+     *
+     * @see https://phpunit.de/manual/6.5/en/textui.html
+     *
+     * @param array $args  Array of arguments to create a full Drush command.
+     */
     function testPhpunit(array $args)
     {
         $this->testInit();
-        $phpunitExec = $this->taskExec('bin/phpunit')
+        $phpunitExec = $this->taskExec('bin/phpunit --verbose')
             ->dir('dkan/test')
             ->arg('--configuration=phpunit');
 
