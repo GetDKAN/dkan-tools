@@ -45,7 +45,7 @@ class TestCommands extends \Robo\Tasks
      *
      * dktl test:behat features/workflow.feature
      *
-     * @param array $args  Array of arguments to create a full Drush command.
+     * @param array $args  Arguments to append to behat command.
      */
     function testBehat(array $args)
     {
@@ -76,7 +76,7 @@ class TestCommands extends \Robo\Tasks
      *
      * @see https://phpunit.de/manual/6.5/en/textui.html
      *
-     * @param array $args  Array of arguments to create a full Drush command.
+     * @param array $args  Arguments to append to full phpunit command.
      */
     function testPhpunit(array $args)
     {
