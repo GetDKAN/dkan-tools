@@ -7,10 +7,10 @@ version: "2"
 services:
   web:
     volumes:
-      - "${DKTL_CURRENT_DIRECTORY}:/var/www/"
+      - "${DKTL_PROJECT_DIRECTORY}:/var/www/"
 
   # CLI node
   # Used for all console commands and tools.
   cli:
     volumes:
-      - "${DKTL_CURRENT_DIRECTORY}:/var/www/"
+      - "${DKTL_PROJECT_DIRECTORY}:/var/www/"

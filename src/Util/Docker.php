@@ -29,7 +29,7 @@ class Docker
             "export SLUG=$slug",
             "export COMPOSE_PROJECT_NAME=$slug",
             'export DKTL_DIRECTORY=' . __DIR__,
-            'export DKTL_CURRENT_DIRECTORY=' . getcwd(),
+            'export DKTL_PROJECT_DIRECTORY=' . getcwd(),
             'export PROXY_DOMAIN='. self::getDockerProxy()
         ];
         return $env;
