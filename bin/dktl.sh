@@ -60,11 +60,18 @@ if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
 # @todo Need to get proxy support working again at some point.
 elif [ "$1" = "docker:url" ]; then
-    echo -n "http://$PROXY_DOMAIN"
-    echo -n ":`$BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2`"
+    echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2)"
 elif [ "$1" = "docker:surl" ]; then
-    echo -n "https://$PROXY_DOMAIN"
-      echo -n ":`$BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2`"
+    echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
+elif [ "$1" = "drush" ]; then
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 -- "${@:2}" --uri=`dktl docker:surl`
 else
-    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 ${@:2}
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 "${@:2}"
+fi
+
+# Docker creates files that appear as owned by root on host. Fix:
+if [ ! -z `find $DKTL_CURRENT_DIRECTORY -user root -print -quit` ]; then
+    CHOWN_CMD="sudo chown -R $USER:$USER ./"
+    echo "➜  Changing ownership of new files to host user"
+    echo -e "\e[32m$CHOWN_CMD\e[39m" && $CHOWN_CMD
 fi

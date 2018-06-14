@@ -23,10 +23,11 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Initialize DKAN project directory.
      */
-    function init()
+    function init($opts = ['host' => ''])
     {
         $dktlRoot = Util::getDktlRoot();
-        if (file_exists('dktl.yml') && file_exists('config')) {
+        $this->io()->section('Initializing dktl configuration');
+        if (file_exists('dktl.yml') && file_exists('config') && file_exists('assets')) {
             throw new \Exception("This project has already been initialized.");
             exit;
         }
@@ -42,6 +43,7 @@ class BasicCommands extends \Robo\Tasks
                 $this->io()->success("dktl.yml file successfully initialized.");
             }
         }
+        $this->io()->section('Initializing config directory');
         if (file_exists('config')) {
             $this->io()->warning('The config directory already exists in this directory; skipping.');
         }
@@ -62,14 +64,64 @@ class BasicCommands extends \Robo\Tasks
                 $this->io()->success("Config directory successfully initialized.");
             }
         }
+        $this->io()->section('Initializing assets directory');
+        if (file_exists('assets')) {
+            $this->io()->warning('The assets directory already exists in this directory; skipping.');
+        }
+        else {
+            // Create the site directory. This will get symlinked into
+            // docroot/sites/all/default.
+            $this->_mkdir('assets/sites/default');
+            $this->_mkdir('assets/sites/default/files');
+            $this->_exec('chmod 777 assets/sites/default/files');
+            $result = $this->taskWriteToFile('assets/sites/default/settings.php')
+                ->textFromFile("$dktlRoot/assets/site/settings.php")
+                ->run();
+            $result = $this->taskWriteToFile('assets/sites/default/settings.docker.php')
+                ->textFromFile("$dktlRoot/assets/site/settings.docker.php")
+                ->run();
+            if ($opts['host']) {
+                $this->initHost($opts['host']);
+            }
+        }
+    }
+
+    /**
+     * Initialize host settings.
+     *
+     * @todo Fix opts, make required.
+     */
+    function initHost($host = NULL) {
+        $dktlRoot = Util::getDktlRoot();
+        $settingsFile = "settings.$host.php";
+        if (!$host) {
+            throw new \Exception("Host not specified.");
+            exit;
+        }
+        if (!file_exists("$dktlRoot/assets/site/$settingsFile")) {
+            $this->io()->warning("Host settings for '$host' not supported; skipping.");
+            exit;
+        }
+        if (!file_exists('site')) {
+            throw new \Exception("The project's site directory must be initialized before adding host settings.");
+            exit;
+        }
+        if (file_exists("site/$settingsFile")) {
+            $this->io()->warning("Host settings for '$host' already initialized; skipping.");
+            exit;
+        }
+        $result = $this->taskWriteToFile("site/settings.$host.php")
+            ->textFromFile("$dktlRoot/assets/site/settings.$host.php")
+            ->run();
     }
 
     /**
      * Run drush command on current site.
      *
-     * Run drush command on current site. If you get errors for passing
-     * arguments starting with dashes (for instance, "uri=") add a double dash
-     * before the drush command string. E.g. "dktl drush -- uli --uri=my-uri".
+     * Run drush command on current site. For instance, to clear caches, run
+     * "dktl drush cc all". Note that the shell script will pass all arguments
+     * correctly as well as append a --uri argument so that commands like
+     * "drush uli" will output a correct url.
       */
     function drush(array $cmd) {
         $drushExec = $this->taskExec('drush')->dir('docroot');

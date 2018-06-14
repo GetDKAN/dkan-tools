@@ -37,16 +37,19 @@ class DkanCommands extends \Robo\Tasks
      *
      * @todo Use Robo config system to load options, allow overrides.
      */
-    function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'dkan'])
+    function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'DKAN'])
     {
         if ($opts['backup']) {
             $this->restoreFromBackup();
             exit;
         }
+        if (!file_exists('docroot/modules') || !file_exists('dkan/modules/contrib')) {
+            throw new \Exception('Codebase not fully built, install could not procede.');
+        }
         $result = $this->taskExec('drush -y si dkan')
             ->dir('docroot')
             ->arg('--verbose')
-            ->arg("account-pass={$opts['account-pass']}")
+            ->arg("--account-pass={$opts['account-pass']}")
             ->arg("--site-name={$opts['site-name']}")
             ->rawArg('install_configure_form.update_status_module=\'array(FALSE,FALSE)\'')
             ->run();

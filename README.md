@@ -9,6 +9,7 @@ This tool currently only supports [Docker](https://www.docker.com/)-based local 
 * Bash-like shell that can execute .sh files (Linux or OS X terminals should all work)
 * [Docker](https://www.docker.com/get-docker)
 * [Docker Compose](https://docs.docker.com/compose/)
+* PHP 7.0 and Composer. (This requirement soon to be optional.)
 
 That's it! All other dependencies are included in the Docker containers that dkan-tools will create.
 
@@ -19,8 +20,7 @@ That's it! All other dependencies are included in the Docker containers that dka
 ```bash
 ln -s /my/dktl/location/bin/dktl.sh ~/bin/dktl
 ```
-
-_Composer-based installation coming soon!_
+3. Go to the directory where DKAN-tools was downloaded to (it should contain a composer.json file) and run `composer install`. 
 
 ## Usage
 
