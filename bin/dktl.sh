@@ -66,6 +66,10 @@ elif [ "$1" = "docker:surl" ]; then
 elif [ "$1" = "drush" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 -- "${@:2}" --uri=`dktl docker:surl`
 else
+    VENDOR="$($BASE_DOCKER_COMPOSE_COMMAND exec cli ls -lha /usr/local/dkan-tools | grep vendor)"
+    if [ -z "$VENDOR" ]; then
+        $BASE_DOCKER_COMPOSE_COMMAND exec cli composer install --working-dir=/usr/local/dkan-tools/
+    fi
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 "${@:2}"
 fi
 
