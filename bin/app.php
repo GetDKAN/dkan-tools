@@ -18,6 +18,7 @@ $commandClasses = [
     \DkanTools\Commands\BasicCommands::class,
     \DkanTools\Commands\DrupalCommands::class,
     \DkanTools\Commands\DkanCommands::class,
+    \DkanTools\Commands\TestCommands::class,
     \DkanTools\Commands\DockerCommands::class
 ];
 $statusCode = \Robo\Robo::run(

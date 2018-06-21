@@ -122,12 +122,28 @@ class BasicCommands extends \Robo\Tasks
      * "dktl drush cc all". Note that the shell script will pass all arguments
      * correctly as well as append a --uri argument so that commands like
      * "drush uli" will output a correct url.
-      */
+     *
+     * @param array $cmd Array of arguments to create a full Drush command.
+     */
     function drush(array $cmd) {
         $drushExec = $this->taskExec('drush')->dir('docroot');
         foreach ($cmd as $arg) {
             $drushExec->arg($arg);
         }
-        $drushExec->run();
+        return $drushExec->run();
+    }
+
+    /**
+     * Run "drush uli" command with correct ULI argument.
+     *
+     * Like the "docker" group of commands, this command is actually run in
+     * inside the dktl.sh script makes it to the DKAN Tools php application. It
+     * simply runs the real "dktl drush" command and passes it the result of
+     * "dktl surl" as the --uri argument.
+     *
+     * @todo Make it configurable whether this uses http or https. 
+     */
+    function drushUli() {
+        throw new \Exception('Something went wrong; this command should be run through dktl.sh');
     }
 }
