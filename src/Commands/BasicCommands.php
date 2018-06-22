@@ -3,6 +3,7 @@
 namespace DkanTools\Commands;
 
 use DkanTools\Util\Util;
+use Robo\Result;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -14,7 +15,7 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Test some things.
      */
-    function test(array $cmd)
+    public function test(array $cmd)
     {
         $cmdStr = implode(' ', $cmd);
         $this->say($cmdStr);
@@ -23,66 +24,110 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Initialize DKAN project directory.
      */
-    function init($opts = ['host' => ''])
+    public function init($opts = ['host' => ''])
     {
-        $dktlRoot = Util::getDktlRoot();
         $this->io()->section('Initializing dktl configuration');
-        if (file_exists('dktl.yml') && file_exists('config') && file_exists('assets')) {
-            throw new \Exception("This project has already been initialized.");
+        if (file_exists('dktl.yml') && file_exists('src')) {
+            $this->io()->note("This project has already been initialized.");
             exit;
         }
+
         if (file_exists('dktl.yml')) {
             $this->io()->warning('The dktl.yml file already exists in this directory; skipping.');
+        } else {
+            $this->createDktlYmlFile();
         }
-        else {
-            // Create dktl.yml file
-            $result = $this->taskWriteToFile('dktl.yml')
-            ->textFromFile("$dktlRoot/assets/dktl.yml")
-            ->run();
-            if (file_exists('dktl.yml')) {
-                $this->io()->success("dktl.yml file successfully initialized.");
-            }
+
+        $this->io()->section('Initializing src directory');
+        if (file_exists('src')) {
+            $this->io()->warning('The src directory already exists in this directory; skipping.');
+        } else {
+            $this->createSrcDirectory($opts['host']);
         }
-        $this->io()->section('Initializing config directory');
-        if (file_exists('config')) {
-            $this->io()->warning('The config directory already exists in this directory; skipping.');
+    }
+
+    private function createDktlYmlFile()
+    {
+        $dktlRoot = Util::getDktlRoot();
+        $f = 'dktl.yml';
+        $result = $this->taskWriteToFile($f)
+        ->textFromFile("$dktlRoot/assets/dktl.yml")
+        ->run();
+
+        $this->directoryAndFileCreationCheck($result, $f);
+    }
+
+    private function createSrcDirectory($host = "")
+    {
+        $this->_mkdir('src');
+
+        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests'];
+
+        foreach ($directories as $directory) {
+            $dir = "src/{$directory}";
+
+            $result = $this->_mkdir($dir);
+
+            $this->directoryAndFileCreationCheck($result, $dir);
         }
-        else {
-            // Create makefile overrides
-            $this->_mkdir('config');
-            $result = $this->taskWriteToFile('config/drupal-override.make')
-                ->textFromFile("$dktlRoot/assets/drush/template.make.yml")
-                ->run();
-            $result = $this->taskWriteToFile('config/dkan-override.make')
-                ->textFromFile("$dktlRoot/assets/drush/template.make.yml")
-                ->run();
-            $result = $this->taskWriteToFile('config/contrib.make')
-                ->textFromFile("$dktlRoot/assets/drush/template.make.yml")
-                ->run();
-            $this->_mkdir('config/modules/custom');
-            if (file_exists('config')) {
-                $this->io()->success("Config directory successfully initialized.");
-            }
+
+        $this->createMakeFiles();
+        $this->createSiteFilesDirectory();
+        $this->createSettingsFiles($host);
+    }
+
+    private function createMakeFiles()
+    {
+        $dktlRoot = Util::getDktlRoot();
+
+        $files = ['drupal', 'dkan'];
+
+        foreach ($files as $file) {
+            $f = "src/make/{$file}.make";
+
+            $result = $this->taskWriteToFile($f)
+          ->textFromFile("$dktlRoot/assets/drush/template.make.yml")
+          ->run();
+
+            $this->directoryAndFileCreationCheck($result, $f);
         }
-        $this->io()->section('Initializing assets directory');
-        if (file_exists('assets')) {
-            $this->io()->warning('The assets directory already exists in this directory; skipping.');
+    }
+
+    private function createSiteFilesDirectory()
+    {
+        $directory = 'src/site/files';
+        $this->_mkdir($directory);
+        $result = $this->_exec("chmod 777 {$directory}");
+
+        $this->directoryAndFileCreationCheck($result, $directory);
+    }
+
+    private function createSettingsFiles($host = "")
+    {
+        $dktlRoot = Util::getDktlRoot();
+
+        $settings = ["settings.php", "settings.docker.php"];
+
+        foreach ($settings as $setting) {
+            $f = "src/site/{$setting}";
+            $result = $this->taskWriteToFile($f)
+          ->textFromFile("$dktlRoot/assets/site/{$setting}")
+          ->run();
+            $this->directoryAndFileCreationCheck($result, $f);
         }
-        else {
-            // Create the site directory. This will get symlinked into
-            // docroot/sites/all/default.
-            $this->_mkdir('assets/sites/default');
-            $this->_mkdir('assets/sites/default/files');
-            $this->_exec('chmod 777 assets/sites/default/files');
-            $result = $this->taskWriteToFile('assets/sites/default/settings.php')
-                ->textFromFile("$dktlRoot/assets/site/settings.php")
-                ->run();
-            $result = $this->taskWriteToFile('assets/sites/default/settings.docker.php')
-                ->textFromFile("$dktlRoot/assets/site/settings.docker.php")
-                ->run();
-            if ($opts['host']) {
-                $this->initHost($opts['host']);
-            }
+
+        if (!empty($host)) {
+            $this->initHost();
+        }
+    }
+
+    private function directoryAndFileCreationCheck(Result $result, $df)
+    {
+        if ($result->getExitCode() == 0 && file_exists($df)) {
+            $this->io()->success("{$df} was created.");
+        } else {
+            $this->io()->error("{$df} was not created.");
+            exit;
         }
     }
 
@@ -91,7 +136,8 @@ class BasicCommands extends \Robo\Tasks
      *
      * @todo Fix opts, make required.
      */
-    function initHost($host = NULL) {
+    public function initHost($host = null)
+    {
         $dktlRoot = Util::getDktlRoot();
         $settingsFile = "settings.$host.php";
         if (!$host) {
@@ -125,7 +171,8 @@ class BasicCommands extends \Robo\Tasks
      *
      * @param array $cmd Array of arguments to create a full Drush command.
      */
-    function drush(array $cmd) {
+    public function drush(array $cmd)
+    {
         $drushExec = $this->taskExec('drush')->dir('docroot');
         foreach ($cmd as $arg) {
             $drushExec->arg($arg);
@@ -141,7 +188,7 @@ class BasicCommands extends \Robo\Tasks
      * simply runs the real "dktl drush" command and passes it the result of
      * "dktl surl" as the --uri argument.
      *
-     * @todo Make it configurable whether this uses http or https. 
+     * @todo Make it configurable whether this uses http or https.
      */
     function drushUli() {
         throw new \Exception('Something went wrong; this command should be run through dktl.sh');

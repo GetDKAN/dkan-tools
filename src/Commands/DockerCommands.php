@@ -28,24 +28,24 @@ class DockerCommands extends \Robo\Tasks
      * You may also run a shorter alias, "dc" (e.g. "dktl dc ps"). See
      * https://docs.docker.com/compose/reference/ for a full list of commands.
      */
-     function dockerCompose()
-     {
-         throw new \Exception(DKTL_DOCKER_PHP_ERROR);
-     }
+    public function dockerCompose()
+    {
+        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+    }
 
-     /**
-      * Display the web URL for the current project.
-      */
-      function dockerUrl()
-      {
-          throw new \Exception(DKTL_DOCKER_PHP_ERROR);
-      }
+    /**
+     * Display the web URL for the current project.
+     */
+    public function dockerUrl()
+    {
+        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+    }
 
-      /**
-       * Display the secure (https) web URL for the current project.
-       */
-      function dockerSurl()
-      {
-          throw new \Exception(DKTL_DOCKER_PHP_ERROR);
-      }
+    /**
+     * Display the secure (https) web URL for the current project.
+     */
+    public function dockerSurl()
+    {
+        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+    }
 }

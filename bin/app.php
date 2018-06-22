@@ -3,6 +3,7 @@
 
 /**
  * If we're running from phar load the phar autoload file.
+ * @todo remove phar related code.
  */
 $pharPath = \Phar::running(true);
 echo $pharPath;

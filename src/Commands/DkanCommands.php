@@ -15,7 +15,7 @@ class DkanCommands extends \Robo\Tasks
     /**
      * Run the DKAN make file and apply any overrides from /config.
      */
-    function dkanMake()
+    public function dkanMake()
     {
         $this->_deleteDir(['dkan/modules/contrib', 'dkan/themes/contrib', 'dkan/libraries']);
 
@@ -26,7 +26,7 @@ class DkanCommands extends \Robo\Tasks
             ->arg('--no-recursion')
             ->arg('--no-cache')
             ->arg('--verbose')
-            ->arg('--overrides=../config/dkan-override.make')
+            ->arg('--overrides=../src/make/dkan.make')
             ->arg('--concurrency=' . Util::drushConcurrency())
             ->arg('dkan')
             ->run();
@@ -37,7 +37,7 @@ class DkanCommands extends \Robo\Tasks
      *
      * @todo Use Robo config system to load options, allow overrides.
      */
-    function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'DKAN'])
+    public function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'DKAN'])
     {
         if ($opts['backup']) {
             $result = $this->restoreFromBackup();
@@ -90,16 +90,14 @@ class DkanCommands extends \Robo\Tasks
         }
     }
 
-    function dkanGet(string $version = NULL, $opts = ['source' => FALSE])
+    public function dkanGet(string $version = null, $opts = ['source' => false])
     {
-
         if (file_exists(self::DKAN_TMP_DIR)) {
             $this->_deleteDir(self::DKAN_TMP_DIR);
         }
         if ($opts['source']) {
             $this->getDkanGit($version);
-        }
-        else {
+        } else {
             $archive = $this->getDkanArchive($version);
             $this->taskExtract($archive)
                 ->to(self::DKAN_TMP_DIR)
@@ -108,11 +106,10 @@ class DkanCommands extends \Robo\Tasks
 
         // At this point we should have the unbuilt DKAN folder in tmp.
         $this->dkanTempReplace();
-        // $this->dkanLink();
-
     }
 
-    function getDkanArchive($version) {
+    public function getDkanArchive($version)
+    {
         Util::prepareTmp();
 
         $fileName = "{$version}.tar.gz";
@@ -127,12 +124,12 @@ class DkanCommands extends \Robo\Tasks
           "https://github.com/GetDKAN/dkan/archive/{$fileName}",
         ];
 
-        $source = NULL;
+        $source = null;
         foreach ($sources as $s) {
-          if (Util::urlExists($s)) {
-            $source = $s;
-            break;
-          }
+            if (Util::urlExists($s)) {
+                $source = $s;
+                break;
+            }
         }
 
         if (!isset($source)) {
@@ -145,15 +142,15 @@ class DkanCommands extends \Robo\Tasks
         return $archive;
     }
 
-    private function dkanTempReplace() {
+    private function dkanTempReplace()
+    {
         $dkanPermanent = getcwd() . '/dkan';
-        $replaced = FALSE;
+        $replaced = false;
         if (file_exists($dkanPermanent)) {
             if ($this->io()->confirm("Are you sure you want to replace your current DKAN profile directory?")) {
                 $this->_deleteDir($dkanPermanent);
-                $replaced = TRUE;
-            }
-            else {
+                $replaced = true;
+            } else {
                 $this->say('Canceled.');
                 return;
             }
