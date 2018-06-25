@@ -22,13 +22,15 @@ if (file_exists('/var/www/src/command')) {
 
 $commandClasses = array_merge($defaultCommandClasses, $customCommandClasses);
 
-$statusCode = \Robo\Robo::run(
-    $_SERVER['argv'],
-    $commandClasses,
-    'DkanTools',
-    '0.0.0-alpha0',
-    $output,
-    'org/project'
-);
+$appName = "DkanTools";
+$appVersion = '0.0.0-alpha0';
+$configurationFilename = 'dktl.yml';
+
+$runner = new \Robo\Runner($commandClasses);
+$runner->setConfigurationFilename($configurationFilename);
+
+$argv = $_SERVER['argv'];
+$output = new \Symfony\Component\Console\Output\ConsoleOutput();
+$statusCode = $runner->execute($argv, $appName, $appVersion, $output);
 
 exit($statusCode);

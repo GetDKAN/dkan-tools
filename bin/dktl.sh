@@ -76,7 +76,14 @@ else
     if [ -z "$VENDOR" ]; then
         $BASE_DOCKER_COMPOSE_COMMAND exec cli composer install --working-dir=/usr/local/dkan-tools/
     fi
-    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 "${@:2}"
+
+    ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec cli which dktl)"
+    if [ -z "$ALIAS" ]; then
+        $BASE_DOCKER_COMPOSE_COMMAND exec cli chmod 777 /usr/local/dkan-tools/bin/inner_dktl.sh
+        $BASE_DOCKER_COMPOSE_COMMAND exec cli ln -s /usr/local/dkan-tools/bin/inner_dktl.sh /usr/local/bin/dktl
+    fi
+
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli dktl $1 "${@:2}"
 fi
 
 # Docker creates files that appear as owned by root on host. Fix:
