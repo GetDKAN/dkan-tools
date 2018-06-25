@@ -1,31 +1,29 @@
 #!/usr/bin/env php
 <?php
 
-/**
- * If we're running from phar load the phar autoload file.
- * @todo remove phar related code.
- */
-$pharPath = \Phar::running(true);
-echo $pharPath;
-if ($pharPath) {
-    require_once "$pharPath/vendor/autoload.php";
-} else {
-    require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
+
+if (file_exists('/var/www/vendor/autoload.php')) {
+    require_once '/var/www/vendor/autoload.php';
 }
+
 
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
-$commandClasses = [
-    \DkanTools\Commands\BasicCommands::class,
-    \DkanTools\Commands\DrupalCommands::class,
-    \DkanTools\Commands\DkanCommands::class,
-    \DkanTools\Commands\TestCommands::class,
-    \DkanTools\Commands\DockerCommands::class
-];
+$discovery = new \Consolidation\AnnotatedCommand\CommandFileDiscovery();
+$discovery->setSearchPattern('*Commands.php');
+$commandClasses = $discovery->discover('/usr/local/dkan-tools/src', '\\DkanTools');
+
+$commandClassesCustom = [];
+if (file_exists('/var/www/src/Command')) {
+    $commandClassesCustom = $discovery->discover('/var/www/src', '\\DkanTools\\Custom');
+}
+
+$finalCommands = array_merge($commandClasses, $commandClassesCustom);
 
 $statusCode = \Robo\Robo::run(
     $_SERVER['argv'],
-    $commandClasses,
+    $finalCommands,
     'DkanTools',
     '0.0.0-alpha0',
     $output,
