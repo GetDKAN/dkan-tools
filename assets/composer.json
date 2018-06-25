@@ -1,0 +1,8 @@
+{
+  "name": "dkan-tools/custom",
+  "autoload": {
+    "psr-4": {
+      "DkanTools\\Custom\\": "src"
+    }
+  }
+}
