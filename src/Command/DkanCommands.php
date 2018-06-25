@@ -1,5 +1,5 @@
 <?php
-namespace DkanTools\Commands;
+namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 
