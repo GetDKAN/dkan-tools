@@ -3,6 +3,7 @@
 
 /**
  * If we're running from phar load the phar autoload file.
+ * @todo remove phar related code.
  */
 $pharPath = \Phar::running(true);
 echo $pharPath;
@@ -21,6 +22,7 @@ $commandClasses = [
     \DkanTools\Commands\TestCommands::class,
     \DkanTools\Commands\DockerCommands::class
 ];
+
 $statusCode = \Robo\Robo::run(
     $_SERVER['argv'],
     $commandClasses,
@@ -29,4 +31,5 @@ $statusCode = \Robo\Robo::run(
     $output,
     'org/project'
 );
+
 exit($statusCode);
