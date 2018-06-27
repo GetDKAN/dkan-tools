@@ -90,4 +90,18 @@ class TestCommands extends \Robo\Tasks
         }
         return $phpunitExec->run();
     }
+
+    function testQaUsers() {
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->dir('docroot')
+            ->exec('drush user-create sitemanager --mail=sitemanager@example.com --password=sitemanager')
+            ->exec('drush user-add-role "site manager" --name=sitemanager')
+            ->exec('drush user-create editor --mail=editor@example.com --password=editor')
+            ->exec('drush user-add-role editor --name=editor')
+            ->exec('drush user-create creator --mail=creator@example.com --password=creator')
+            ->exec('drush user-add-role "content creator" --name=creator')
+            ->exec('drush user-add-role "content creator" --name=creator')
+            ->run();
+    }
 }
