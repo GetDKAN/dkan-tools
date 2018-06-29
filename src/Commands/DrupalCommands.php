@@ -13,88 +13,39 @@ class DrupalCommands extends \Robo\Tasks
     /**
      * Run make for Drupal core.
      */
-    function drupalMake($opts = ['yes|y' => false])
+    public function drupalMake($opts = ['yes|y' => false])
     {
-        if (file_exists('docroot')) {
-            if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. Delete it and reinstall drupal?')) {
-                $this->io()->warning('Make aborted');
-                exit;
+        if (file_exists('dkan')) {
+            if (file_exists('docroot')) {
+                if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. Delete it and reinstall drupal?')) {
+                    $this->io()->warning('Make aborted');
+                    exit;
+                }
+                $this->_deleteDir('docroot');
             }
-            $this->_deleteDir('docroot');
-        }
 
-        $result = $this->taskExec('drush make -y dkan/drupal-org-core.make')
+            $concurrency = Util::drushConcurrency();
+
+            $result = $this->taskExec('drush make -y dkan/drupal-org-core.make')
             ->arg('--root=docroot')
-            ->arg('--concurrency=' . Util::drushConcurrency())
+            ->arg('--concurrency=' . $concurrency)
             ->arg('--prepare-install')
-            ->arg('--overrides=../config/drupal-override.make')
+            ->arg('--overrides=../src/make/drupal.make')
             ->arg('docroot')
             ->run();
 
-        if ($result->getExitCode() == 0 && file_exists('docroot')) {
-            $this->io()->success('Drupal core successfully downloaded to docroot folder.');
-        }
+            if ($result->getExitCode() == 0 && file_exists('docroot')) {
+                $this->io()->success('Drupal core successfully downloaded to docroot folder.');
+            }
 
-        $this->drupalDkanLink();
-        $this->drupalCustomLink();
-        $this->drupalSitesDefaultLink();
+            $this->linkDkan();
+            $this->linkSitesDefault();
+            $this->linkModules();
+            $this->linkThemes();
+        } else {
+            $this->io()->error('We need DKAN before making Drupal');
+        }
     }
-
-    /**
-     * Link the DKAN folder. Runs automatically with drupal:make
-     */
-    function drupalDkanLink()
-    {
-        if (!file_exists('dkan') || !file_exists('docroot')) {
-            throw new \Exception("Could not link profile folder. Folders 'dkan' and 'docroot' must both be present to create link.");
-            return;
-        }
-        $result = $this->_exec('ln -s ../../dkan docroot/profiles/dkan');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
-            return $result;
-        }
-        $this->io()->success('Successfully linked DKAN to docroot/profiles');
-    }
-
-
-    /**
-     * Link the DKAN folder. Runs automatically with drupal:make
-     */
-    function drupalSitesDefaultLink()
-    {
-        if (!file_exists('assets') || !file_exists('docroot')) {
-            throw new \Exception("Could not link sites/default folder. Folders 'assets' and 'docroot' must both be present to create link.");
-            return;
-        }
-        $result = $this->taskExecStack()
-            ->stopOnFail()
-            ->exec('rm -rf docroot/sites/default')
-            ->exec('ln -s ../../assets/sites/default docroot/sites/default');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
-            return $result;
-        }
-        $this->io()->success('Successfully linked assets/sites/default folder to docroot/sites/default');
-    }
-
-    /**
-     * Link the modules/custom folder. Runs automatically with drupal:make
-     */
-    function drupalCustomLink()
-    {
-        if (!file_exists('config/modules/custom') || !file_exists('docroot')) {
-            throw new \Exception("Could not link custom folder. Folders 'config/modules/custom' and 'docroot' must both be present to create link.");
-            return;
-        }
-        $result = $this->_exec('ln -s ../../config/modules/custom docroot/sites/all/modules/custom');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
-            return $result;
-        }
-        $this->io()->success('Successfully linked custom/modules to docroot/sites/all/modules/custom');
-    }
-
 
     /**
      * Run Drupal minimal installation script. Takes mysql url as optional
@@ -104,7 +55,7 @@ class DrupalCommands extends \Robo\Tasks
      *
      * @param string $db Mysql connection string.
      */
-    function drupalInstallMin($db = NULL)
+    public function drupalInstallMin($db = null)
     {
         $db = $db ? $db : $this->getDbUrl();
         $update = "install_configure_form.update_status_module='array(false,false)'";
@@ -126,9 +77,79 @@ class DrupalCommands extends \Robo\Tasks
      *
      * @todo Stop hardcoding and get from env or make dynamic.
      */
-    function getDbUrl()
+    public function getDbUrl()
     {
         return 'mysql://drupal:123@db/drupal';
     }
 
+    /**
+     * Link the DKAN folder to docroot/profiles.
+     */
+    private function linkDkan()
+    {
+        if (!file_exists('dkan') || !file_exists('docroot')) {
+            $this->io()->error("Could not link profile folder. Folders 'dkan' and 'docroot' must both be present to create link.");
+            exit;
+        }
+
+        $result = $this->_exec('ln -s ../../dkan docroot/profiles/dkan');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not crete link');
+            return $result;
+        }
+
+        $this->io()->success('Successfully linked DKAN to docroot/profiles');
+    }
+
+    /**
+     * Link src/site to docroot/sites/default.
+     */
+    private function linkSitesDefault()
+    {
+        if (!file_exists('src/site') || !file_exists('docroot')) {
+            $this->io()->error("Could not link sites/default folder. Folders 'src/site' and 'docroot' must both be present to create the link.");
+            exit;
+        }
+
+        $this->_exec('rm -rf docroot/sites/default');
+        $this->_exec('ln -s ../../src/site docroot/sites/default');
+
+        $this->io()->success('Successfully linked src/site folder to docroot/sites/default');
+    }
+
+    /**
+     * Link src/modules to  docroot/sites/all/modules/custom.
+     */
+    private function linkModules()
+    {
+        if (!file_exists('src/modules') || !file_exists('docroot')) {
+            $this->io()->error("Could not link modules. Folders 'src/modules' and 'docroot' must both be present to create link.");
+            exit;
+        }
+
+        $result = $this->_exec('ln -s ../../../../src/modules docroot/sites/all/modules/custom');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not crete link');
+            return $result;
+        }
+        $this->io()->success('Successfully linked src/modules to docroot/sites/all/modules/custom');
+    }
+
+    /**
+     * Link src/themes to  docroot/sites/all/modules/themes.
+     */
+    private function linkThemes()
+    {
+        if (!file_exists('src/themes') || !file_exists('docroot')) {
+            throw new \Exception("Could not link themes. Folders 'src/themes' and 'docroot' must both be present to create link.");
+            return;
+        }
+        $result = $this->_exec('ln -s ../../../../src/themes docroot/sites/all/themes/custom');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not crete link');
+            return $result;
+        }
+
+        $this->io()->success('Successfully linked src/themes to docroot/sites/all/themes/custom');
+    }
 }
