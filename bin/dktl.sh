@@ -36,7 +36,7 @@ export SLUG
 DOCKER_COMPOSE_COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
 PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
 VOLUME_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.nosync.yml"
-CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/custom/docker-compose.custom.yml"
+CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.custom.yml"
 
 
 if [ -f $CUSTOM_CONF ]; then
