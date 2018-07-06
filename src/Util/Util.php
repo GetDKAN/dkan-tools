@@ -42,9 +42,9 @@ class Util
     public static function getAllFilesWithExtension($path, $ext)
     {
         $files_with_extension = [];
-        $subs = get_all_subdirectories($path);
+        $subs = self::getAllSubdirectories($path);
         foreach ($subs as $sub) {
-            $files = get_files_with_extension($sub, $ext);
+            $files = self::getFilesWithExtension($sub, $ext);
             $files_with_extension = array_merge($files_with_extension, $files);
         }
         return $files_with_extension;
@@ -53,7 +53,7 @@ class Util
     public static function getFilesWithExtension($path, $ext)
     {
         $files_with_extension = [];
-        $files = get_files($path);
+        $files = self::getFiles($path);
         foreach ($files as $file) {
             $e = pathinfo($file, PATHINFO_EXTENSION);
             if ($ext == $e) {
@@ -70,7 +70,7 @@ class Util
         while (!empty($stack)) {
             $sub = array_shift($stack);
             $all_subs[] = $sub;
-            $subs = get_subdirectories($sub);
+            $subs = self::getSubdirectories($sub);
             $stack = array_merge($stack, $subs);
         }
         return $all_subs;
@@ -78,7 +78,7 @@ class Util
 
     public static function getSubdirectories($path)
     {
-        $directories_info = shell_table_to_array(`ls {$path} -lha | grep '^dr'`);
+        $directories_info = self::shellTableToArray(`ls {$path} -lha | grep '^dr'`);
         $subs = [];
         foreach ($directories_info as $di) {
             if (isset($di[8])) {
@@ -91,9 +91,9 @@ class Util
         return $subs;
     }
 
-    public function getFiles($path)
+    public static function getFiles($path)
     {
-        $files_info = shell_table_to_array(`ls {$path} -lha | grep -v '^dr'`);
+        $files_info = self::shellTableToArray(`ls {$path} -lha | grep -v '^dr'`);
         $files = [];
         foreach ($files_info as $fi) {
             if (isset($fi[8])) {

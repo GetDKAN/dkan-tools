@@ -1,6 +1,6 @@
 <?php
 
-namespace DkanTools\Commands;
+namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 use Robo\Result;
@@ -44,6 +44,29 @@ class BasicCommands extends \Robo\Tasks
         } else {
             $this->createSrcDirectory($opts['host']);
         }
+
+        $this->io()->section('Setting up custom commands');
+        if (file_exists('src/Command/composer.json')) {
+            $this->io()->warning('A composer.json file already exists.');
+        } else {
+            $this->setupCustomCommands();
+        }
+    }
+
+    private function setupCustomCommands()
+    {
+        $this->createCommandDirectory();
+    }
+
+    private function createCommandDirectory()
+    {
+        $dktlRoot = Util::getDktlRoot();
+        $dir = 'command';
+        $result = $this->taskCopyDir(["{$dktlRoot}/assets/{$dir}" => "/var/www/src/{$dir}"])->run();
+
+        $this->directoryAndFileCreationCheck($result, "src/{$dir}");
+
+        $this->_exec("composer install --working-dir='/var/www/src/command'");
     }
 
     private function createDktlYmlFile()
@@ -190,7 +213,8 @@ class BasicCommands extends \Robo\Tasks
      *
      * @todo Make it configurable whether this uses http or https.
      */
-    function drushUli() {
+    public function drushUli()
+    {
         throw new \Exception('Something went wrong; this command should be run through dktl.sh');
     }
 }

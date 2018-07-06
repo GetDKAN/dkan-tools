@@ -1,5 +1,5 @@
 <?php
-namespace DkanTools\Commands;
+namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 
@@ -40,7 +40,7 @@ class DkanCommands extends \Robo\Tasks
     public function dkanInstall($opts = ['backup|b' => false, 'account-pass' => 'admin', 'site-name' => 'DKAN'])
     {
         if ($opts['backup']) {
-            $result = $this->restoreFromBackup();
+            $result = $this->restoreDbFromBackup('last_install.sql');
             return $result;
         }
         if (!file_exists('docroot/modules') || !file_exists('dkan/modules/contrib')) {
@@ -70,10 +70,10 @@ class DkanCommands extends \Robo\Tasks
         }
     }
 
-    private function restoreFromBackup()
+    private function restoreDbFromBackup($file)
     {
-        if (!file_exists('backups') || !file_exists('backups/last_install.sql')) {
-            throw new \Exception('Last DB backup could not be found.');
+        if (!file_exists('backups') || !file_exists("backups/{$file}")) {
+            throw new \Exception("{$file} backup could not be found.");
         }
         $result = $this->taskExec('drush -y sql-drop')->dir('docroot')->run();
         if ($result->getExitCode() != 0) {
@@ -81,7 +81,7 @@ class DkanCommands extends \Robo\Tasks
         }
         $this->say("Removed tables, restoring DB");
         $result = $this->taskExec('drush sqlc <')
-            ->arg('../backups/last_install.sql')
+            ->arg("../backups/{$file}")
             ->dir('docroot')
             ->run();
         if ($result->getExitCode() != 0) {
@@ -140,6 +140,64 @@ class DkanCommands extends \Robo\Tasks
         $this->io()->section("Getting DKAN from {$source}");
         $this->taskExec("wget -O {$archive} {$source}")->run();
         return $archive;
+    }
+
+    /**
+     * DKAN restore.
+     *
+     * A command that creates a DKAN site from a db dump and files.
+     *
+     * @param string $db_url
+     *   A url to a file with sql commands to recreate a database.
+     * @param string $files_url
+     *   A url to an archive with all the files to the site. Only zip files are supported.
+     */
+    public function dkanRestore($db_url, $files_url)
+    {
+        $this->restoreDb($db_url);
+        $this->restoreFiles($files_url);
+    }
+
+    private function restoreDb($db_url)
+    {
+        $c = $this->collectionBuilder();
+        $tmp_path = $c->tmpDir();
+
+        $c->addTask($this->taskExec("wget -O {$tmp_path}/db.sql {$db_url}"));
+        $c->addTask($this->taskExec('drush -y sql-drop')->dir('docroot'));
+        $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/db.sql")->dir('docroot'));
+
+        $result = $c->run();
+
+        if ($result->getExitCode() == 0) {
+            $this->io()->success('Database restored.');
+        }
+        else {
+            $this->io()->error('Issues restoring the database.');
+        }
+
+        return $result;
+    }
+
+    private function restoreFiles($files_url)
+    {
+        $c = $this->collectionBuilder();
+        $tmp_path = $c->tmpDir();
+
+        $c->addTask($this->taskExec("wget -O {$tmp_path}/files.zip {$files_url}"));
+        $c->addTask($this->taskExec("unzip {$tmp_path}/files.zip -d {$tmp_path}"));
+        $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "src/site/files"]));
+
+        $result = $c->run();
+
+        if ($result->getExitCode() == 0) {
+            $this->io()->success('Files were restored.');
+        }
+        else {
+            $this->io()->error('Issues restoring the files.');
+        }
+
+        return $result;
     }
 
     private function dkanTempReplace()
