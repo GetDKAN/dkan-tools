@@ -72,11 +72,14 @@ elif [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "test:phpunit" ];
     # For several commands, we want to insert a "--" to pass all arguments as an array.
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 -- "${@:2}"
 else
+    # Check whether dkan-tools' dependencies have been initialized.
     VENDOR="$($BASE_DOCKER_COMPOSE_COMMAND exec cli ls -lha /usr/local/dkan-tools | grep vendor)"
     if [ -z "$VENDOR" ]; then
+        echo "Composer Install"
         $BASE_DOCKER_COMPOSE_COMMAND exec cli composer install --working-dir=/usr/local/dkan-tools/
     fi
 
+    # If dktl is not a proper command inside of the container, create it.
     ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec cli which dktl)"
     if [ -z "$ALIAS" ]; then
         $BASE_DOCKER_COMPOSE_COMMAND exec cli chmod 777 /usr/local/dkan-tools/bin/inner_dktl.sh
