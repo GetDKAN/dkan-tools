@@ -15,7 +15,7 @@ $discovery = new \Consolidation\AnnotatedCommand\CommandFileDiscovery();
 $discovery->setSearchPattern('*Commands.php');
 $defaultCommandClasses = $discovery->discover('/usr/local/dkan-tools/src', '\\DkanTools');
 
-$commandClassesCustom = [];
+$customCommandClasses = [];
 if (file_exists('/var/www/src/command')) {
     $customCommandClasses = $discovery->discover('/var/www/src/command', '\\DkanTools\\Custom');
 }
