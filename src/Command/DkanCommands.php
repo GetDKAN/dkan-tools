@@ -142,57 +142,62 @@ class DkanCommands extends \Robo\Tasks
         return $archive;
     }
 
-    public function dkanRestore($opts = ['db' => '', 'files' => ''])
+    /**
+     * DKAN restore.
+     *
+     * A command that creates a DKAN site from a db dump and files.
+     *
+     * @param string $db_url
+     *   A url to a file with sql commands to recreate a database.
+     * @param string $files_url
+     *   A url to an archive with all the files to the site. Only zip files are supported.
+     */
+    public function dkanRestore($db_url, $files_url)
     {
-        $this->restoreDb($opts['db']);
-        $this->restoreFiles($opts['files']);
+        $this->restoreDb($db_url);
+        $this->restoreFiles($files_url);
     }
 
-    private function restoreFiles($files)
+    private function restoreDb($db_url)
     {
-        if (file_exists('tmp/files.zip')) {
-            $this->extractZipFiles();
-            $this->restoreFilesFromBackup();
-        } elseif (!empty($files)) {
-            $this->taskExec("wget -O ./tmp/files.zip {$files}")->run();
-            $this->restoreFilesFromBackup();
-        } else {
-            $this->io()->error("tmp/files.zip should exist, or the files option should be set.");
+        $c = $this->collectionBuilder();
+        $tmp_path = $c->tmpDir();
+
+        $c->addTask($this->taskExec("wget -O {$tmp_path}/db.sql {$db_url}"));
+        $c->addTask($this->taskExec('drush -y sql-drop')->dir('docroot'));
+        $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/db.sql")->dir('docroot'));
+
+        $result = $c->run();
+
+        if ($result->getExitCode() == 0) {
+            $this->io()->success('Database restored.');
         }
+        else {
+            $this->io()->error('Issues restoring the database.');
+        }
+
+        return $result;
     }
 
-    private function extractZipFiles()
+    private function restoreFiles($files_url)
     {
-        if (file_exists('tmp/files')) {
-            $this->io()->success("Files archive has been extracted.");
-        } else {
-            $this->_exec("unzip tmp/files.zip -d tmp");
-        }
-    }
+        $c = $this->collectionBuilder();
+        $tmp_path = $c->tmpDir();
 
-    private function restoreFilesFromBackup()
-    {
-        if (file_exists('tmp/files')) {
-            $this->_exec("rsync -r tmp/files/ src/site/files/");
-        } else {
-            $this->io()->error("No files folder in tmp after extraction.");
-        }
-    }
+        $c->addTask($this->taskExec("wget -O {$tmp_path}/files.zip {$files_url}"));
+        $c->addTask($this->taskExec("unzip {$tmp_path}/files.zip -d {$tmp_path}"));
+        $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "src/site/files"]));
 
-    private function restoreDb($db)
-    {
-        if (!file_exists('backups')) {
-            $this->_mkdir('backups');
+        $result = $c->run();
+
+        if ($result->getExitCode() == 0) {
+            $this->io()->success('Files were restored.');
+        }
+        else {
+            $this->io()->error('Issues restoring the files.');
         }
 
-        if (file_exists('backups/db.sql')) {
-            $this->restoreDbFromBackup("db.sql");
-        } elseif (!empty($db)) {
-            $this->taskExec("wget -O ./backups/db.sql {$db}")->run();
-            $this->restoreDbFromBackup("db.sql");
-        } else {
-            $this->io()->error("backups/db.sql should exist, or the db option should be set.");
-        }
+        return $result;
     }
 
     private function dkanTempReplace()
