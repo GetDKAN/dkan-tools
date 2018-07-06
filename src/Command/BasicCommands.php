@@ -46,8 +46,8 @@ class BasicCommands extends \Robo\Tasks
         }
 
         $this->io()->section('Setting up custom commands');
-        if (file_exists('composer.json')) {
-            $this->io()->warning('A composer.json file already exists at the root.');
+        if (file_exists('src/Command/composer.json')) {
+            $this->io()->warning('A composer.json file already exists.');
         } else {
             $this->setupCustomCommands();
         }
@@ -55,30 +55,18 @@ class BasicCommands extends \Robo\Tasks
 
     private function setupCustomCommands()
     {
-        $this->createComposerJson();
         $this->createCommandDirectory();
-    }
-
-    private function createComposerJson()
-    {
-        $dktlRoot = Util::getDktlRoot();
-        $f = 'composer.json';
-        $result = $this->taskWriteToFile($f)
-            ->textFromFile("{$dktlRoot}/assets/{$f}")
-            ->run();
-
-        $this->directoryAndFileCreationCheck($result, $f);
-
-        $this->_exec("composer install --working-dir='/var/www'");
     }
 
     private function createCommandDirectory()
     {
         $dktlRoot = Util::getDktlRoot();
-        $dir = 'Command';
+        $dir = 'command';
         $result = $this->taskCopyDir(["{$dktlRoot}/assets/{$dir}" => "/var/www/src/{$dir}"])->run();
 
         $this->directoryAndFileCreationCheck($result, "src/{$dir}");
+
+        $this->_exec("composer install --working-dir='/var/www/src/command'");
     }
 
     private function createDktlYmlFile()
