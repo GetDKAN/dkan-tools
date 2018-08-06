@@ -36,7 +36,7 @@ export SLUG
 DOCKER_COMPOSE_COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
 PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
 VOLUME_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.nosync.yml"
-CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/custom/docker-compose.custom.yml"
+CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.custom.yml"
 
 
 if [ -f $CUSTOM_CONF ]; then
@@ -72,11 +72,21 @@ elif [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "test:phpunit" ];
     # For several commands, we want to insert a "--" to pass all arguments as an array.
     $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 -- "${@:2}"
 else
+    # Check whether dkan-tools' dependencies have been initialized.
     VENDOR="$($BASE_DOCKER_COMPOSE_COMMAND exec cli ls -lha /usr/local/dkan-tools | grep vendor)"
     if [ -z "$VENDOR" ]; then
+        echo "Composer Install"
         $BASE_DOCKER_COMPOSE_COMMAND exec cli composer install --working-dir=/usr/local/dkan-tools/
     fi
-    $BASE_DOCKER_COMPOSE_COMMAND exec cli php /usr/local/dkan-tools/bin/app.php $1 "${@:2}"
+
+    # If dktl is not a proper command inside of the container, create it.
+    ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec cli which dktl)"
+    if [ -z "$ALIAS" ]; then
+        $BASE_DOCKER_COMPOSE_COMMAND exec cli chmod 777 /usr/local/dkan-tools/bin/inner_dktl.sh
+        $BASE_DOCKER_COMPOSE_COMMAND exec cli ln -s /usr/local/dkan-tools/bin/inner_dktl.sh /usr/local/bin/dktl
+    fi
+
+    $BASE_DOCKER_COMPOSE_COMMAND exec cli dktl $1 "${@:2}"
 fi
 
 # Docker creates files that appear as owned by root on host. Fix:

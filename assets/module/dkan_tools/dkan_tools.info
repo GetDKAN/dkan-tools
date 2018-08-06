@@ -1,0 +1,6 @@
+name = DKAN Tools
+description = A helper module provided by dkan-tools.
+core = 7.x
+dependencies[] = environment
+dependencies[] = environment_indicator
+
