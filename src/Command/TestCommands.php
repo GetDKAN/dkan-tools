@@ -1,6 +1,6 @@
 <?php
 
-namespace DkanTools\Commands;
+namespace DkanTools\Command;
 
 use Symfony\Component\Console\Input\InputOption;
 
@@ -19,7 +19,7 @@ class TestCommands extends \Robo\Tasks
      * "dkan/test" for output. Usually this command does not need to be run on
      * its own as all other test commands run it first.
      */
-    function testInit()
+    public function testInit()
     {
         if (!file_exists('dkan/test/vendor')) {
             $this->io()->section('Installing test dependencies.');
@@ -47,7 +47,7 @@ class TestCommands extends \Robo\Tasks
      *
      * @param array $args  Arguments to append to behat command.
      */
-    function testBehat(array $args)
+    public function testBehat(array $args)
     {
         $this->testInit();
         $behatExec = $this->taskExec('bin/behat')
@@ -78,7 +78,7 @@ class TestCommands extends \Robo\Tasks
      *
      * @param array $args  Arguments to append to full phpunit command.
      */
-    function testPhpunit(array $args)
+    public function testPhpunit(array $args)
     {
         $this->testInit();
         $phpunitExec = $this->taskExec('bin/phpunit --verbose')

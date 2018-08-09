@@ -1,6 +1,6 @@
 <?php
 
-namespace DkanTools\Commands;
+namespace DkanTools\Command;
 
 /**
  * These functions are not meant to be run, simply to provide documentation for
