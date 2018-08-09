@@ -3,12 +3,6 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$custom_autoload = '/var/www/src/command/vendor/autoload.php';
-if (file_exists($custom_autoload)) {
-    require_once $custom_autoload;
-}
-
-
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
 $discovery = new \Consolidation\AnnotatedCommand\CommandFileDiscovery();
