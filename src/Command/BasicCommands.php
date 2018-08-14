@@ -203,6 +203,15 @@ class BasicCommands extends \Robo\Tasks
         return $drushExec->run();
     }
 
+    public function composer(array $cmd)
+    {
+        $drushExec = $this->taskExec('composer');
+        foreach ($cmd as $arg) {
+            $drushExec->arg($arg);
+        }
+        return $drushExec->run();
+    }
+
     /**
      * Run "drush uli" command with correct ULI argument.
      *
