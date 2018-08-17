@@ -152,4 +152,23 @@ class DrupalCommands extends \Robo\Tasks
 
         $this->io()->success('Successfully linked src/themes to docroot/sites/all/themes/custom');
     }
+
+    /**
+     * Remove all gitignores from docroot.
+     */
+    public function drupalRemoveGitIgnores() {
+        $gitignores = [];
+        exec("find docroot -type f -name '.gitignore'", $gitignores);
+
+        foreach ($gitignores as $gitignore) {
+            `rm {$gitignore}`;
+        }
+
+        $gitignores = [];
+        exec("find dkan -type f -name '.gitignore'", $gitignores);
+
+        foreach ($gitignores as $gitignore) {
+            `rm {$gitignore}`;
+        }
+    }
 }
