@@ -217,4 +217,15 @@ class DkanCommands extends \Robo\Tasks
         $verb = $replaced ? 'replaced' : 'created';
         $this->say("DKAN profile directory $verb.");
     }
+
+    public function dkanDeploy($target_environment)
+    {
+        $script = "/var/www/src/script/deploy.sh";
+        $docroot = "/var/www/docroot";
+
+        if (file_exists("/var/www/src/script/deploy.sh")) {
+            $command = "{$script} {$docroot} {$target_environment}";
+            $this->_exec($command);
+        }
+    }
 }
