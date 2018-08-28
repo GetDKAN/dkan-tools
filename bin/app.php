@@ -17,7 +17,7 @@ if (file_exists('/var/www/src/command')) {
 $commandClasses = array_merge($defaultCommandClasses, $customCommandClasses);
 
 $appName = "DkanTools";
-$appVersion = '0.0.0-alpha0';
+$appVersion = '1.0.0-alpha1';
 $configurationFilename = 'dktl.yml';
 
 $runner = new \Robo\Runner($commandClasses);
