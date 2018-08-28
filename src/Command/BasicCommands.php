@@ -44,24 +44,6 @@ class BasicCommands extends \Robo\Tasks
         } else {
             $this->createSrcDirectory($opts['host']);
         }
-
-        $this->io()->section('Setting up custom commands');
-        $this->setupCustomCommands();
-
-    }
-
-    private function setupCustomCommands()
-    {
-        $this->createCommandDirectory();
-    }
-
-    private function createCommandDirectory()
-    {
-        $dktlRoot = Util::getDktlRoot();
-        $dir = 'command';
-        $result = $this->taskCopyDir(["{$dktlRoot}/assets/{$dir}" => "/var/www/src/{$dir}"])->run();
-
-        $this->directoryAndFileCreationCheck($result, "src/{$dir}");
     }
 
     private function createDktlYmlFile()
@@ -79,7 +61,7 @@ class BasicCommands extends \Robo\Tasks
     {
         $this->_mkdir('src');
 
-        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests', 'script'];
+        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
