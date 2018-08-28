@@ -105,11 +105,7 @@ class BasicCommands extends \Robo\Tasks
             $f = "src/script/{$file}.sh";
 
             $task = $this->taskWriteToFile($f)
-                ->textFromFile("$dktlRoot/assets/script/deploy_base.sh");
-            if ($file == "deploy") {
-                $task->text("\n\n");
-                $task->textFromFile("$dktlRoot/assets/script/deploy.sh");
-            }
+                ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
             $result = $task->run();
             $this->_exec("chmod +x /var/www/src/script/{$file}.sh");
 
