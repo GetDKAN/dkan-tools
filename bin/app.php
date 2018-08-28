@@ -18,13 +18,14 @@ $commandClasses = array_merge($defaultCommandClasses, $customCommandClasses);
 
 $appName = "DkanTools";
 $appVersion = '1.0.0-alpha1';
-$configurationFilename = 'dktl.yml';
 
 $runner = new \Robo\Runner($commandClasses);
-$runner->setConfigurationFilename($configurationFilename);
 
 $argv = $_SERVER['argv'];
+
+$loader = new \DkanTools\Util\ArgumentsAndOptionsLoader($argv);
+
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-$statusCode = $runner->execute($argv, $appName, $appVersion, $output);
+$statusCode = $runner->execute($loader->enhancedArgv(), $appName, $appVersion, $output);
 
 exit($statusCode);
