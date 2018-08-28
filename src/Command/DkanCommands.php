@@ -148,9 +148,9 @@ class DkanCommands extends \Robo\Tasks
      * A command that creates a DKAN site from a db dump and files.
      *
      * @param string $db_url
-     *   A url to a file with sql commands to recreate a database.
+     *   A url to a file with sql commands to recreate a database. sql and sql.gz files are supported.
      * @param string $files_url
-     *   A url to an archive with all the files to the site. Only zip files are supported.
+     *   A url to an archive with all the files to the site. zip, gz, and tar.gz files are supported.
      */
     public function dkanRestore($db_url, $files_url)
     {
@@ -160,12 +160,23 @@ class DkanCommands extends \Robo\Tasks
 
     private function restoreDb($db_url)
     {
+        $info = pathinfo($db_url);
+        $filename = $info['basename'];
+        $ext = $info['extension'];
+
         $c = $this->collectionBuilder();
         $tmp_path = $c->tmpDir();
 
-        $c->addTask($this->taskExec("wget -O {$tmp_path}/db.sql {$db_url}"));
+        $c->addTask($this->taskExec("wget -O {$tmp_path}/{$filename} {$db_url}"));
+
         $c->addTask($this->taskExec('drush -y sql-drop')->dir('docroot'));
-        $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/db.sql")->dir('docroot'));
+
+        if ($ext == "gz") {
+            $c->addTask($this->taskExec("zcat {$tmp_path}/{$filename} | drush sqlc")->dir('docroot'));
+        }
+        else {
+            $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/")->dir('docroot'));
+        }
 
         $result = $c->run();
 
@@ -181,12 +192,38 @@ class DkanCommands extends \Robo\Tasks
 
     private function restoreFiles($files_url)
     {
+        $info = pathinfo($files_url);
+
+        $full_file_name = $info['basename'];
+        $extension = $info['extension'];
+
         $c = $this->collectionBuilder();
         $tmp_path = $c->tmpDir();
 
-        $c->addTask($this->taskExec("wget -O {$tmp_path}/files.zip {$files_url}"));
-        $c->addTask($this->taskExec("unzip {$tmp_path}/files.zip -d {$tmp_path}"));
-        $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "src/site/files"]));
+        $c->addTask($this->taskExec("wget -O {$tmp_path}/{$full_file_name} {$files_url}"));
+
+        if($extension == "zip") {
+            $c->addTask($this->taskExec("unzip {$tmp_path}/{$full_file_name} -d {$tmp_path}"));
+        }
+        else if($extension == "gz") {
+            if (substr_count($full_file_name, ".tar") > 0) {
+                $c->addTask($this->taskExec("tar -xvzf {$tmp_path}/{$full_file_name}"));
+            }
+            else {
+                $c->addTask($this->taskExec("gunzip {$tmp_path}/{$full_file_name}"));
+            }
+        }
+
+        if (file_exists("{$tmp_path}/files")) {
+            $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "src/site/files"]));
+        }
+        else {
+            $prefix = str_replace(".tar.gz", "", $full_file_name);
+            if (file_exists("./{$prefix}/files")) {
+                $c->addTask($this->taskExec("rsync -r --links ./{$prefix}/files /var/www/src/site/"));
+                $c->addTask($this->taskExec("rm -rf ./{$prefix}"));
+            }
+        }
 
         $result = $c->run();
 
