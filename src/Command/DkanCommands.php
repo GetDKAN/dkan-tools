@@ -175,7 +175,7 @@ class DkanCommands extends \Robo\Tasks
             $c->addTask($this->taskExec("zcat {$tmp_path}/{$filename} | drush sqlc")->dir('docroot'));
         }
         else {
-            $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/")->dir('docroot'));
+            $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/{$filename}")->dir('docroot'));
         }
 
         $result = $c->run();
