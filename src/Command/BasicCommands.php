@@ -1,6 +1,6 @@
 <?php
 
-namespace DkanTools\Commands;
+namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 use Robo\Result;
@@ -61,7 +61,7 @@ class BasicCommands extends \Robo\Tasks
     {
         $this->_mkdir('src');
 
-        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests'];
+        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
@@ -71,9 +71,32 @@ class BasicCommands extends \Robo\Tasks
             $this->directoryAndFileCreationCheck($result, $dir);
         }
 
+        $this->addDkanToolsModule();
         $this->createMakeFiles();
         $this->createSiteFilesDirectory();
         $this->createSettingsFiles($host);
+        $this->setupScripts();
+    }
+
+    private function setupScripts() {
+        $dktlRoot = Util::getDktlRoot();
+
+        $files = ['deploy', 'deploy.custom'];
+
+        foreach ($files as $file) {
+            $f = "src/script/{$file}.sh";
+
+            $task = $this->taskWriteToFile($f)
+                ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
+            $result = $task->run();
+            $this->_exec("chmod +x /var/www/src/script/{$file}.sh");
+
+            $this->directoryAndFileCreationCheck($result, $f);
+        }
+    }
+
+    private function addDkanToolsModule() {
+        $this->_copyDir('/usr/local/dkan-tools/assets/module/dkan_tools', '/var/www/src/modules/dkan_tools');
     }
 
     private function createMakeFiles()
@@ -85,9 +108,13 @@ class BasicCommands extends \Robo\Tasks
         foreach ($files as $file) {
             $f = "src/make/{$file}.make";
 
-            $result = $this->taskWriteToFile($f)
-          ->textFromFile("$dktlRoot/assets/drush/template.make.yml")
-          ->run();
+            $task = $this->taskWriteToFile($f)
+              ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
+            if ($file == "drupal") {
+                $task->text("defaults:\n  projects:\n    subdir: contrib\n");
+                $task->text("projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'");
+            }
+            $result = $task->run();
 
             $this->directoryAndFileCreationCheck($result, $f);
         }
@@ -180,6 +207,15 @@ class BasicCommands extends \Robo\Tasks
         return $drushExec->run();
     }
 
+    public function composer(array $cmd)
+    {
+        $drushExec = $this->taskExec('composer');
+        foreach ($cmd as $arg) {
+            $drushExec->arg($arg);
+        }
+        return $drushExec->run();
+    }
+
     /**
      * Run "drush uli" command with correct ULI argument.
      *
@@ -190,7 +226,8 @@ class BasicCommands extends \Robo\Tasks
      *
      * @todo Make it configurable whether this uses http or https.
      */
-    function drushUli() {
+    public function drushUli()
+    {
         throw new \Exception('Something went wrong; this command should be run through dktl.sh');
     }
 }

@@ -6,7 +6,8 @@
     },
     "autoload": {
         "psr-4": {
-            "DkanTools\\": "src"
+            "DkanTools\\": "src",
+            "DkanTools\\Custom\\": "/var/www/src/command"
         }
     },
     "require-dev": {

@@ -1,20 +1,23 @@
 <?php
-
-$databases = array (
-  'default' =>
-  array (
-    'default' =>
-    array (
-      'database' => 'drupal',
-      'username' => 'drupal',
-      'password' => '123',
-      'host' => 'db',
-      'port' => '',
-      'driver' => 'mysql',
-      'prefix' => '',
+if (getenv("VIRTUAL_HOST") == "dkan.docker") {
+  $databases = array(
+    'default' => array(
+      'default' => array(
+        'database' => 'drupal',
+        'username' => 'drupal',
+        'password' => '123',
+        'host' => 'db',
+        'port' => '',
+        'driver' => 'mysql',
+        'prefix' => '',
+      ),
     ),
-  ),
-);
+  );
 
-# Uncomment this if needed, but not enabled by default.
-#$base_url = 'http://#HOST:#WEB_PORT';
+  $conf['environment_indicator_overwrite'] = true;
+  $conf['environment_indicator_overwritten_name'] = 'Local';
+  $conf['environment_indicator_overwritten_color'] = '#ff0000';
+  $conf['environment_indicator_overwritten_text_color'] = '#ffffff';
+  $conf['environment_indicator_overwritten_position'] = 'top';
+  $conf['environment_indicator_overwritten_fixed'] = true;
+}
