@@ -28,7 +28,7 @@ class ArgumentLoader
         if (!empty($command) && $this->onlyCommandGiven()) {
             $yamld_command = $command;
             $config = Yaml::parse(file_get_contents("/var/www/dktl.yml"));
-            print_r($config);
+
             if (isset($config[$yamld_command])) {
                 $argv = array_merge($argv, array_values($config[$yamld_command]));
             }
