@@ -4,7 +4,7 @@ namespace DkanTools\Util;
 
 use Symfony\Component\Yaml\Yaml;
 
-class ArgumentsAndOptionsLoader
+class ArgumentLoader
 {
     private $argv;
 
@@ -16,18 +16,17 @@ class ArgumentsAndOptionsLoader
     public function getCommand() {
         $command = "";
         if (count($this->argv) >= 2) {
-            print_r($this->argv);
             $command = $this->argv[1];
         }
         return $command;
     }
 
-    public function enhancedArgv() {
+    public function getAlteredArgv() {
         $argv = $this->argv;
         $command = $this->getCommand();
 
         if (!empty($command) && $this->onlyCommandGiven()) {
-            $yamld_command = str_replace(":", "|", $command);
+            $yamld_command = $command;
             $config = Yaml::parse(file_get_contents("/var/www/dktl.yml"));
             print_r($config);
             if (isset($config[$yamld_command])) {

@@ -23,9 +23,9 @@ $runner = new \Robo\Runner($commandClasses);
 
 $argv = $_SERVER['argv'];
 
-$loader = new \DkanTools\Util\ArgumentsAndOptionsLoader($argv);
+$loader = new \DkanTools\Util\ArgumentLoader($argv);
 
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-$statusCode = $runner->execute($loader->enhancedArgv(), $appName, $appVersion, $output);
+$statusCode = $runner->execute($loader->getAlteredArgv(), $appName, $appVersion, $output);
 
 exit($statusCode);
