@@ -1,6 +1,6 @@
 # DKAN Tools (DKTL)
 
-This CLI application provides tools for implementing and developping [DKAN](https://getdkan.org/), the Drupal-based open data portal.
+This CLI application provides tools for implementing and developing [DKAN](https://getdkan.org/), the Drupal-based open data portal.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ That's it! All other dependencies are included in the Docker containers that dka
 ## Installation
 
 1. Download or clone this repository into any location on your development machine.
-2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) to `bin\dktl.sh`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
+2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) `bin\dktl.sh`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
 ```bash
 ln -s /my/dktl/location/bin/dktl.sh ~/bin/dktl
 ```
@@ -43,13 +43,13 @@ Finally, lets install DKAN.
 
 ```dktl dkan:install```
 
-To access you site use ``dktl drush:uli``
+To access your site use ``dktl drush:uli``
 
 ## Existing DKAN Site to DKTL
 
 One of the many reasons for using DKTL is to create a clear separation between **our** application, and other software that we are simply using. To accomplish this, we want as much of what makes our application unique to live in the ``src`` directory.
 
-To get started we find what version of DKAN our current application and run the following commands:
+To get started we find what version of DKAN our current application is using, and run the following commands:
 
 ```
 mkdir my_project && cd my_project
@@ -109,9 +109,9 @@ After our database and files have been installed. We can access our site with ``
 
 The `dktl` script assumes that it is being run from inside a DKAN project. A DKAN project will ultimately have the following contents:
 
-* `dkan/` dir: The DKAN code, cloned or downloaded from https://github.com/GetDKAN/dkan
-* `docroot/`: The full Drupal codebase. The `dkan/` dir will be symlinked into `docroot/profiles/`.
-* `config/`: All project-specific configuration and customizations.
+* `dkan/` directory: The DKAN code, cloned or downloaded from https://github.com/GetDKAN/dkan
+* `docroot/`: The full Drupal codebase. The `dkan/` directory will be symlinked into `docroot/profiles/`.
+* `src/`: All project-specific configuration and customizations.
 * `dktl.yml`: Project configuration for DKAN Tools
 
 ### Starting docker
