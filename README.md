@@ -1,6 +1,6 @@
-# DKAN Tools
+# DKAN Tools (DKTL)
 
-This CLI application provides tools for implementing and developping [DKAN](https://getdkan.org/), the Drupal-based open data portal.
+This CLI application provides tools for implementing and developing [DKAN](https://getdkan.org/), the Drupal-based open data portal.
 
 ## Requirements
 
@@ -9,26 +9,109 @@ This tool currently only supports [Docker](https://www.docker.com/)-based local 
 * Bash-like shell that can execute .sh files (Linux or OS X terminals should all work)
 * [Docker](https://www.docker.com/get-docker)
 * [Docker Compose](https://docs.docker.com/compose/)
-* PHP 7.0 and Composer. (This requirement soon to be optional.)
 
 That's it! All other dependencies are included in the Docker containers that dkan-tools will create.
 
 ## Installation
 
 1. Download or clone this repository into any location on your development machine.
-2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) to `bin\dktl.sh`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
+2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) `bin\dktl.sh`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
 ```bash
 ln -s /my/dktl/location/bin/dktl.sh ~/bin/dktl
 ```
-3. Go to the directory where DKAN-tools was downloaded to (it should contain a composer.json file) and run `composer install`. 
+
+## Starting a project
+To start a project with ``dktl`` simply create a directory.
+
+```mkdir my_project && cd my_project```
+
+Inside the project directory start the tool and initialize your project.
+
+```dktl dc up -d && dktl init```
+
+After initialization, we want to get DKAN ready.
+
+```dktl dkan:get <version_number> && dktl dkan:make```
+
+Versions of DKAN look like this: ``7.x-1.15.3``. You can see all of [DKAN's releases](https://github.com/getDkan/dkan/releases) in Github.
+
+The last prepartion step is to get Drupal.
+
+```dktl drupal:make```
+
+Finally, lets install DKAN.
+
+```dktl dkan:install```
+
+To access your site use ``dktl drush:uli``
+
+## Existing DKAN Site to DKTL
+
+One of the many reasons for using DKTL is to create a clear separation between **our** application, and other software that we are simply using. To accomplish this, we want as much of what makes our application unique to live in the ``src`` directory.
+
+To get started we find what version of DKAN our current application is using, and run the following commands:
+
+```
+mkdir my_project && cd my_project
+dktl dc up -d && dktl init
+dktl dkan:get <version_number>
+```
+
+Before we finish getting DKAN ready, we want to figure out if our current site has any patched versions of DKAN dependencies. DKAN uses **Drush Make** to define its dependency. DKTL takes advantage of Drush Make to be able to apply patches to DKAN without having to modify anything owned by DKAN itself.
+
+Any patches that we want to apply to dkan can be placed in the ``src/make/dkan.make`` file.
+
+For reference on how to use make files with Drush Make look at the [Drush Make documentation](http://docs.drush.org/en/7.x/make/).
+
+After setting up our ``dkan.make`` file, we can finish getting DKAN ready.
+
+``dktl dkan:make``
+
+Now we can get Drupal ready. DKAN comes with a suggested version of Drupal. This version can be found in ``dkan/drupal-org-core.make``. If our site is using a different version, we can modify this by adding the right version to ``src/make/drupal.make``.
+
+Part of you file should look like this:
+
+```
+projects:
+  drupal:
+    type: core
+    version: '7.50'
+
+```
+
+In ``src/make/drupal.make`` we can also define the contributed modules, themes, and libraries that our site uses. For example if our site uses the deploy module we can add this to ``drupal.make`` under the ``projects`` section:
+
+```
+deploy:
+  version: '3.1'
+```
+
+Most of all other configuration in Drupal/DKAN sites is placed in the ``sites/default`` directory inside of Drupal.
+
+To keep the separation between our code/configuration and what is Drupal's, DKTL provides the ``src/site``
+
+``src/site`` will replace ``sites/default`` once Drupal is installed. ``src/site`` should then contain all of the configuration that will be in ``sites/default``. DKTL already provided some things in ``src/site``. ``settings.php`` contains some generalized code that is meant to load any other setting files present there as long as they follow the ``settings.<something>.php`` pattern. All of the special settings that you previously had in ``settings.php`` or other drupal configuration files should live in your custom ``settings.<something>.php`` file in ``src/site``. 
+
+After all of our contributed dependencies and other custom configuration have been properly captured in ``drupal.make``, we can get and setup the code:
+
+```dktl drupal:make```
+
+Finally, if all our configuration is in file we can now install dkan and enble any other modules that control the configuration of our site.
+
+If not all our configuration is in code, then we usually need to get a version of an existing database and a set of files. DKTL provides the ``dktl dkan:restore`` command to accomplish that.
+
+``dktl dkan:restore <path_to_db> <path_to_files>``
+
+After our database and files have been installed. We can access our site with ``dktl drush:uli``.
+ 
 
 ## Usage
 
 The `dktl` script assumes that it is being run from inside a DKAN project. A DKAN project will ultimately have the following contents:
 
-* `dkan/` dir: The DKAN code, cloned or downloaded from https://github.com/GetDKAN/dkan
-* `docroot/`: The full Drupal codebase. The `dkan/` dir will be symlinked into `docroot/profiles/`.
-* `config/`: All project-specific configuration and customizations.
+* `dkan/` directory: The DKAN code, cloned or downloaded from https://github.com/GetDKAN/dkan
+* `docroot/`: The full Drupal codebase. The `dkan/` directory will be symlinked into `docroot/profiles/`.
+* `src/`: All project-specific configuration and customizations.
 * `dktl.yml`: Project configuration for DKAN Tools
 
 ### Starting docker

@@ -25,7 +25,7 @@ class ArgumentLoader
         $argv = $this->argv;
         $command = $this->getCommand();
 
-        if (!empty($command) && $this->onlyCommandGiven()) {
+        if (!empty($command) && $this->onlyCommandGiven() && file_exists("/var/www/dktl.yml")) {
             $yamld_command = $command;
             $config = Yaml::parse(file_get_contents("/var/www/dktl.yml"));
 
