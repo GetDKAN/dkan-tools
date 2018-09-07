@@ -15,7 +15,7 @@ if [ -z `which docker-compose` ]; then
 fi
 
 dktl_symlink_location=$(which dktl)
-dktl_executable_location=$(readlink -f $dktl_symlink_location)
+dktl_executable_location=$(readlink $dktl_symlink_location)
 
 DKTL_DIRECTORY=$(dirname $(dirname $dktl_executable_location))
 export DKTL_DIRECTORY
