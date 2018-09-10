@@ -25,7 +25,10 @@ To start a project with ``dktl`` simply create a directory.
 
 ```mkdir my_project && cd my_project```
 
-Inside the project directory start the tool and initialize your project.
+Inside the project directory create an empty file called ``dktl.yml``.
+```touch dktl.yml```
+
+Start the tool and initialize your project.
 
 ```dktl dc up -d && dktl init```
 

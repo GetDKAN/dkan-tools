@@ -169,13 +169,15 @@ class DkanCommands extends \Robo\Tasks
 
         $c->addTask($this->taskExec("wget -O {$tmp_path}/{$filename} {$db_url}"));
 
-        $c->addTask($this->taskExec('drush -y sql-drop')->dir('docroot'));
+        $drupal_root = Util::getProjectDocroot();
+
+        $c->addTask($this->taskExec('drush -y sql-drop')->dir($drupal_root));
 
         if ($ext == "gz") {
-            $c->addTask($this->taskExec("zcat {$tmp_path}/{$filename} | drush sqlc")->dir('docroot'));
+            $c->addTask($this->taskExec("zcat {$tmp_path}/{$filename} | drush sqlc")->dir($drupal_root));
         }
         else {
-            $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/{$filename}")->dir('docroot'));
+            $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/{$filename}")->dir($drupal_root));
         }
 
         $result = $c->run();
@@ -192,6 +194,7 @@ class DkanCommands extends \Robo\Tasks
 
     private function restoreFiles($files_url)
     {
+        $project_directory = Util::getProjectDirectory();
         $info = pathinfo($files_url);
 
         $full_file_name = $info['basename'];
@@ -207,31 +210,23 @@ class DkanCommands extends \Robo\Tasks
         }
         else if($extension == "gz") {
             if (substr_count($full_file_name, ".tar") > 0) {
-                $c->addTask($this->taskExec("tar -xvzf {$tmp_path}/{$full_file_name}"));
+                $c->addTask($this->taskExec("tar -xvzf {$full_file_name}")->dir($tmp_path));
             }
             else {
                 $c->addTask($this->taskExec("gunzip {$tmp_path}/{$full_file_name}"));
             }
         }
 
-        if (file_exists("{$tmp_path}/files")) {
-            $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "src/site/files"]));
-        }
-        else {
-            $prefix = str_replace(".tar.gz", "", $full_file_name);
-            if (file_exists("./{$prefix}/files")) {
-                $c->addTask($this->taskExec("rsync -r --links ./{$prefix}/files /var/www/src/site/"));
-                $c->addTask($this->taskExec("rm -rf ./{$prefix}"));
-            }
-        }
+        $c->addTask($this->taskFlattenDir(["{$tmp_path}/*" => "{$tmp_path}/files"]));
+        $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "{$project_directory}/src/site/files"]));
 
         $result = $c->run();
 
         if ($result->getExitCode() == 0) {
-            $this->io()->success('Files were restored.');
+            $this->io()->success('Files Restored.');
         }
         else {
-            $this->io()->error('Issues restoring the files.');
+            $this->io()->error('Issues Restoring.');
         }
 
         return $result;
@@ -257,10 +252,11 @@ class DkanCommands extends \Robo\Tasks
 
     public function dkanDeploy($target_environment)
     {
-        $script = "/var/www/src/script/deploy.sh";
-        $docroot = "/var/www/docroot";
+        $project = Util::getProjectDirectory();
+        $script = "{$project}/src/script/deploy.sh";
+        $docroot = Util::getProjectDocroot();
 
-        if (file_exists("/var/www/src/script/deploy.sh")) {
+        if (file_exists($script)) {
             $command = "{$script} {$docroot} {$target_environment}";
             $this->_exec($command);
         }

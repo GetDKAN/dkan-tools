@@ -10,9 +10,33 @@ class Util
 {
     const TMP_DIR = "./tmp";
 
-    public static function getDktlRoot()
+    public static function getDktlDirectory()
     {
-        return dirname(__DIR__, 2);
+        $dktl_symlink_location = exec("which dktl");
+        $dktl_executable_location = exec("readlink {$dktl_symlink_location}");
+
+        $dktl_directory = $dktl_executable_location;
+        for ($i = 0; $i < 2; $i++) {
+          $dktl_directory = exec("dirname {$dktl_directory}");
+        }
+        return $dktl_directory;
+    }
+
+    public static function getProjectDirectory() {
+        $directory = exec("pwd");
+
+        while ($directory != "/") {
+            if (file_exists("{$directory}/dktl.yml")) {
+                return $directory;
+            }
+            $directory = exec("dirname {$directory}");
+        }
+
+        throw new \Exception("You don't seem to be in a DKTL project.");
+    }
+
+    public static function getProjectDocroot() {
+        return self::getProjectDirectory() . "/docroot";
     }
 
     public static function drushConcurrency()

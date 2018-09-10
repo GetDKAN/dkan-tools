@@ -79,7 +79,8 @@ class BasicCommands extends \Robo\Tasks
     }
 
     private function setupScripts() {
-        $dktlRoot = Util::getDktlRoot();
+        $dktlRoot = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
 
         $files = ['deploy', 'deploy.custom'];
 
@@ -89,19 +90,21 @@ class BasicCommands extends \Robo\Tasks
             $task = $this->taskWriteToFile($f)
                 ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
             $result = $task->run();
-            $this->_exec("chmod +x /var/www/src/script/{$file}.sh");
+            $this->_exec("chmod +x {$project_dir}/src/script/{$file}.sh");
 
             $this->directoryAndFileCreationCheck($result, $f);
         }
     }
 
     private function addDkanToolsModule() {
-        $this->_copyDir('/usr/local/dkan-tools/assets/module/dkan_tools', '/var/www/src/modules/dkan_tools');
+        $dktl_dir = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
+        $this->_copyDir("{$dktl_dir}/assets/module/dkan_tools", "{$project_dir}/src/modules/dkan_tools");
     }
 
     private function createMakeFiles()
     {
-        $dktlRoot = Util::getDktlRoot();
+        $dktlRoot = Util::getDktlDirectory();
 
         $files = ['drupal', 'dkan'];
 
@@ -131,7 +134,7 @@ class BasicCommands extends \Robo\Tasks
 
     private function createSettingsFiles($host = "")
     {
-        $dktlRoot = Util::getDktlRoot();
+        $dktlRoot = Util::getDktlDirectory();
 
         $settings = ["settings.php", "settings.docker.php"];
 
@@ -165,7 +168,7 @@ class BasicCommands extends \Robo\Tasks
      */
     public function initHost($host = null)
     {
-        $dktlRoot = Util::getDktlRoot();
+        $dktlRoot = Util::getDktlDirectory();
         $settingsFile = "settings.$host.php";
         if (!$host) {
             throw new \Exception("Host not specified.");
@@ -200,7 +203,8 @@ class BasicCommands extends \Robo\Tasks
      */
     public function drush(array $cmd)
     {
-        $drushExec = $this->taskExec('drush')->dir('docroot');
+        $drupal_root = Util::getProjectDocroot();
+        $drushExec = $this->taskExec('drush')->dir($drupal_root);
         foreach ($cmd as $arg) {
             $drushExec->arg($arg);
         }

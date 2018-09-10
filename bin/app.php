@@ -3,15 +3,18 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+$dktl_directory = DkanTools\Util\Util::getDktlDirectory();
+$dktl_project_directory = DkanTools\Util\Util::getProjectDirectory();
+
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
 $discovery = new \Consolidation\AnnotatedCommand\CommandFileDiscovery();
 $discovery->setSearchPattern('*Commands.php');
-$defaultCommandClasses = $discovery->discover('/usr/local/dkan-tools/src', '\\DkanTools');
+$defaultCommandClasses = $discovery->discover("{$dktl_directory}/src", '\\DkanTools');
 
 $customCommandClasses = [];
-if (file_exists('/var/www/src/command')) {
-    $customCommandClasses = $discovery->discover('/var/www/src/command', '\\DkanTools\\Custom');
+if (file_exists("{$dktl_project_directory}/src/command")) {
+    $customCommandClasses = $discovery->discover("{$dktl_project_directory}/src/command", '\\DkanTools\\Custom');
 }
 
 $commandClasses = array_merge($defaultCommandClasses, $customCommandClasses);

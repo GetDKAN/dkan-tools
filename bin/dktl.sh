@@ -21,9 +21,6 @@ DKTL_DIRECTORY=$(dirname $(dirname $dktl_executable_location))
 export DKTL_DIRECTORY
 
 DKTL_PROJECT_DIRECTORY=$(find-up dktl.yml)
-if [ -z $DKTL_PROJECT_DIRECTORY ]; then
-    DKTL_PROJECT_DIRECTORY=$(pwd)
-fi
 export DKTL_PROJECT_DIRECTORY
 
 SLUG=${DKTL_PROJECT_DIRECTORY##*/}
