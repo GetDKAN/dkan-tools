@@ -163,4 +163,10 @@ Everything else is flexible:
 
 Each function inside of the class will show up as an available DKTL command.
 
-_More documentation coming soon!_
+## Disabling CHOWN
+
+DKTL, by default, performs most of its tasks inside of a docker container. This can cause project files to have undesirable permissions. To combat that, DKTL attempts to give ownership of all project files to the user running DKTL when it detects that files have changed. In some circumstances we do not want this behavior. This can be controlled through and environment variable.
+
+To disable chowning create the environment variable with this command:
+
+```export DKTL_CHOWN="FALSE"```
