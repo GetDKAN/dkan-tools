@@ -163,10 +163,12 @@ Everything else is flexible:
 
 Each function inside of the class will show up as an available DKTL command.
 
-## Disabling CHOWN
+## Disabling `chown`
 
-DKTL, by default, performs most of its tasks inside of a docker container. This can cause project files to have undesirable permissions. To combat that, DKTL attempts to give ownership of all project files to the user running DKTL when it detects that files have changed. In some circumstances we do not want this behavior. This can be controlled through and environment variable.
+DKTL, by default, performs most of its tasks inside of a docker container. The result is that any files created by scripts running inside the container will appear to be owned by "root" on the host machine, which often leads to permission issues when trying to use these files. To avoid this DKTL attempts to give ownership of all project files to the user running DKTL when it detects that files have changed, using the `chown` command via `sudo`. In some circumstances, such as environments where `sudo` is not available, you may not want this behavior. This can be controlled by setting a true/false environment variable, `DKTL_CHOWN`.
 
-To disable chowning create the environment variable with this command:
+To disable the chown behavior, create the environment variable with this command:
 
-```export DKTL_CHOWN="FALSE"```
+```bash
+export DKTL_CHOWN="FALSE"
+```
