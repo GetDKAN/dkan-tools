@@ -89,9 +89,11 @@ else
     $BASE_DOCKER_COMPOSE_COMMAND exec cli dktl $1 "${@:2}"
 fi
 
-# Docker creates files that appear as owned by root on host. Fix:
-if [ ! -z `find $DKTL_PROJECT_DIRECTORY -user root -print -quit` ]; then
-    CHOWN_CMD="sudo chown -R $USER:$USER $DKTL_PROJECT_DIRECTORY"
-    echo && echo "➜  Changing ownership of new files to host user"
-    echo -e "\e[32m$CHOWN_CMD\e[39m" && $CHOWN_CMD
+if [ -z $DKTL_CHOWN ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
+    # Docker creates files that appear as owned by root on host. Fix:
+    if [ ! -z `find $DKTL_PROJECT_DIRECTORY -user root -print -quit` ]; then
+        CHOWN_CMD="sudo chown -R $USER:$USER $DKTL_PROJECT_DIRECTORY"
+        echo && echo "➜  Changing ownership of new files to host user"
+        echo -e "\e[32m$CHOWN_CMD\e[39m" && $CHOWN_CMD
+    fi
 fi
