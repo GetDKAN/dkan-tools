@@ -13,4 +13,4 @@ services:
 volumes:
   filesync:
     external:
-      name: "${SLUG}_filesync"
+      name: "${DKTL_SLUG}_filesync"

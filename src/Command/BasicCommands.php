@@ -48,7 +48,7 @@ class BasicCommands extends \Robo\Tasks
 
     private function createDktlYmlFile()
     {
-        $dktlRoot = Util::getDktlRoot();
+        $dktlRoot = Util::getDktlDirectory();
         $f = 'dktl.yml';
         $result = $this->taskWriteToFile($f)
         ->textFromFile("$dktlRoot/assets/dktl.yml")

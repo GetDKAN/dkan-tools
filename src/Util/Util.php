@@ -12,27 +12,19 @@ class Util
 
     public static function getDktlDirectory()
     {
-        $dktl_symlink_location = exec("which dktl");
-        $dktl_executable_location = exec("readlink {$dktl_symlink_location}");
-
-        $dktl_directory = $dktl_executable_location;
-        for ($i = 0; $i < 2; $i++) {
-          $dktl_directory = exec("dirname {$dktl_directory}");
-        }
-        return $dktl_directory;
+        return getenv("DKTL_DIRECTORY");
     }
 
     public static function getProjectDirectory() {
         $directory = exec("pwd");
 
-        while ($directory != "/") {
-            if (file_exists("{$directory}/dktl.yml")) {
-                return $directory;
-            }
-            $directory = exec("dirname {$directory}");
+        $argv = $_SERVER['argv'];
+
+        if (isset($argv[1]) && $argv[1] == "init") {
+            return $directory;
         }
 
-        throw new \Exception("You don't seem to be in a DKTL project.");
+        return getenv("DKTL_PROJECT_DIRECTORY");
     }
 
     public static function getProjectDocroot() {
