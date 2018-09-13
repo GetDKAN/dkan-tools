@@ -104,7 +104,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   # Check containers state if in DOCKER mode
   containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
   if [ -z "$containers" ]; then
-    echo "No containers are active, run 'dktl dc up -d' to start your containers."
+    echo "Starting docker containers."
     $BASE_DOCKER_COMPOSE_COMMAND up -d
   fi
 
