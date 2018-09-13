@@ -22,12 +22,13 @@ class ArgumentLoader
     }
 
     public function getAlteredArgv() {
+        $project_directory = Util::getProjectDirectory();
         $argv = $this->argv;
         $command = $this->getCommand();
 
-        if (!empty($command) && $this->onlyCommandGiven() && file_exists("/var/www/dktl.yml")) {
+        if (!empty($command) && $this->onlyCommandGiven() && file_exists("{$project_directory}/dktl.yml")) {
             $yamld_command = $command;
-            $config = Yaml::parse(file_get_contents("/var/www/dktl.yml"));
+            $config = Yaml::parse(file_get_contents("{$project_directory}/dktl.yml"));
 
             if (isset($config[$yamld_command])) {
                 $argv = array_merge($argv, array_values($config[$yamld_command]));

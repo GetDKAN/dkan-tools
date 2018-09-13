@@ -20,7 +20,7 @@ services:
       - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
     network_mode: bridge
     labels:
-      - "traefik.frontend.rule=Host:${SLUG}.${PROXY_DOMAIN}"
+      - "traefik.frontend.rule=Host:${DKTL_SLUG}.${DKTL_PROXY_DOMAIN}"
       - "traefik.frontend.passHostHeader=true"
     environment:
       # no_proxy="" required for default Docker For Mac system proxy that contains a space and prevents Selenium from loading.
@@ -54,6 +54,7 @@ services:
     image: getdkan/dkan-docker:php7-cli
     environment:
       - XDEBUG_CONFIG=idekey=PHPSTORM
+      - DKTL_MODE=HOST
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
@@ -127,5 +128,5 @@ services:
     volumes:
       - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
     labels:
-      - "traefik.frontend.rule=Host:${SLUG}-solr.${PROXY_DOMAIN}"
+      - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
     network_mode: bridge

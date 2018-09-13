@@ -10,9 +10,25 @@ class Util
 {
     const TMP_DIR = "./tmp";
 
-    public static function getDktlRoot()
+    public static function getDktlDirectory()
     {
-        return dirname(__DIR__, 2);
+        return getenv("DKTL_DIRECTORY");
+    }
+
+    public static function getProjectDirectory() {
+        $directory = exec("pwd");
+
+        $argv = $_SERVER['argv'];
+
+        if (isset($argv[1]) && $argv[1] == "init") {
+            return $directory;
+        }
+
+        return getenv("DKTL_PROJECT_DIRECTORY");
+    }
+
+    public static function getProjectDocroot() {
+        return self::getProjectDirectory() . "/docroot";
     }
 
     public static function drushConcurrency()

@@ -25,9 +25,9 @@ To start a project with ``dktl`` simply create a directory.
 
 ```mkdir my_project && cd my_project```
 
-Inside the project directory start the tool and initialize your project.
+Inside the project directory, initialize your project.
 
-```dktl dc up -d && dktl init```
+```dktl init```
 
 After initialization, we want to get DKAN ready.
 
@@ -172,3 +172,20 @@ To disable the `chown` behavior, create the environment variable with this comma
 ```bash
 export DKTL_CHOWN="FALSE"
 ```
+
+## Running without Docker
+
+One of the greatest strenghts of DKTL is the ease in which a proper environment can be ready to run a DKAN project and the tooling, with the only dependency being docker and docker-compose.
+
+If for some reason you would like to use some of DKTL without docker, there is a mechanism to accomplish this.
+
+First of all, make sure that you have all of the software DKTL needs:
+1) PHP
+2) Composer
+3) Drush
+
+The mode in which DKTL runs is controlled by an environment variable: ``DKTL_MODE``. To run DKLT without docker set the environment variable to ``HOST``:
+
+```export DKTL_MODE="HOST"```
+
+To go back to running in docker mode, set the variable to ``DOCKER``.
