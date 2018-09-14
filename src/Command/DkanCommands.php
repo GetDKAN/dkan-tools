@@ -160,24 +160,20 @@ class DkanCommands extends \Robo\Tasks
 
     private function restoreDb($db_url)
     {
-        $info = pathinfo($db_url);
-        $filename = $info['basename'];
+        Util::prepareTmp();
+        $file_path = $this->getFile($db_url);
+        $info = pathinfo($file_path);
         $ext = $info['extension'];
-
-        $c = $this->collectionBuilder();
-        $tmp_path = $c->tmpDir();
-
-        $c->addTask($this->taskExec("wget -O {$tmp_path}/{$filename} {$db_url}"));
-
         $drupal_root = Util::getProjectDocroot();
 
+        $c = $this->collectionBuilder();
         $c->addTask($this->taskExec('drush -y sql-drop')->dir($drupal_root));
 
         if ($ext == "gz") {
-            $c->addTask($this->taskExec("zcat {$tmp_path}/{$filename} | drush sqlc")->dir($drupal_root));
+            $c->addTask($this->taskExec("zcat $file_path | drush sqlc")->dir($drupal_root));
         }
         else {
-            $c->addTask($this->taskExec('drush sqlc <')->arg("{$tmp_path}/{$filename}")->dir($drupal_root));
+            $c->addTask($this->taskExec('drush sqlc <')->arg($file_path)->dir($drupal_root));
         }
 
         $result = $c->run();
@@ -188,32 +184,32 @@ class DkanCommands extends \Robo\Tasks
         else {
             $this->io()->error('Issues restoring the database.');
         }
+        Util::cleanupTmp();
 
         return $result;
     }
 
     private function restoreFiles($files_url)
     {
-        $project_directory = Util::getProjectDirectory();
-        $info = pathinfo($files_url);
-
-        $full_file_name = $info['basename'];
+        Util::prepareTmp();
+        $tmp_path = Util::TMP_DIR;
+        $file_path = $this->getFile($files_url);
+        $info = pathinfo($file_path);
         $extension = $info['extension'];
 
-        $c = $this->collectionBuilder();
-        $tmp_path = $c->tmpDir();
+        $project_directory = Util::getProjectDirectory();
 
-        $c->addTask($this->taskExec("wget -O {$tmp_path}/{$full_file_name} {$files_url}"));
+        $c = $this->collectionBuilder();
 
         if($extension == "zip") {
-            $c->addTask($this->taskExec("unzip {$tmp_path}/{$full_file_name} -d {$tmp_path}"));
+            $c->addTask($this->taskExec("unzip $file_path -d {$tmp_path}"));
         }
         else if($extension == "gz") {
-            if (substr_count($full_file_name, ".tar") > 0) {
-                $c->addTask($this->taskExec("tar -xvzf {$full_file_name}")->dir($tmp_path));
+            if (substr_count($file_path, ".tar") > 0) {
+                $c->addTask($this->taskExec("tar -xvzf {$file_path}")->dir($tmp_path));
             }
             else {
-                $c->addTask($this->taskExec("gunzip {$tmp_path}/{$full_file_name}"));
+                $c->addTask($this->taskExec("gunzip {$file_path}"));
             }
         }
 
@@ -228,8 +224,40 @@ class DkanCommands extends \Robo\Tasks
         else {
             $this->io()->error('Issues Restoring.');
         }
+        Util::cleanupTmp();
 
         return $result;
+    }
+
+    private function getFile($url) {
+        $tmp_dir_path = Util::TMP_DIR;
+
+        if (substr_count($url, "http://") > 0 || substr_count($url, "https://")) {
+            $info = pathinfo($url);
+            $filename = $info['basename'];
+            $approach = "wget -O {$tmp_dir_path}/{$filename} {$url}";
+        }
+        elseif (substr_count($url, "s3://")) {
+            $parser = new \Aws\S3\S3UriParser();
+            $info = $parser->parse($url);
+            $filename = $info['key'];
+            $approach = "aws s3 cp {$url} {$tmp_dir_path}";
+        }
+        else {
+            $this->io()->error("Unsupported file protocol.");
+            return;
+        }
+
+        $result = $this->taskExec($approach)->run();
+
+        if ($result->getExitCode() == 0) {
+            $this->io()->success("Got the file from {$url}.");
+        }
+        else {
+            $this->io()->error("Issues getting the file from {$url}.");
+        }
+
+        return "$tmp_dir_path/$filename";
     }
 
     private function dkanTempReplace()

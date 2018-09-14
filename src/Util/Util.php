@@ -8,7 +8,7 @@ namespace DkanTools\Util;
  */
 class Util
 {
-    const TMP_DIR = "./tmp";
+    const TMP_DIR = "/tmp/dktl";
 
     public static function getDktlDirectory()
     {
@@ -46,6 +46,14 @@ class Util
         $tmp_dir = self::TMP_DIR;
         if (!file_exists($tmp_dir)) {
             mkdir($tmp_dir);
+        }
+    }
+
+    public static function cleanupTmp()
+    {
+        $tmp_dir = self::TMP_DIR;
+        if (file_exists($tmp_dir)) {
+            exec("rm -rf {$tmp_dir}");
         }
     }
 
