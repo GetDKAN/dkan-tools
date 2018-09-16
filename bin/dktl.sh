@@ -129,7 +129,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 fi
 
 if [ "$DKTL_MODE" = "HOST" ]; then
-  if [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "test:phpunit" ]; then
+  if [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "test:phpunit" ] || [ "$1" = "test:lint" ] || [ "$1" = "test:lint-fix" ]; then
     # For several commands, we want to insert a "--" to pass all arguments as an array.
     php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"
   else

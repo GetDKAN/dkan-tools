@@ -204,6 +204,11 @@ class BasicCommands extends \Robo\Tasks
         return $drushExec->run();
     }
 
+    /**
+     * Proxy to composer.
+     *
+     *
+     */
     public function composer(array $cmd)
     {
         $drushExec = $this->taskExec('composer');

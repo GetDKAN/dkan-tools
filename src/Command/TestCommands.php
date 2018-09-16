@@ -2,6 +2,7 @@
 
 namespace DkanTools\Command;
 
+use DkanTools\Util\Util;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
@@ -89,5 +90,36 @@ class TestCommands extends \Robo\Tasks
             $phpunitExec->arg($arg);
         }
         return $phpunitExec->run();
+    }
+
+    /**
+     * Proxy to phpcs.
+     */
+    public function testLint(array $args) {
+        $dktl_dir = Util::getDktlDirectory();
+        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcs";
+
+        $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
+        $task->run();
+
+        $task = $this->taskExec($phpcs_command);
+        foreach ($args as $arg) {
+            $task->arg($arg);
+        }
+        $task->run();
+    }
+
+    /**
+     * Proxy to phpcbf.
+     */
+    public function testLintFix(array $args) {
+        $dktl_dir = Util::getDktlDirectory();
+        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcbf";
+
+        $task = $this->taskExec($phpcs_command);
+        foreach ($args as $arg) {
+            $task->arg($arg);
+        }
+        $task->run();
     }
 }
