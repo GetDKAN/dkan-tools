@@ -88,23 +88,36 @@ class DkanCommands extends \Robo\Tasks
         }
     }
 
-    public function dkanGet(string $version = null, $opts = ['source' => false])
+    public function dkanGet(string $version = null, $opts = ['source' => "https"])
     {
         Util::prepareTmp();
         if ($opts['source']) {
-            $this->getDkanGit($version);
+            $this->getDkanWithGit($version, $opts['source']);
+            $path = Util::TMP_DIR . "/dkan";
         } else {
             $archive = $this->getDkanArchive($version);
             $task = $this->taskExec("tar -xvzf {$archive}")->dir(Util::TMP_DIR);
             $task->run();
+            $path = str_replace(".tar.gz", "", $archive);
         }
 
         // At this point we should have the unbuilt DKAN folder in tmp.
-        $this->dkanTempReplace(str_replace(".tar.gz", "", $archive));
+        $this->dkanTempReplace($path);
         Util::cleanupTmp();
     }
 
-    public function getDkanArchive($version)
+    private function getDkanWithGit($version, $mode) {
+        if ($mode == "https") {
+            $source = "https://github.com/GetDKAN/dkan.git";
+        }
+        else {
+            $source = "git@github.com:GetDKAN/dkan.git";
+        }
+        $task = $this->taskExec("git clone {$source} -b {$version}")->dir(Util::TMP_DIR);
+        return $task->run();
+    }
+
+    private function getDkanArchive($version)
     {
         $fileName = "{$version}.tar.gz";
         $archive = Util::TMP_DIR . "/dkan-{$fileName}";
