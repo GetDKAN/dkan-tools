@@ -10,8 +10,6 @@ use DkanTools\Util\Util;
  */
 class DkanCommands extends \Robo\Tasks
 {
-    const DKAN_TMP_DIR = Util::TMP_DIR . "/dkan";
-
     /**
      * Run the DKAN make file and apply any overrides from /config.
      */
@@ -92,26 +90,22 @@ class DkanCommands extends \Robo\Tasks
 
     public function dkanGet(string $version = null, $opts = ['source' => false])
     {
-        if (file_exists(self::DKAN_TMP_DIR)) {
-            $this->_deleteDir(self::DKAN_TMP_DIR);
-        }
+        Util::prepareTmp();
         if ($opts['source']) {
             $this->getDkanGit($version);
         } else {
             $archive = $this->getDkanArchive($version);
-            $this->taskExtract($archive)
-                ->to(self::DKAN_TMP_DIR)
-                ->run();
+            $task = $this->taskExec("tar -xvzf {$archive}")->dir(Util::TMP_DIR);
+            $task->run();
         }
 
         // At this point we should have the unbuilt DKAN folder in tmp.
-        $this->dkanTempReplace();
+        $this->dkanTempReplace(str_replace(".tar.gz", "", $archive));
+        Util::cleanupTmp();
     }
 
     public function getDkanArchive($version)
     {
-        Util::prepareTmp();
-
         $fileName = "{$version}.tar.gz";
         $archive = Util::TMP_DIR . "/dkan-{$fileName}";
         if (file_exists($archive)) {
@@ -260,20 +254,20 @@ class DkanCommands extends \Robo\Tasks
         return "$tmp_dir_path/$filename";
     }
 
-    private function dkanTempReplace()
+    private function dkanTempReplace($tmp_dkan)
     {
-        $dkanPermanent = getcwd() . '/dkan';
+        $dkan_permanent = Util::getProjectDirectory() . '/dkan';
         $replaced = false;
-        if (file_exists($dkanPermanent)) {
+        if (file_exists($dkan_permanent)) {
             if ($this->io()->confirm("Are you sure you want to replace your current DKAN profile directory?")) {
-                $this->_deleteDir($dkanPermanent);
+                $this->_deleteDir($dkan_permanent);
                 $replaced = true;
             } else {
                 $this->say('Canceled.');
                 return;
             }
         }
-        $this->_exec('mv ' . self::DKAN_TMP_DIR . ' ' . getcwd());
+        $this->_exec('mv ' . $tmp_dkan . ' ' . $dkan_permanent);
         $verb = $replaced ? 'replaced' : 'created';
         $this->say("DKAN profile directory $verb.");
     }
