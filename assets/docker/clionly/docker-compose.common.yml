@@ -1,0 +1,22 @@
+# Common Docker Container configuration
+version: "2"
+services:
+  # CLI node
+  # Used for all console commands and tools.
+  cli:
+    hostname: cli
+    image: getdkan/dkan-docker:php7-cli
+    environment:
+      - XDEBUG_CONFIG=idekey=PHPSTORM
+      - DKTL_MODE=HOST
+    env_file:
+      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
+    volumes:
+      # Load the DKAN tools dir
+      - "${DKTL_DIRECTORY}/:/usr/local/dkan-tools"
+      # Host SSH keys mapping. Uncomment one of the lines below based on your setup.
+      - ~/.ssh:/root/.ssh
+      - ~/.aws:/root/.aws
+    labels:
+      - traefik.enable=false
+    network_mode: bridge

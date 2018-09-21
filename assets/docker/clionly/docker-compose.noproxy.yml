@@ -1,0 +1,6 @@
+version: "2"
+services:
+  cli:
+    environment:
+      - PHP_IDE_CONFIG=serverName=dkan.docker
+      - VIRTUAL_HOST=dkan.docker

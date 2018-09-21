@@ -12,6 +12,25 @@ find-up () {
 
 if [ -z $DKTL_MODE ] || [ "$DKTL_MODE" = "DOCKER" ]; then
   DKTL_MODE="DOCKER"
+
+  # Determine which Docker profile we should run.
+  if [ "$1" = "docker:url" ] || [ "$1" = "docker:surl" ] || [ "$1" = "drush" ] || [ "$1" = "dkan:deploy" ] || [ "$1" = "dkan:install" ] || [ "$1" = "dkan:restore" ] || [ "$1" = "drupal:install-min" ] || [ "$1" = "drush:uli" ] || [ "$1" = "test:phpunit" ] || [ "$1" = "test:behat" ]; then
+    DKTL_DOCKER_PROFILE="full"
+  else
+    DKTL_DOCKER_PROFILE="clionly"
+  fi
+
+  if [[ $1 =~ ^-p.*$ ]];then
+    if [ "$2" = "docker:compose" ] || [ "$2" = "dc" ]; then
+      string="${1}"
+      prefix="-p"
+      DKTL_DOCKER_PROFILE=${string#"$prefix"}
+      shift 1
+    else
+      echo "The -p (profile) option is not supported with $2"
+      exit 1
+    fi
+  fi
 elif [ "$DKTL_MODE" = "HOST" ]; then
   DKTL_MODE="HOST"
 else
@@ -69,14 +88,15 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
   export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
 
-  DOCKER_COMPOSE_COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
-  PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
-  VOLUME_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.nosync.yml"
+  DOCKER_COMPOSE_COMMON_CONF="$DKTL_DIRECTORY/assets/docker/$DKTL_DOCKER_PROFILE/docker-compose.common.yml"
+  PROXY_CONF="$DKTL_DIRECTORY/assets/docker/$DKTL_DOCKER_PROFILE/docker-compose.noproxy.yml"
+  VOLUME_CONF="$DKTL_DIRECTORY/assets/docker/$DKTL_DOCKER_PROFILE/docker-compose.nosync.yml"
   CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.custom.yml"
+
   if [ -f $CUSTOM_CONF ]; then
-      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $CUSTOM_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $CUSTOM_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}${DKTL_DOCKER_PROFILE}" --project-directory $DKTL_PROJECT_DIRECTORY"
   else
-      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $DOCKER_COMPOSE_COMMON_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $DOCKER_COMPOSE_COMMON_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}${DKTL_DOCKER_PROFILE}" --project-directory $DKTL_PROJECT_DIRECTORY"
   fi
 
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
