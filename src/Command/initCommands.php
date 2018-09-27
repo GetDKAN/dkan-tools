@@ -3,23 +3,10 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
+use Robo\Result;
 
-/**
- * This is project's console commands configuration for Robo task runner.
- *
- * @see http://robo.li/
- */
-class BasicCommands extends \Robo\Tasks
+class initCommands extends \Robo\Tasks
 {
-    /**
-     * Test some things.
-     */
-    public function test(array $cmd)
-    {
-        $cmdStr = implode(' ', $cmd);
-        $this->say($cmdStr);
-    }
-
     /**
      * Initialize DKAN project directory.
      */
@@ -45,13 +32,35 @@ class BasicCommands extends \Robo\Tasks
         }
     }
 
+    /**
+     * Generates basic configuration for a DKAN project to work with CircleCI.
+     */
+    public function initCicleCI() {
+        $dktl_dir = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
+        return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
+    }
+
+    /**
+     * Generates basic configuration for a DKAN project to work with ProboCI.
+     */
+    public function initProboCI() {
+        $dktl_dir = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
+        $collection = $this->collectionBuilder();
+        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/.probo.yml {$project_dir}"));
+        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/settings.probo.php {$project_dir}/src/site"));
+        return $collection->run();
+
+    }
+
     private function createDktlYmlFile()
     {
         $dktlRoot = Util::getDktlDirectory();
         $f = 'dktl.yml';
         $result = $this->taskWriteToFile($f)
-        ->textFromFile("$dktlRoot/assets/dktl.yml")
-        ->run();
+            ->textFromFile("$dktlRoot/assets/dktl.yml")
+            ->run();
 
         $this->directoryAndFileCreationCheck($result, $f);
     }
@@ -70,6 +79,7 @@ class BasicCommands extends \Robo\Tasks
             $this->directoryAndFileCreationCheck($result, $dir);
         }
 
+        $this->addDkanToolsModule();
         $this->createMakeFiles();
         $this->createSiteFilesDirectory();
         $this->createSettingsFiles($host);
@@ -94,6 +104,12 @@ class BasicCommands extends \Robo\Tasks
         }
     }
 
+    private function addDkanToolsModule() {
+        $dktl_dir = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
+        $this->_copyDir("{$dktl_dir}/assets/module/dkan_tools", "{$project_dir}/src/modules/dkan_tools");
+    }
+
     private function createMakeFiles()
     {
         $dktlRoot = Util::getDktlDirectory();
@@ -104,7 +120,7 @@ class BasicCommands extends \Robo\Tasks
             $f = "src/make/{$file}.make";
 
             $task = $this->taskWriteToFile($f)
-              ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
+                ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
             if ($file == "drupal") {
                 $task->text("defaults:\n  projects:\n    subdir: contrib\n");
                 $task->text("projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'");
@@ -133,23 +149,13 @@ class BasicCommands extends \Robo\Tasks
         foreach ($settings as $setting) {
             $f = "src/site/{$setting}";
             $result = $this->taskWriteToFile($f)
-          ->textFromFile("$dktlRoot/assets/site/{$setting}")
-          ->run();
+                ->textFromFile("$dktlRoot/assets/site/{$setting}")
+                ->run();
             $this->directoryAndFileCreationCheck($result, $f);
         }
 
         if (!empty($host)) {
-            $this->initHost();
-        }
-    }
-
-    private function directoryAndFileCreationCheck(Result $result, $df)
-    {
-        if ($result->getExitCode() == 0 && file_exists($df)) {
-            $this->io()->success("{$df} was created.");
-        } else {
-            $this->io()->error("{$df} was not created.");
-            exit;
+            $this->initHost($host);
         }
     }
 
@@ -158,7 +164,7 @@ class BasicCommands extends \Robo\Tasks
      *
      * @todo Fix opts, make required.
      */
-    public function initHost($host = null)
+    private function initHost($host)
     {
         $dktlRoot = Util::getDktlDirectory();
         $settingsFile = "settings.$host.php";
@@ -181,49 +187,17 @@ class BasicCommands extends \Robo\Tasks
         $result = $this->taskWriteToFile("site/settings.$host.php")
             ->textFromFile("$dktlRoot/assets/site/settings.$host.php")
             ->run();
+
+        return $result;
     }
 
-    /**
-     * Run drush command on current site.
-     *
-     * Run drush command on current site. For instance, to clear caches, run
-     * "dktl drush cc all". Note that the shell script will pass all arguments
-     * correctly as well as append a --uri argument so that commands like
-     * "drush uli" will output a correct url.
-     *
-     * @param array $cmd Array of arguments to create a full Drush command.
-     */
-    public function drush(array $cmd)
+    private function directoryAndFileCreationCheck(Result $result, $df)
     {
-        $drupal_root = Util::getProjectDocroot();
-        $drushExec = $this->taskExec('drush')->dir($drupal_root);
-        foreach ($cmd as $arg) {
-            $drushExec->arg($arg);
+        if ($result->getExitCode() == 0 && file_exists($df)) {
+            $this->io()->success("{$df} was created.");
+        } else {
+            $this->io()->error("{$df} was not created.");
+            exit;
         }
-        return $drushExec->run();
-    }
-
-    public function composer(array $cmd)
-    {
-        $drushExec = $this->taskExec('composer');
-        foreach ($cmd as $arg) {
-            $drushExec->arg($arg);
-        }
-        return $drushExec->run();
-    }
-
-    /**
-     * Run "drush uli" command with correct ULI argument.
-     *
-     * Like the "docker" group of commands, this command is actually run in
-     * inside the dktl.sh script makes it to the DKAN Tools php application. It
-     * simply runs the real "dktl drush" command and passes it the result of
-     * "dktl surl" as the --uri argument.
-     *
-     * @todo Make it configurable whether this uses http or https.
-     */
-    public function drushUli()
-    {
-        throw new \Exception('Something went wrong; this command should be run through dktl.sh');
     }
 }
