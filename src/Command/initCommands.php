@@ -38,7 +38,7 @@ class initCommands extends \Robo\Tasks
     public function initCicleCI() {
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
-        return $this->taskExec("cp {$dktl_dir}/assets/.circleci {$project_dir}")->run();
+        return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
     }
 
     /**
@@ -48,8 +48,8 @@ class initCommands extends \Robo\Tasks
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
         $collection = $this->collectionBuilder();
-        $collection->addTask($this->taskExec("cp {$dktl_dir}/assets/.probo.yml {$project_dir}"));
-        $collection->addTask($this->taskExec("cp {$dktl_dir}/assets/settings.probo.php {$project_dir}/src/site"));
+        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/.probo.yml {$project_dir}"));
+        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/settings.probo.php {$project_dir}/src/site"));
         return $collection->run();
 
     }
