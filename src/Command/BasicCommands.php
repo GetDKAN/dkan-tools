@@ -71,7 +71,6 @@ class BasicCommands extends \Robo\Tasks
             $this->directoryAndFileCreationCheck($result, $dir);
         }
 
-        $this->addDkanToolsModule();
         $this->createMakeFiles();
         $this->createSiteFilesDirectory();
         $this->createSettingsFiles($host);
@@ -94,12 +93,6 @@ class BasicCommands extends \Robo\Tasks
 
             $this->directoryAndFileCreationCheck($result, $f);
         }
-    }
-
-    private function addDkanToolsModule() {
-        $dktl_dir = Util::getDktlDirectory();
-        $project_dir = Util::getProjectDirectory();
-        $this->_copyDir("{$dktl_dir}/assets/module/dkan_tools", "{$project_dir}/src/modules/dkan_tools");
     }
 
     private function createMakeFiles()
