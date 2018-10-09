@@ -206,8 +206,6 @@ class BasicCommands extends \Robo\Tasks
 
     /**
      * Proxy to composer.
-     *
-     *
      */
     public function composer(array $cmd)
     {
