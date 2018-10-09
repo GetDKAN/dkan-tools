@@ -95,7 +95,7 @@ class TestCommands extends \Robo\Tasks
     /**
      * Proxy to phpcs.
      */
-    public function testLint(array $args) {
+    public function phpcs(array $args) {
         $dktl_dir = Util::getDktlDirectory();
         $phpcs_command = "{$dktl_dir}/vendor/bin/phpcs";
 
@@ -112,7 +112,7 @@ class TestCommands extends \Robo\Tasks
     /**
      * Proxy to phpcbf.
      */
-    public function testLintFix(array $args) {
+    public function phpcbf(array $args) {
         $dktl_dir = Util::getDktlDirectory();
         $phpcs_command = "{$dktl_dir}/vendor/bin/phpcbf";
 
@@ -120,6 +120,45 @@ class TestCommands extends \Robo\Tasks
         foreach ($args as $arg) {
             $task->arg($arg);
         }
+        $task->run();
+    }
+
+    /**
+     * Preconfigured linting for paths inside of the repo.
+     */
+    public function testLint(array $paths) {
+        $dktl_dir = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
+
+        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcs";
+
+        $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
+        $task->run();
+
+        $task = $this->taskExec("{$phpcs_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+
+        foreach ($paths as $path) {
+            $task->arg("{$project_dir}/{$path}");
+        }
+
+        $task->run();
+    }
+
+    /**
+     * Preconfigured lint fixing for paths inside of the repo.
+     */
+    public function testLintFix(array $paths) {
+        $dktl_dir = Util::getDktlDirectory();
+        $project_dir = Util::getProjectDirectory();
+
+        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcbf";
+
+        $task = $this->taskExec("{$phpcs_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+
+        foreach ($paths as $path) {
+            $task->arg("{$project_dir}/{$path}");
+        }
+
         $task->run();
     }
 }
