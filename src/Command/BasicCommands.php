@@ -2,6 +2,7 @@
 
 namespace DkanTools\Command;
 
+use Robo\Result;
 use DkanTools\Util\Util;
 
 /**
