@@ -3,7 +3,9 @@
     "require": {
         "consolidation/Robo": "~1",
         "pear/archive_tar": "^1.4",
-        "aws/aws-sdk-php": "^3.67"
+        "aws/aws-sdk-php": "^3.67",
+        "dealerdirect/phpcodesniffer-composer-installer": "*",
+        "drupal/coder": "8.2.12"
     },
     "autoload": {
         "psr-4": {

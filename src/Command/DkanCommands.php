@@ -88,7 +88,13 @@ class DkanCommands extends \Robo\Tasks
         }
     }
 
-    public function dkanGet(string $version = null, $opts = ['source' => false])
+    /**
+     * Get DKAN.
+     *
+     * @param string $version
+     *   The DKAN version to get (ex. 7.x-1.15.3).
+     */
+    public function dkanGet(string $version, $opts = ['source' => false])
     {
         Util::prepareTmp();
         if ($opts['source']) {
@@ -272,6 +278,16 @@ class DkanCommands extends \Robo\Tasks
         $this->say("DKAN profile directory $verb.");
     }
 
+    /**
+     * Performs common tasks when switching databases or code bases.
+     *
+     * Operations like running rr and updb. It also runs environment
+     * switching which is provided by the environment module.
+     *
+     * @param string $target_environment
+     *   One of the site environments. DKTL provides 4 by default: local,
+     *   development, test, and production.
+     */
     public function dkanDeploy($target_environment)
     {
         $project = Util::getProjectDirectory();
