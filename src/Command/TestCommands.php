@@ -92,12 +92,18 @@ class TestCommands extends \Robo\Tasks
         return $phpunitExec->run();
     }
 
+    private function getVendorCommand($binary_name) {
+        $dktl_dir = Util::getDktlDirectory();
+        return "{$dktl_dir}/vendor/bin/{$binary_name}";
+    }
+
     /**
      * Proxy to phpcs.
      */
     public function phpcs(array $args) {
         $dktl_dir = Util::getDktlDirectory();
-        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcs";
+
+        $phpcs_command = $this->getVendorCommand("phpcs");
 
         $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
         $task->run();
@@ -113,10 +119,9 @@ class TestCommands extends \Robo\Tasks
      * Proxy to phpcbf.
      */
     public function phpcbf(array $args) {
-        $dktl_dir = Util::getDktlDirectory();
-        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcbf";
+        $phpcbf_command = $this->getVendorCommand("phpcbf");
 
-        $task = $this->taskExec($phpcs_command);
+        $task = $this->taskExec($phpcbf_command);
         foreach ($args as $arg) {
             $task->arg($arg);
         }
@@ -130,7 +135,7 @@ class TestCommands extends \Robo\Tasks
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
 
-        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcs";
+        $phpcs_command = $this->getVendorCommand("phpcs");
 
         $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
         $task->run();
@@ -148,12 +153,11 @@ class TestCommands extends \Robo\Tasks
      * Preconfigured lint fixing for paths inside of the repo.
      */
     public function testLintFix(array $paths) {
-        $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
 
-        $phpcs_command = "{$dktl_dir}/vendor/bin/phpcbf";
+        $phpcbf_command = $this->getVendorCommand("phpcbf");
 
-        $task = $this->taskExec("{$phpcs_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+        $task = $this->taskExec("{$phpcbf_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
 
         foreach ($paths as $path) {
             $task->arg("{$project_dir}/{$path}");
