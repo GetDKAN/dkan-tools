@@ -152,10 +152,14 @@ class DkanCommands extends \Robo\Tasks
      * @param string $files_url
      *   A url to an archive with all the files to the site. zip, gz, and tar.gz files are supported.
      */
-    public function dkanRestore($db_url, $files_url)
+    public function dkanRestore($db_url = NULL, $files_url = NULL)
     {
-        $this->restoreDb($db_url);
-        $this->restoreFiles($files_url);
+        if ($db_url) {
+          $this->restoreDb($db_url);
+        }
+        if ($files_url) {
+          $this->restoreFiles($files_url);
+        }
     }
 
     private function restoreDb($db_url)
