@@ -29,12 +29,23 @@ class ArgumentLoader
         if (!empty($command) && $this->onlyCommandGiven() && file_exists("{$project_directory}/dktl.yml")) {
             $yamld_command = $command;
             $config = Yaml::parse(file_get_contents("{$project_directory}/dktl.yml"));
-
             if (isset($config[$yamld_command])) {
-                $argv = array_merge($argv, array_values($config[$yamld_command]));
+                $commandConfig = $this->alterOpts($config[$yamld_command]);
+                $argv = array_merge($argv, array_values($commandConfig));
             }
         }
+        print_r($argv);
         return $argv;
+    }
+
+    private function alterOpts(array $commandConfig) {
+        foreach($commandConfig as $key => $value) {
+            if (is_string($key)) {
+                unset($commandConfig[$key]);
+                $commandConfig[] = "--{$key}={$value}";
+            }
+        }
+        return $commandConfig;
     }
 
     private function onlyCommandGiven() {
