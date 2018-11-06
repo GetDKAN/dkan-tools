@@ -97,13 +97,13 @@ class DkanCommands extends \Robo\Tasks
      * @option $source
      *   Use git and preserve git directories to get DKAN (use if developing on
      *   DKAN itself and you expect to push changes back.)
-     * @option $version
+     * @option $release
      *   Redundant to the $verion argument. Provided for historical reasons.
      */
-    public function dkanGet(string $version, $opts = ['source' => false, 'version' => NULL])
+    public function dkanGet(string $version = '', $opts = ['source' => false, 'release' => NULL])
     {
-        if (!$version && $opts['version']) {
-            $version = $opts['version'];
+        if (!$version && $opts['release']) {
+            $version = $opts['release'];
         }
         Util::prepareTmp();
         if ($opts['source']) {
