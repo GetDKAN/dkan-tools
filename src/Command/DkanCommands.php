@@ -208,15 +208,17 @@ class DkanCommands extends \Robo\Tasks
     private function restoreFiles(string $files_url)
     {
         Util::prepareTmp();
-        $tmp_path = Util::TMP_DIR;
         $filePath = $this->getFile($files_url);
         $projectDirectory = Util::getProjectDirectory();
-        
+
         $parentDir = $this->restoreFilesExtract($filePath);
 
-        $this->restoreFilesCopy("{$parentDir}/files", "{$projectDirectory}/src/site/files");
-        $this->restoreFilesCopy("{$parentDir}/private", "{$projectDirectory}/private");
-
+        if (is_dir("{$parentDir}/files")) {
+            $this->restoreFilesCopy("{$parentDir}/files", "{$projectDirectory}/src/site/files");
+        }
+        if (is_dir("{$parentDir}/private")) {
+            $this->restoreFilesCopy("{$parentDir}/private", "{$projectDirectory}/private");
+        }
         if (!is_dir("{$parentDir}/files") && !is_dir("{$parentDir}/private")) {
           $this->io->warning('No files found');
           return FALSE;
@@ -234,16 +236,17 @@ class DkanCommands extends \Robo\Tasks
      */
     private function restoreFilesExtract(string $filePath)
     {
+        $tmpPath = Util::TMP_DIR;
         $info = pathinfo($filePath);
         $extension = $info['extension'];
 
         if($extension == "zip") {
-            $taskUnzip = $this->taskExec("unzip $filePath -d {$tmp_path}");
+            $taskUnzip = $this->taskExec("unzip $filePath -d {$tmpPath}");
             $parentDir = substr($filepath, 0, -4);
         }
         else if($extension == "gz") {
             if (substr_count($filePath, ".tar") > 0) {
-                $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmp_path);
+                $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmpPath);
                 $parentDir = substr($filePath, 0, -7);
             }
             else {
@@ -255,10 +258,10 @@ class DkanCommands extends \Robo\Tasks
           throw new \Exception('Could not extract file.');
         }
         $result = $taskUnzip->run();
-        if ($result->getExitCode() == 1) {
-            throw new \Exception('Extraction failed.');
+        if (is_dir($parentDir) && $result->getExitCode() == 0) {
+          return $parentDir;
         }
-        return $parentDir;
+        throw new \Exception('Extraction failed.');
     }
 
     private function restoreFilesCopy(string $source, string $destination)
