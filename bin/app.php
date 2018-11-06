@@ -19,16 +19,16 @@ if (file_exists("{$dktl_project_directory}/src/command")) {
 
 $commandClasses = array_merge($defaultCommandClasses, $customCommandClasses);
 
-$appName = "DkanTools";
+$appName = "DKAN Tools";
 $appVersion = '1.0.0-alpha1';
+$configurationFilename = 'dktl.yml';
 
 $runner = new \Robo\Runner($commandClasses);
+$runner->setConfigurationFilename($configurationFilename);
 
 $argv = $_SERVER['argv'];
 
-$loader = new \DkanTools\Util\ArgumentLoader($argv);
-
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-$statusCode = $runner->execute($loader->getAlteredArgv(), $appName, $appVersion, $output);
+$statusCode = $runner->execute($argv, $appName, $appVersion, $output);
 
 exit($statusCode);
