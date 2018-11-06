@@ -139,12 +139,15 @@ You should see some standard docker output and a message that you containers are
 
 ### Configuring DKTL commands
 
-You will probably want to set up some default arguments for certain commands, especially the urls for your `dkan:deploy` command. This is what the dkan.yml file is for. You can provide options and arguments for any DKTL command in dkan.yml. For instance:
+You will probably want to set up some default arguments for certain commands, especially the urls for your `dkan:deploy` command. This is what the dkan.yml file is for. You can provide options for any DKTL command in dkan.yml. For instance:
 
 ```yaml
-"dkan:restore":
-    db_url: "s3://my-backups-bucket/my-db.sql.gz"
-    files_url: "s3://my-backups-bucket/my-files.tar.gz"
+command:
+  dkan:
+    restore:
+      options:
+        db_url: "s3://my-backups-bucket/my-db.sql.gz"
+        files_url: "s3://my-backups-bucket/my-files.tar.gz"
 ```
 
 If you include this in your dktl.yml file, typing `dktl dkan:restore` without any arguments will load these two options.
