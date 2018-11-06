@@ -34,7 +34,6 @@ class ArgumentLoader
                 $argv = array_merge($argv, array_values($commandConfig));
             }
         }
-        print_r($argv);
         return $argv;
     }
 
