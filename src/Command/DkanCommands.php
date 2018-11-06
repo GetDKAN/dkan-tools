@@ -260,6 +260,9 @@ class DkanCommands extends \Robo\Tasks
           throw new \Exception('Could not extract file.');
         }
         $result = $taskUnzip->run();
+        if (!is_dir($parentDir)) {
+          $parentDir = dirname($parentDir);
+        }
         if (is_dir($parentDir) && $result->getExitCode() == 0) {
           return $parentDir;
         }
