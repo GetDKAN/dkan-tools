@@ -105,6 +105,9 @@ class DkanCommands extends \Robo\Tasks
         if (!$version && $opts['release']) {
             $version = $opts['release'];
         }
+        if (!$version) {
+          throw new \Exception('You must specify a version.');
+        }
         Util::prepareTmp();
         if ($opts['source']) {
             $this->getDkanGit($version);
