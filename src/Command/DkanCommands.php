@@ -143,16 +143,29 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * Restore diles and database.
+     * Restore files and database.
      *
-     * A command that creates a DKAN site from a db dump and files. It is
-     * reccomended that you set the args for this in dktl.yml.
+     * A command that creates a DKAN site from a db dump and files. The restire
+     * command supports files compressed in zip, .gz and .tar.gz formats, and
+     * will accept URLs using the http, https or s3 protocols.
+     *
+     * For files, dktl expects that the archive contain a files/ dir either in
+     * the root of the archive or under a dir with the same basename as the
+     * archive. (For instance, files in mysite.tar.gz could be located either in
+     * /mysite/files/ or just /files/).
+     *
+     * If your site uses private files, a second dir called private/ may be
+     * included at the same level as files/. These files will be copied to a
+     * new "/private" dir created in your project root.
+     *
+     * It is reccomended that you set the options for this in command in
+     * dktl.yml (see README for more information).
      *
      * @param array $opts
      * @option $db_url
-     *   A url to a file with sql commands to recreate a database. sql and sql.gz files are supported.
+     *   The database archive URL. sql and sql.gz files are supported.
      * @option $files_url
-     *   A url to an archive with all the files to the site. zip, gz, and tar.gz files are supported.
+     *   A url to the site files archive. zip, gz, and tar.gz files are supported.
      */
     public function dkanRestore($opts = ['db_url' => NULL, 'files_url' => NULL])
     {
