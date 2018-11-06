@@ -162,6 +162,12 @@ class DkanCommands extends \Robo\Tasks
         }
     }
 
+    /**
+     * Restore a database dump to the db container.
+     *
+     * @param string $db_url URL to DB dump to restore.
+     * @see self::dkanRestore() For full documentation on URL params.
+     */
     private function restoreDb($db_url)
     {
         Util::prepareTmp();
@@ -193,19 +199,43 @@ class DkanCommands extends \Robo\Tasks
         return $result;
     }
 
-    public function restoreFiles($files_url)
+    /**
+     * Restore a files archive to appropriate site directories.
+     *
+     * @param string $files_url Files URL to restore.
+     * @see self::dkanRestore() For full documentation on URL params.
+     */
+    private function restoreFiles(string $files_url)
     {
         Util::prepareTmp();
         $tmp_path = Util::TMP_DIR;
         $filePath = $this->getFile($files_url);
+        $projectDirectory = Util::getProjectDirectory();
+        
+        $parentDir = $this->restoreFilesExtract($filePath);
+
+        $this->restoreFilesCopy("{$parentDir}/files", "{$projectDirectory}/src/site/files");
+        $this->restoreFilesCopy("{$parentDir}/private", "{$projectDirectory}/private");
+
+        if (!is_dir("{$parentDir}/files") && !is_dir("{$parentDir}/private")) {
+          $this->io->warning('No files found');
+          return FALSE;
+        }
+
+        Util::cleanupTmp();
+    }
+
+    /**
+     * Extract a zip or tar.gz archive in the tmp dir.
+     *
+     * @param string $filePath  The path to the archive.
+     *
+     * @return string The directory to which the archive was extracted.
+     */
+    private function restoreFilesExtract(string $filePath)
+    {
         $info = pathinfo($filePath);
         $extension = $info['extension'];
-
-        $project_directory = Util::getProjectDirectory();
-        $files_dir = "{$project_directory}/src/site/files";
-        $private_dir = "{$project_directory}/private";
-
-        $c = $this->collectionBuilder();
 
         if($extension == "zip") {
             $taskUnzip = $this->taskExec("unzip $filePath -d {$tmp_path}");
@@ -226,30 +256,25 @@ class DkanCommands extends \Robo\Tasks
         }
         $result = $taskUnzip->run();
         if ($result->getExitCode() == 1) {
-            $this->io()->error('Extraction failed.');
+            throw new \Exception('Extraction failed.');
         }
+        return $parentDir;
+    }
 
-        if (is_dir("{$parentDir}/files")) {
-          $this->say('Copying files');
-          $this->taskCopyDir(["{$parentDir}/files" => $files_dir])->run();
+    private function restoreFilesCopy(string $source, string $destination)
+    {
+        if (is_dir($source)) {
+            $this->say('Copying files');
+            $result = $this->taskCopyDir([$source => $destination])->run();
+            if ($result->getExitCode() == 0) {
+                $this->io()->success("Files restored to $destination.");
+            }
+            else {
+                throw new \Exception("Failed restoring files to $destination.");
+            }
+            return $result;
         }
-        if (is_dir("{$parentDir}/private")) {
-          $this->say('Copying private files');
-          $this->taskCopyDir(["{$parentDir}/private" => $private_dir])->run();
-        }
-        if (!is_dir("{$parentDir}/files") && !is_dir("{$parentDir}/private")) {
-          $this->io->warning('No files found');
-          return FALSE;
-        }
-        //
-        // if ($result->getExitCode() == 0) {
-        //     $this->io()->success('Files Restored.');
-        // }
-        // else {
-        //     $this->io()->error('Issues Restoring.');
-        // }
-
-        Util::cleanupTmp();
+        throw new \Exception("Source dir $source not found.");
     }
 
     private function getFile($url) {
