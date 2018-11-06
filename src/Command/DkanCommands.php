@@ -143,22 +143,24 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * DKAN restore.
+     * Restore diles and database.
      *
-     * A command that creates a DKAN site from a db dump and files.
+     * A command that creates a DKAN site from a db dump and files. It is
+     * reccomended that you set the args for this in dktl.yml.
      *
-     * @param string $db_url
+     * @param array $opts
+     * @option $db_url
      *   A url to a file with sql commands to recreate a database. sql and sql.gz files are supported.
-     * @param string $files_url
+     * @option $files_url
      *   A url to an archive with all the files to the site. zip, gz, and tar.gz files are supported.
      */
-    public function dkanRestore($db_url = NULL, $files_url = NULL)
+    public function dkanRestore($opts = ['db_url' => NULL, 'files_url' => NULL])
     {
-        if ($db_url) {
-          $this->restoreDb($db_url);
+        if ($opts['db_url']) {
+          $this->restoreDb($opts['db_url']);
         }
-        if ($files_url) {
-          $this->restoreFiles($files_url);
+        if ($opts['files_url']) {
+          $this->restoreFiles($opts['files_url']);
         }
     }
 
