@@ -193,44 +193,63 @@ class DkanCommands extends \Robo\Tasks
         return $result;
     }
 
-    private function restoreFiles($files_url)
+    public function restoreFiles($files_url)
     {
         Util::prepareTmp();
         $tmp_path = Util::TMP_DIR;
-        $file_path = $this->getFile($files_url);
-        $info = pathinfo($file_path);
+        $filePath = $this->getFile($files_url);
+        $info = pathinfo($filePath);
         $extension = $info['extension'];
 
         $project_directory = Util::getProjectDirectory();
+        $files_dir = "{$project_directory}/src/site/files";
+        $private_dir = "{$project_directory}/private";
 
         $c = $this->collectionBuilder();
 
         if($extension == "zip") {
-            $c->addTask($this->taskExec("unzip $file_path -d {$tmp_path}"));
+            $taskUnzip = $this->taskExec("unzip $filePath -d {$tmp_path}");
+            $parentDir = substr($filepath, 0, -4);
         }
         else if($extension == "gz") {
-            if (substr_count($file_path, ".tar") > 0) {
-                $c->addTask($this->taskExec("tar -xvzf {$file_path}")->dir($tmp_path));
+            if (substr_count($filePath, ".tar") > 0) {
+                $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmp_path);
+                $parentDir = substr($filePath, 0, -7);
             }
             else {
-                $c->addTask($this->taskExec("gunzip {$file_path}"));
+                $taskUnzip = $this->taskExec("gunzip {$filePath}");
+                $parentDir = substr($filepath, 0, -3);
             }
         }
-
-        $c->addTask($this->taskFlattenDir(["{$tmp_path}/*" => "{$tmp_path}/files"]));
-        $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "{$project_directory}/src/site/files"]));
-
-        $result = $c->run();
-
-        if ($result->getExitCode() == 0) {
-            $this->io()->success('Files Restored.');
-        }
         else {
-            $this->io()->error('Issues Restoring.');
+          throw new \Exception('Could not extract file.');
         }
-        Util::cleanupTmp();
+        $result = $taskUnzip->run();
+        if ($result->getExitCode() == 1) {
+            $this->io()->error('Extraction failed.');
+        }
 
-        return $result;
+        if (is_dir("{$parentDir}/files")) {
+          $this->say('Copying files');
+          $this->taskCopyDir(["{$parentDir}/files" => $files_dir])->run();
+        }
+        if (is_dir("{$parentDir}/private")) {
+          $this->say('Copying private files');
+          $this->taskCopyDir(["{$parentDir}/private" => $private_dir])->run();
+        }
+        if (!is_dir("{$parentDir}/files") && !is_dir("{$parentDir}/private")) {
+          $this->io->warning('No files found');
+          return FALSE;
+        }
+        //
+        // if ($result->getExitCode() == 0) {
+        //     $this->io()->success('Files Restored.');
+        // }
+        // else {
+        //     $this->io()->error('Issues Restoring.');
+        // }
+
+        Util::cleanupTmp();
     }
 
     private function getFile($url) {
