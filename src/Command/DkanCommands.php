@@ -278,7 +278,7 @@ class DkanCommands extends \Robo\Tasks
             }
             else {
                 $taskUnzip = $this->taskExec("gunzip {$filePath}");
-                $parentDir = substr($filepath, 0, -3);
+                $parentDir = substr($filePath, 0, -3);
             }
         }
         else {
