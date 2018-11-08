@@ -24,7 +24,7 @@ class DkanCommands extends \Robo\Tasks
             ->arg('--no-recursion')
             ->arg('--no-cache')
             ->arg('--verbose')
-            ->arg('--overrides=../src/make/dkan.make')
+            ->arg('--overrides=src/make/dkan.make')
             ->arg('--concurrency=' . Util::drushConcurrency())
             ->arg('dkan')
             ->run();
@@ -273,7 +273,7 @@ class DkanCommands extends \Robo\Tasks
         }
         else if($extension == "gz") {
             if (substr_count($filePath, ".tar") > 0) {
-                $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmpPath);
+                $taskUnzip = $this->taskExec("tar -xpvzf {$filePath}")->dir($tmpPath);
                 $parentDir = substr($filePath, 0, -7);
             }
             else {
