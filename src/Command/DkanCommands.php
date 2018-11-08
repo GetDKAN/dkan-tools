@@ -93,9 +93,21 @@ class DkanCommands extends \Robo\Tasks
      *
      * @param string $version
      *   The DKAN version to get (ex. 7.x-1.15.3).
+     * @param array $opts
+     * @option $source
+     *   Use git and preserve git directories to get DKAN (use if developing on
+     *   DKAN itself and you expect to push changes back.)
+     * @option $release
+     *   Redundant to the $verion argument. Provided for historical reasons.
      */
-    public function dkanGet(string $version, $opts = ['source' => false])
+    public function dkanGet(string $version = '', $opts = ['source' => false, 'release' => NULL])
     {
+        if (!$version && $opts['release']) {
+            $version = $opts['release'];
+        }
+        if (!$version) {
+          throw new \Exception('You must specify a version.');
+        }
         Util::prepareTmp();
         if ($opts['source']) {
             $this->getDkanGit($version);
@@ -143,25 +155,46 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * DKAN restore.
+     * Restore files and database.
      *
-     * A command that creates a DKAN site from a db dump and files.
+     * A command that creates a DKAN site from a db dump and files. The restire
+     * command supports files compressed in zip, .gz and .tar.gz formats, and
+     * will accept URLs using the http, https or s3 protocols.
      *
-     * @param string $db_url
-     *   A url to a file with sql commands to recreate a database. sql and sql.gz files are supported.
-     * @param string $files_url
-     *   A url to an archive with all the files to the site. zip, gz, and tar.gz files are supported.
+     * For files, dktl expects that the archive contain a files/ dir either in
+     * the root of the archive or under a dir with the same basename as the
+     * archive. (For instance, files in mysite.tar.gz could be located either in
+     * /mysite/files/ or just /files/).
+     *
+     * If your site uses private files, a second dir called private/ may be
+     * included at the same level as files/. These files will be copied to a
+     * new "/private" dir created in your project root.
+     *
+     * It is reccomended that you set the options for this in command in
+     * dktl.yml (see README for more information).
+     *
+     * @param array $opts
+     * @option $db_url
+     *   The database archive URL. sql and sql.gz files are supported.
+     * @option $files_url
+     *   A url to the site files archive. zip, gz, and tar.gz files are supported.
      */
-    public function dkanRestore($db_url = NULL, $files_url = NULL)
+    public function dkanRestore($opts = ['db_url' => NULL, 'files_url' => NULL])
     {
-        if ($db_url) {
-          $this->restoreDb($db_url);
+        if ($opts['db_url']) {
+          $this->restoreDb($opts['db_url']);
         }
-        if ($files_url) {
-          $this->restoreFiles($files_url);
+        if ($opts['files_url']) {
+          $this->restoreFiles($opts['files_url']);
         }
     }
 
+    /**
+     * Restore a database dump to the db container.
+     *
+     * @param string $db_url URL to DB dump to restore.
+     * @see self::dkanRestore() For full documentation on URL params.
+     */
     private function restoreDb($db_url)
     {
         Util::prepareTmp();
@@ -193,44 +226,88 @@ class DkanCommands extends \Robo\Tasks
         return $result;
     }
 
-    private function restoreFiles($files_url)
+    /**
+     * Restore a files archive to appropriate site directories.
+     *
+     * @param string $files_url Files URL to restore.
+     * @see self::dkanRestore() For full documentation on URL params.
+     */
+    private function restoreFiles(string $files_url)
     {
         Util::prepareTmp();
-        $tmp_path = Util::TMP_DIR;
-        $file_path = $this->getFile($files_url);
-        $info = pathinfo($file_path);
+        $filePath = $this->getFile($files_url);
+        $projectDirectory = Util::getProjectDirectory();
+
+        $parentDir = $this->restoreFilesExtract($filePath);
+
+        if (is_dir("{$parentDir}/files")) {
+            $this->restoreFilesCopy("{$parentDir}/files", "{$projectDirectory}/src/site/files");
+        }
+        if (is_dir("{$parentDir}/private")) {
+            $this->restoreFilesCopy("{$parentDir}/private", "{$projectDirectory}/private");
+        }
+        if (!is_dir("{$parentDir}/files") && !is_dir("{$parentDir}/private")) {
+          $this->io->warning('No files found');
+          return FALSE;
+        }
+
+        Util::cleanupTmp();
+    }
+
+    /**
+     * Extract a zip or tar.gz archive in the tmp dir.
+     *
+     * @param string $filePath  The path to the archive.
+     *
+     * @return string The directory to which the archive was extracted.
+     */
+    private function restoreFilesExtract(string $filePath)
+    {
+        $tmpPath = Util::TMP_DIR;
+        $info = pathinfo($filePath);
         $extension = $info['extension'];
 
-        $project_directory = Util::getProjectDirectory();
-
-        $c = $this->collectionBuilder();
-
         if($extension == "zip") {
-            $c->addTask($this->taskExec("unzip $file_path -d {$tmp_path}"));
+            $taskUnzip = $this->taskExec("unzip $filePath -d {$tmpPath}");
+            $parentDir = substr($filepath, 0, -4);
         }
         else if($extension == "gz") {
-            if (substr_count($file_path, ".tar") > 0) {
-                $c->addTask($this->taskExec("tar -xvzf {$file_path}")->dir($tmp_path));
+            if (substr_count($filePath, ".tar") > 0) {
+                $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmpPath);
+                $parentDir = substr($filePath, 0, -7);
             }
             else {
-                $c->addTask($this->taskExec("gunzip {$file_path}"));
+                $taskUnzip = $this->taskExec("gunzip {$filePath}");
+                $parentDir = substr($filepath, 0, -3);
             }
         }
-
-        $c->addTask($this->taskFlattenDir(["{$tmp_path}/*" => "{$tmp_path}/files"]));
-        $c->addTask($this->taskCopyDir(["{$tmp_path}/files" => "{$project_directory}/src/site/files"]));
-
-        $result = $c->run();
-
-        if ($result->getExitCode() == 0) {
-            $this->io()->success('Files Restored.');
-        }
         else {
-            $this->io()->error('Issues Restoring.');
+          throw new \Exception('Could not extract file.');
         }
-        Util::cleanupTmp();
+        $result = $taskUnzip->run();
+        if (!is_dir($parentDir)) {
+          $parentDir = dirname($parentDir);
+        }
+        if (is_dir($parentDir) && $result->getExitCode() == 0) {
+          return $parentDir;
+        }
+        throw new \Exception('Extraction failed.');
+    }
 
-        return $result;
+    private function restoreFilesCopy(string $source, string $destination)
+    {
+        if (is_dir($source)) {
+            $this->say('Copying files');
+            $result = $this->taskCopyDir([$source => $destination])->run();
+            if ($result->getExitCode() == 0) {
+                $this->io()->success("Files restored to $destination.");
+            }
+            else {
+                throw new \Exception("Failed restoring files to $destination.");
+            }
+            return $result;
+        }
+        throw new \Exception("Source dir $source not found.");
     }
 
     private function getFile($url) {
