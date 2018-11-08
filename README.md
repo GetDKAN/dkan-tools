@@ -219,3 +219,12 @@ The mode in which DKTL runs is controlled by an environment variable: ``DKTL_MOD
 ```export DKTL_MODE="HOST"```
 
 To go back to running in docker mode, set the variable to ``DOCKER``.
+
+## Troubleshooting
+
+<dl>
+  <dt>PHP Warning:  is_file(): Unable to find the wrapper "s3"</dt>
+  <dd>Delete the vendor directory in your local dkan-tools and run <code>dktl</code> in your project directory</dd>
+  <dt>Changing ownership of new files to host user ... chown: ...: illegal group name</dt>
+  <dd>Disable the chown behavior <code>export DKTL_CHOWN="FALSE"</code></dd>
+</dl>
