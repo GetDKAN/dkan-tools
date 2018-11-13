@@ -26,3 +26,4 @@ steps:
 
       dktl dkan:restore
       dktl dkan:deploy test
+      dktl test:qa-users
