@@ -74,7 +74,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
   BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
   if [ -f $OVERRIDES_CONF ]; then
-    BASE_DOCKER_COMPOSE_COMMAND += " -f $OVERRIDES_CONF"
+    BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
   fi
 
 
