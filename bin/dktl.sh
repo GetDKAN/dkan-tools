@@ -69,15 +69,14 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
   export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
 
-  DOCKER_COMPOSE_COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
+  COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
-  VOLUME_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.nosync.yml"
-  CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.custom.yml"
-  if [ -f $CUSTOM_CONF ]; then
-      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $CUSTOM_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
-  else
-      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $DOCKER_COMPOSE_COMMON_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+  OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
+  BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+  if [ -f $OVERRIDES_CONF ]; then
+    BASE_DOCKER_COMPOSE_COMMAND += " -f $OVERRIDES_CONF"
   fi
+
 
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
