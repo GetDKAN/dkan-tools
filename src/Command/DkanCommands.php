@@ -100,7 +100,7 @@ class DkanCommands extends \Robo\Tasks
      * @option $release
      *   Redundant to the $verion argument. Provided for historical reasons.
      */
-    public function dkanGet(string $version = '', $opts = ['source' => false, 'release' => NULL])
+    public function dkanGet(string $version = NULL, $opts = ['source' => false, 'release' => NULL])
     {
         if (!$version && $opts['release']) {
             $version = $opts['release'];
@@ -242,6 +242,7 @@ class DkanCommands extends \Robo\Tasks
 
         if (is_dir("{$parentDir}/files")) {
             $this->restoreFilesCopy("{$parentDir}/files", "{$projectDirectory}/src/site/files");
+            $this->_exec("chmod -R 777 {$projectDirectory}/src/site/files");
         }
         if (is_dir("{$parentDir}/private")) {
             $this->restoreFilesCopy("{$parentDir}/private", "{$projectDirectory}/private");
@@ -269,11 +270,11 @@ class DkanCommands extends \Robo\Tasks
 
         if($extension == "zip") {
             $taskUnzip = $this->taskExec("unzip $filePath -d {$tmpPath}");
-            $parentDir = substr($filepath, 0, -4);
+            $parentDir = substr($filePath, 0, -4);
         }
         else if($extension == "gz") {
             if (substr_count($filePath, ".tar") > 0) {
-                $taskUnzip = $this->taskExec("tar -xpvzf {$filePath}")->dir($tmpPath);
+                $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmpPath);
                 $parentDir = substr($filePath, 0, -7);
             }
             else {

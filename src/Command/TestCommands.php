@@ -165,4 +165,60 @@ class TestCommands extends \Robo\Tasks
 
         $task->run();
     }
+
+    /**
+     * Create QA users for each basic DKAN role.
+     *
+     * Running this command will create three users: sitemanager, editor, and
+     * creator. They will be assigned the corresponding role and a password
+     * equal to the username.
+     *
+     * @option $workflow Create workflow users as well.
+     */
+    public function testQaUsers($opts = ['workflow|w' => false]) {
+        $users = [
+            'sitemanager' => ['site manager'],
+            'editor' => ['editor'],
+            'creator' => ['content creator']
+        ];
+        if ($opts['workflow']) {
+            if ($this->hasWorkflow()) {
+                $users += [
+                    'contributor' => ['content creator', 'Workflow Contributor'],
+                    'moderator' => ['editor' , 'Workflow Moderator'],
+                    'supervisor' => ['site manager', 'Workflow Supervisor']
+                ];
+            }
+            else {
+                throw new \Exception('Workflow QA users requested, but dkan_workflow_permissions not enbled.');
+            }
+        }
+        $stack = $this->taskExecStack()->stopOnFail()->dir('docroot');
+        foreach($users as $user => $roles) {
+            // Add stack of drush commands to create users and assign roles.
+            $stack->exec("drush ucrt $user --mail={$user}@example.com --password={$user}");
+            foreach($roles as $role) {
+                $stack->exec("drush urol '{$role}' --name={$user}");
+            }
+        }
+        $result = $stack->run();
+        return $result;
+    }
+
+    /**
+     * Use Drush to check if dkan_workflow_permissions module is enabled.
+     */
+    private function hasWorkflow() {
+        $result = $this->taskExec('drush php-eval')
+            ->arg('echo module_exists("dkan_workflow_permissions");')
+            ->dir('docroot')
+            ->printOutput(FALSE)
+            ->run();
+        if ($result->getExitCode() == 0) {
+            return $result->getMessage();
+        }
+        else {
+          throw new \Exception('Drush command failed; aborting');
+        }
+    }
 }
