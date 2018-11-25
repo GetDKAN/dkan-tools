@@ -46,11 +46,11 @@ if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
 fi
 export DKTL_PROJECT_DIRECTORY
 
-which dktl
 DKTL_DIRECTORY=$(which dktl)
-DKTL_DIRECTORY=$(readlink $DKTL_DIRECTORY)
+if [[ -L $(which dktl) ]]; then
+  DKTL_DIRECTORY=$(readlink $DKTL_DIRECTORY)
+fi
 DKTL_DIRECTORY=$(dirname $(dirname $DKTL_DIRECTORY))
-echo $DKTL_DIRECTORY "test which assignment"
 export DKTL_DIRECTORY
 
 DKTL_SLUG=${DKTL_PROJECT_DIRECTORY##*/}
