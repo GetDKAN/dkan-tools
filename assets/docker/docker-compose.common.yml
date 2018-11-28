@@ -56,6 +56,8 @@ services:
     environment:
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - DKTL_MODE=HOST
+      - AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+      - AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
