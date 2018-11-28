@@ -53,17 +53,21 @@ fi
 DKTL_DIRECTORY=$(dirname $(dirname $DKTL_DIRECTORY))
 export DKTL_DIRECTORY
 
-DKTL_SLUG=${DKTL_PROJECT_DIRECTORY##*/}
-DKTL_SLUG=${DKTL_SLUG//-/}
-DKTL_SLUG=${DKTL_SLUG//_/}
-DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]") # Mixed case dirs cause issue with docker image names
-export DKTL_SLUG
+if [ -z "$DKTL_SLUG" ]; then
+  DKTL_SLUG=${DKTL_PROJECT_DIRECTORY##*/}
+  DKTL_SLUG=${DKTL_SLUG//-/}
+  DKTL_SLUG=${DKTL_SLUG//_/}
+  DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]") # Mixed case dirs cause issue with docker image names
+  export DKTL_SLUG
+fi
 
 # Setup for Docker mode and Docker specific commands.
 if [ "$DKTL_MODE" = "DOCKER" ]; then
 
   # Check for proxy container, get domain from that.
-  PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
+  if [ -z "$PROXY_DOMAIN" ]; then
+    PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
+  fi
   # If no proxy is running, use the overridden or default proxy domain
   if [ -z "$PROXY_DOMAIN" ]; then
     [ "$AHOY_WEB_DOMAIN" ] && WEB_DOMAIN=$AHOY_WEB_DOMAIN || WEB_DOMAIN="localtest.me"
