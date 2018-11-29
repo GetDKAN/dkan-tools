@@ -26,6 +26,7 @@ services:
     environment:
       # no_proxy="" required for default Docker For Mac system proxy that contains a space and prevents Selenium from loading.
       # Linked containers to browser will also need this setting.
+      - PROXY_DOMAIN
       - no_proxy=""
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
