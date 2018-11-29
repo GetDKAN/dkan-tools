@@ -58,6 +58,7 @@ services:
       - DKTL_MODE=HOST
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - PROXY_DOMAIN
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
