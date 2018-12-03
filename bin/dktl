@@ -47,21 +47,27 @@ fi
 export DKTL_PROJECT_DIRECTORY
 
 DKTL_DIRECTORY=$(which dktl)
-DKTL_DIRECTORY=$(readlink $DKTL_DIRECTORY)
+if [[ -L $(which dktl) ]]; then
+  DKTL_DIRECTORY=$(readlink $DKTL_DIRECTORY)
+fi
 DKTL_DIRECTORY=$(dirname $(dirname $DKTL_DIRECTORY))
 export DKTL_DIRECTORY
 
-DKTL_SLUG=${DKTL_PROJECT_DIRECTORY##*/}
-DKTL_SLUG=${DKTL_SLUG//-/}
-DKTL_SLUG=${DKTL_SLUG//_/}
-DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]") # Mixed case dirs cause issue with docker image names
-export DKTL_SLUG
+if [ -z "$DKTL_SLUG" ]; then
+  DKTL_SLUG=${DKTL_PROJECT_DIRECTORY##*/}
+  DKTL_SLUG=${DKTL_SLUG//-/}
+  DKTL_SLUG=${DKTL_SLUG//_/}
+  DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]") # Mixed case dirs cause issue with docker image names
+  export DKTL_SLUG
+fi
 
 # Setup for Docker mode and Docker specific commands.
 if [ "$DKTL_MODE" = "DOCKER" ]; then
 
   # Check for proxy container, get domain from that.
-  PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
+  if [ -z "$PROXY_DOMAIN" ]; then
+    PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
+  fi
   # If no proxy is running, use the overridden or default proxy domain
   if [ -z "$PROXY_DOMAIN" ]; then
     [ "$AHOY_WEB_DOMAIN" ] && WEB_DOMAIN=$AHOY_WEB_DOMAIN || WEB_DOMAIN="localtest.me"
@@ -69,14 +75,18 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
   export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
 
-  DOCKER_COMPOSE_COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
+  COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
-  VOLUME_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.nosync.yml"
-  CUSTOM_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.custom.yml"
-  if [ -f $CUSTOM_CONF ]; then
-      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $CUSTOM_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+  OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
+  BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+  if [ -f $OVERRIDES_CONF ]; then
+    BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
+  fi
+  # Check for interactive shell
+  if [ -t 1 ]; then
+    EXEC_OPTS=''
   else
-      BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $DOCKER_COMPOSE_COMMON_CONF -f $VOLUME_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+    EXEC_OPTS='-T'
   fi
 
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
@@ -109,14 +119,14 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
 
   # The containers are running, set DKTL inside the cli container.
-  ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec cli which dktl)"
+  ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
   if [ -z "$ALIAS" ]; then
-      $BASE_DOCKER_COMPOSE_COMMAND exec cli chmod 777 /usr/local/dkan-tools/bin/dktl.sh
-      $BASE_DOCKER_COMPOSE_COMMAND exec cli ln -s /usr/local/dkan-tools/bin/dktl.sh /usr/local/bin/dktl
+      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chmod 777 /usr/local/dkan-tools/bin/dktl
+      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 
   # Proxy pass to internal DKTL
-  $BASE_DOCKER_COMPOSE_COMMAND exec cli dktl $1 "${@:2}"
+  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli dktl $1 "${@:2}"
 
   if [ -z $DKTL_CHOWN ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:

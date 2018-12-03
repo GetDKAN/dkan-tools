@@ -188,9 +188,7 @@ class BasicCommands extends \Robo\Tasks
      * Run drush command on current site.
      *
      * Run drush command on current site. For instance, to clear caches, run
-     * "dktl drush cc all". Note that the shell script will pass all arguments
-     * correctly as well as append a --uri argument so that commands like
-     * "drush uli" will output a correct url.
+     * "dktl drush cc all". 
      *
      * @param array $cmd Array of arguments to create a full Drush command.
      */

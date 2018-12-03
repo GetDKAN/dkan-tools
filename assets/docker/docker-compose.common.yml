@@ -15,6 +15,7 @@ services:
       - solr
     volumes:
       # PHP configuration overrides
+      - "${DKTL_PROJECT_DIRECTORY}:/var/www/"
       - "${DKTL_DIRECTORY}/assets/docker/etc/php5/php.ini:/etc/php5/fpm/conf.d/z_php.ini"
       - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-linux.ini:/etc/php5/xdebug-linux.ini"
       - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
@@ -25,6 +26,7 @@ services:
     environment:
       # no_proxy="" required for default Docker For Mac system proxy that contains a space and prevents Selenium from loading.
       # Linked containers to browser will also need this setting.
+      - PROXY_DOMAIN
       - no_proxy=""
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
@@ -55,6 +57,9 @@ services:
     environment:
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - DKTL_MODE=HOST
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - PROXY_DOMAIN
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
@@ -67,6 +72,7 @@ services:
     ports:
       - "8888"
     volumes:
+      - "${DKTL_PROJECT_DIRECTORY}:/var/www/"
       # Load the DKAN tools dir
       - "${DKTL_DIRECTORY}/:/usr/local/dkan-tools"
       # Host SSH keys mapping. Uncomment one of the lines below based on your setup.

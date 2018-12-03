@@ -15,9 +15,9 @@ That's it! All other dependencies are included in the Docker containers that dka
 ## Installation
 
 1. Download or clone this repository into any location on your development machine.
-2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) `bin\dktl.sh`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
+2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) `bin\dktl`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
 ```bash
-ln -s /my/dktl/location/bin/dktl.sh ~/bin/dktl
+ln -s /my/dktl/location/bin/dktl ~/bin/dktl
 ```
 
 ## Starting a project
@@ -214,11 +214,13 @@ First of all, make sure that you have all of the software DKTL needs:
 2) Composer
 3) Drush
 
-The mode in which DKTL runs is controlled by an environment variable: ``DKTL_MODE``. To run DKLT without docker set the environment variable to ``HOST``:
+The mode in which DKTL runs is controlled by an environment variable: `DKTL_MODE`. To run DKLT without docker set the environment variable to `HOST`:
 
-```export DKTL_MODE="HOST"```
+```bash
+export DKTL_MODE="HOST"
+```
 
-To go back to running in docker mode, set the variable to ``DOCKER``.
+To go back to running in docker mode, set the variable to `DOCKER`.
 
 ## Troubleshooting
 

@@ -24,7 +24,7 @@ class DkanCommands extends \Robo\Tasks
             ->arg('--no-recursion')
             ->arg('--no-cache')
             ->arg('--verbose')
-            ->arg('--overrides=../src/make/dkan.make')
+            ->arg('--overrides=src/make/dkan.make')
             ->arg('--concurrency=' . Util::drushConcurrency())
             ->arg('dkan')
             ->run();
