@@ -35,7 +35,7 @@ class initCommands extends \Robo\Tasks
     /**
      * Generates basic configuration for a DKAN project to work with CircleCI.
      */
-    public function initCicleCI() {
+    public function initCircleCI() {
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
         return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
