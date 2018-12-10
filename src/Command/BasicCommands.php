@@ -13,182 +13,10 @@ use DkanTools\Util\Util;
 class BasicCommands extends \Robo\Tasks
 {
     /**
-     * Test some things.
-     */
-    public function test(array $cmd)
-    {
-        $cmdStr = implode(' ', $cmd);
-        $this->say($cmdStr);
-    }
-
-    /**
-     * Initialize DKAN project directory.
-     */
-    public function init($opts = ['host' => ''])
-    {
-        $this->io()->section('Initializing dktl configuration');
-        if (file_exists('dktl.yml') && file_exists('src')) {
-            $this->io()->note("This project has already been initialized.");
-            exit;
-        }
-
-        if (file_exists('dktl.yml')) {
-            $this->io()->warning('The dktl.yml file already exists in this directory; skipping.');
-        } else {
-            $this->createDktlYmlFile();
-        }
-
-        $this->io()->section('Initializing src directory');
-        if (file_exists('src')) {
-            $this->io()->warning('The src directory already exists in this directory; skipping.');
-        } else {
-            $this->createSrcDirectory($opts['host']);
-        }
-    }
-
-    private function createDktlYmlFile()
-    {
-        $dktlRoot = Util::getDktlDirectory();
-        $f = 'dktl.yml';
-        $result = $this->taskWriteToFile($f)
-        ->textFromFile("$dktlRoot/assets/dktl.yml")
-        ->run();
-
-        $this->directoryAndFileCreationCheck($result, $f);
-    }
-
-    private function createSrcDirectory($host = "")
-    {
-        $this->_mkdir('src');
-
-        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
-
-        foreach ($directories as $directory) {
-            $dir = "src/{$directory}";
-
-            $result = $this->_mkdir($dir);
-
-            $this->directoryAndFileCreationCheck($result, $dir);
-        }
-
-        $this->createMakeFiles();
-        $this->createSiteFilesDirectory();
-        $this->createSettingsFiles($host);
-        $this->setupScripts();
-    }
-
-    private function setupScripts() {
-        $dktlRoot = Util::getDktlDirectory();
-        $project_dir = Util::getProjectDirectory();
-
-        $files = ['deploy', 'deploy.custom'];
-
-        foreach ($files as $file) {
-            $f = "src/script/{$file}.sh";
-
-            $task = $this->taskWriteToFile($f)
-                ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
-            $result = $task->run();
-            $this->_exec("chmod +x {$project_dir}/src/script/{$file}.sh");
-
-            $this->directoryAndFileCreationCheck($result, $f);
-        }
-    }
-
-    private function createMakeFiles()
-    {
-        $dktlRoot = Util::getDktlDirectory();
-
-        $files = ['drupal', 'dkan'];
-
-        foreach ($files as $file) {
-            $f = "src/make/{$file}.make";
-
-            $task = $this->taskWriteToFile($f)
-              ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
-            if ($file == "drupal") {
-                $task->text("defaults:\n  projects:\n    subdir: contrib\n");
-                $task->text("projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'");
-            }
-            $result = $task->run();
-
-            $this->directoryAndFileCreationCheck($result, $f);
-        }
-    }
-
-    private function createSiteFilesDirectory()
-    {
-        $directory = 'src/site/files';
-        $this->_mkdir($directory);
-        $result = $this->_exec("chmod 777 {$directory}");
-
-        $this->directoryAndFileCreationCheck($result, $directory);
-    }
-
-    private function createSettingsFiles($host = "")
-    {
-        $dktlRoot = Util::getDktlDirectory();
-
-        $settings = ["settings.php", "settings.docker.php"];
-
-        foreach ($settings as $setting) {
-            $f = "src/site/{$setting}";
-            $result = $this->taskWriteToFile($f)
-          ->textFromFile("$dktlRoot/assets/site/{$setting}")
-          ->run();
-            $this->directoryAndFileCreationCheck($result, $f);
-        }
-
-        if (!empty($host)) {
-            $this->initHost();
-        }
-    }
-
-    private function directoryAndFileCreationCheck(Result $result, $df)
-    {
-        if ($result->getExitCode() == 0 && file_exists($df)) {
-            $this->io()->success("{$df} was created.");
-        } else {
-            $this->io()->error("{$df} was not created.");
-            exit;
-        }
-    }
-
-    /**
-     * Initialize host settings.
-     *
-     * @todo Fix opts, make required.
-     */
-    public function initHost($host = null)
-    {
-        $dktlRoot = Util::getDktlDirectory();
-        $settingsFile = "settings.$host.php";
-        if (!$host) {
-            throw new \Exception("Host not specified.");
-            exit;
-        }
-        if (!file_exists("$dktlRoot/assets/site/$settingsFile")) {
-            $this->io()->warning("Host settings for '$host' not supported; skipping.");
-            exit;
-        }
-        if (!file_exists('site')) {
-            throw new \Exception("The project's site directory must be initialized before adding host settings.");
-            exit;
-        }
-        if (file_exists("site/$settingsFile")) {
-            $this->io()->warning("Host settings for '$host' already initialized; skipping.");
-            exit;
-        }
-        $result = $this->taskWriteToFile("site/settings.$host.php")
-            ->textFromFile("$dktlRoot/assets/site/settings.$host.php")
-            ->run();
-    }
-
-    /**
      * Run drush command on current site.
      *
      * Run drush command on current site. For instance, to clear caches, run
-     * "dktl drush cc all". 
+     * "dktl drush cc all".
      *
      * @param array $cmd Array of arguments to create a full Drush command.
      */
@@ -215,17 +43,62 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Run "drush uli" command with correct ULI argument.
+     * Run DKAN DB installation.
      *
-     * Like the "docker" group of commands, this command is actually run in
-     * inside the dktl.sh script makes it to the DKAN Tools php application. It
-     * simply runs the real "dktl drush" command and passes it the result of
-     * "dktl surl" as the --uri argument.
-     *
-     * @todo Make it configurable whether this uses http or https.
+     * @option @account-pass
+     *   Password to assign to admin user. Defaults to "admin".
+     * @option $site-name
+     *   Site name for your new Drupal site. Defaults to "DKAN".
      */
-    public function drushUli()
+    public function install($opts = ['account-pass' => 'admin', 'site-name' => 'DKAN'])
     {
-        throw new \Exception('Something went wrong; this command should be run through dktl.sh');
+        if (!file_exists('docroot/modules') || !file_exists('dkan/modules/contrib')) {
+            throw new \Exception('Codebase not fully built, install could not procede.');
+        }
+        $result = $this->taskExec('drush -y si dkan')
+            ->dir('docroot')
+            ->arg('--verbose')
+            ->arg("--account-pass={$opts['account-pass']}")
+            ->arg("--site-name={$opts['site-name']}")
+            ->rawArg('install_configure_form.update_status_module=\'array(FALSE,FALSE)\'')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Installation command failed.');
+            return $result;
+        }
+        $this->io()->success('Installation completed successfully.');
+
+        if (!file_exists('backups')) {
+            $this->_mkdir('backups');
+        }
+        $result = $this->taskExec('drush sql-dump | gzip >')
+            ->arg('../backups/last_install.sql.gz')
+            ->dir('docroot')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->success('Backup created in "backups" folder.');
+        }
+    }
+
+    /**
+     * Performs common tasks when switching databases or code bases.
+     *
+     * Operations like running rr and updb. It also runs environment
+     * switching which is provided by the environment module.
+     *
+     * @param string $target_environment
+     *   One of the site environments. DKTL provides 4 by default: local,
+     *   development, test, and production.
+     */
+    public function deploy($target_environment)
+    {
+        $project = Util::getProjectDirectory();
+        $script = "{$project}/src/script/deploy.sh";
+        $docroot = Util::getProjectDocroot();
+
+        if (file_exists($script)) {
+            $command = "{$script} {$docroot} {$target_environment}";
+            $this->_exec($command);
+        }
     }
 }
