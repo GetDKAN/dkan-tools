@@ -201,6 +201,15 @@ class DrupalCommands extends \Robo\Tasks
 
         foreach ($gitignores as $gitignore) {
             `rm {$gitignore}`;
+            $this->io()->note("Removing: {$gitignore}");
+        }
+
+        $gits = [];
+        exec("find docroot -type d -name '.git'", $gits);
+
+        foreach ($gits as $git) {
+            `rm -R {$git}`;
+            $this->io()->note("Removing: {$git}");
         }
     }
 }
