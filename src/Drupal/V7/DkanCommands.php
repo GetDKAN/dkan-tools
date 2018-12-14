@@ -334,12 +334,12 @@ class DkanCommands extends \Robo\Tasks
 
         if ($result->getExitCode() == 0) {
             $this->io()->success("Got the file from {$url}.");
+            return "$tmp_dir_path/$filename";
         }
         else {
             $this->io()->error("Issues getting the file from {$url}.");
+            throw new \Exception("Error retrieving file.");
         }
-
-        return "$tmp_dir_path/$filename";
     }
 
     private function dkanTempReplace($tmp_dkan)
