@@ -13,19 +13,10 @@ use DkanTools\Util\Util;
 class BasicCommands extends \Robo\Tasks
 {
     /**
-     * Test some things.
-     */
-    public function test(array $cmd)
-    {
-        $cmdStr = implode(' ', $cmd);
-        $this->say($cmdStr);
-    }
-
-    /**
      * Run drush command on current site.
      *
      * Run drush command on current site. For instance, to clear caches, run
-     * "dktl drush cc all". 
+     * "dktl drush cc all".
      *
      * @param array $cmd Array of arguments to create a full Drush command.
      */
@@ -52,17 +43,62 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Run "drush uli" command with correct ULI argument.
+     * Run DKAN DB installation.
      *
-     * Like the "docker" group of commands, this command is actually run in
-     * inside the dktl.sh script makes it to the DKAN Tools php application. It
-     * simply runs the real "dktl drush" command and passes it the result of
-     * "dktl surl" as the --uri argument.
-     *
-     * @todo Make it configurable whether this uses http or https.
+     * @option @account-pass
+     *   Password to assign to admin user. Defaults to "admin".
+     * @option $site-name
+     *   Site name for your new Drupal site. Defaults to "DKAN".
      */
-    public function drushUli()
+    public function install($opts = ['account-pass' => 'admin', 'site-name' => 'DKAN'])
     {
-        throw new \Exception('Something went wrong; this command should be run through dktl.sh');
+        if (!file_exists('docroot/modules') || !file_exists('dkan/modules/contrib')) {
+            throw new \Exception('Codebase not fully built, install could not procede.');
+        }
+        $result = $this->taskExec('drush -y si dkan')
+            ->dir('docroot')
+            ->arg('--verbose')
+            ->arg("--account-pass={$opts['account-pass']}")
+            ->arg("--site-name={$opts['site-name']}")
+            ->rawArg('install_configure_form.update_status_module=\'array(FALSE,FALSE)\'')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Installation command failed.');
+            return $result;
+        }
+        $this->io()->success('Installation completed successfully.');
+
+        if (!file_exists('backups')) {
+            $this->_mkdir('backups');
+        }
+        $result = $this->taskExec('drush sql-dump | gzip >')
+            ->arg('../backups/last_install.sql.gz')
+            ->dir('docroot')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->success('Backup created in "backups" folder.');
+        }
+    }
+
+    /**
+     * Performs common tasks when switching databases or code bases.
+     *
+     * Operations like running rr and updb. It also runs environment
+     * switching which is provided by the environment module.
+     *
+     * @param string $target_environment
+     *   One of the site environments. DKTL provides 4 by default: local,
+     *   development, test, and production.
+     */
+    public function deploy($target_environment)
+    {
+        $project = Util::getProjectDirectory();
+        $script = "{$project}/src/script/deploy.sh";
+        $docroot = Util::getProjectDocroot();
+
+        if (file_exists($script)) {
+            $command = "{$script} {$docroot} {$target_environment}";
+            $this->_exec($command);
+        }
     }
 }

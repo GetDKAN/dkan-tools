@@ -15,7 +15,8 @@ That's it! All other dependencies are included in the Docker containers that dka
 ## Installation
 
 1. Download or clone this repository into any location on your development machine.
-2. Create a symbolic link anywhere in your [PATH](http://www.linfo.org/path_env_var.html) (type `echo $PATH` to see what paths are available) `bin\dktl`, and name the link `dktl`. For instance, if you have a bin directory in your home directory that is in your PATH, try  
+2. Add _/bin/dktl_ to your path somehow. This is often accomplished by adding a symbolic link to a folder already in your path, like _~/bin_. For instance: 
+
 ```bash
 ln -s /my/dktl/location/bin/dktl ~/bin/dktl
 ```
@@ -23,37 +24,39 @@ ln -s /my/dktl/location/bin/dktl ~/bin/dktl
 ## Starting a project
 To start a project with `dktl` simply create a directory.
 
-```
+```bash
 mkdir my_project && cd my_project
 ```
 
 Inside the project directory, initialize your project.
 
-```
+```bash
 dktl init
 ```
 
 After initialization, we want to get DKAN ready.
 
-```
-dktl dkan:get <version_number> && dktl dkan:make
+```bash
+dktl dkan:get <version_number>
 ```
 
 Versions of DKAN look like this: ``7.x-1.15.3``. You can see all of [DKAN's releases](https://github.com/getDkan/dkan/releases) in Github.
 
-The last prepartion step is to get Drupal.
+Now run the "make" command:
 
+```bash
+dktl make
 ```
-dktl drupal:make
-```
+
+The `make` command will get all of DKAN's dependencies _including_ Drupal core. It will also create all the symlinks necesarry to create a working Drupal site under _/docroot_.
 
 Finally, let's install DKAN.
 
-```
+```bash
 dktl dkan:install
 ```
 
-To access your site use `dktl drush:uli`
+You can find your local site URL by typing `dktl docker:surl`.
 
 ## Existing DKAN Site to DKTL
 
@@ -61,7 +64,7 @@ One of the many reasons for using DKTL is to create a clear separation between *
 
 To get started we find what version of DKAN our current application is using, and run the following commands:
 
-```
+```bash
 mkdir my_project && cd my_project
 dktl dc up -d && dktl init
 dktl dkan:get <version_number>
@@ -69,54 +72,52 @@ dktl dkan:get <version_number>
 
 Before we finish getting DKAN ready, we want to figure out if our current site has any patched versions of DKAN dependencies. DKAN uses **Drush Make** to define its dependency. DKTL takes advantage of Drush Make to be able to apply patches to DKAN without having to modify anything owned by DKAN itself.
 
-Any patches that we want to apply to dkan can be placed in the ``src/make/dkan.make`` file.
+Any patches that we want to apply to dkan can be placed in the _/src/make/dkan.make_ file.
 
 For reference on how to use make files with Drush Make look at the [Drush Make documentation](http://docs.drush.org/en/7.x/make/).
 
-After setting up our ``dkan.make`` file, we can finish getting DKAN ready.
+DKAN comes with a suggested version of Drupal core. This version can be found in _/dkan/drupal-org-core.make_. If we want to build the site using a different version (for instance, if you need a security update but aren't ready to move to the newest DKAN version), we add the right version to _/src/make/drupal.make_:
 
-``dktl dkan:make``
-
-Now we can get Drupal ready. DKAN comes with a suggested version of Drupal. This version can be found in ``dkan/drupal-org-core.make``. If our site is using a different version, we can modify this by adding the right version to ``src/make/drupal.make``.
-
-Part of you file should look like this:
-
-```
+```yaml
+api: 2
+core: 7.x
 projects:
   drupal:
     type: core
     version: '7.50'
-
 ```
 
-In ``src/make/drupal.make`` we can also define the contributed modules, themes, and libraries that our site uses. For example if our site uses the deploy module we can add this to ``drupal.make`` under the ``projects`` section:
+In _/src/make/drupal.make_ we can also define the contributed modules, themes, and libraries that our site uses. For example if our site uses the deploy module we can add this to _/src/make/drupal.make_ under the `projects` section:
 
-```
-deploy:
-  version: '3.1'
-```
-
-Most of all other configuration in Drupal/DKAN sites is placed in the ``sites/default`` directory inside of Drupal.
-
-To keep the separation between our code/configuration and what is Drupal's, DKTL provides the ``src/site``
-
-``src/site`` will replace ``sites/default`` once Drupal is installed. ``src/site`` should then contain all of the configuration that will be in ``sites/default``. DKTL already provided some things in ``src/site``. ``settings.php`` contains some generalized code that is meant to load any other setting files present there as long as they follow the ``settings.<something>.php`` pattern. All of the special settings that you previously had in ``settings.php`` or other drupal configuration files should live in your custom ``settings.<something>.php`` file in ``src/site``.
-
-After all of our contributed dependencies and other custom configuration have been properly captured in ``drupal.make``, we can get and setup the code:
-
-```
-dktl drupal:make
+```yaml
+projects:
+  deploy:
+    version: '3.1'
 ```
 
-Finally, if all our configuration is in file we can now install dkan and enble any other modules that control the configuration of our site.
+Most of all other configuration in Drupal/DKAN sites is placed in the _/sites/default_ directory inside of Drupal.
 
-If not all our configuration is in code, then we usually need to get a version of an existing database and a set of files. DKTL provides the ``dktl dkan:restore`` command to accomplish that.
+To keep the separation between our code/configuration and what is Drupal's, DKTL provides _/src/site_
+
+The _/src/site_ folder will replace _docroot/sites/default_ once Drupal is installed. _/src/site_ should then contain all of the configuration that will be in _/docroot/sites/default_. DKTL should have already provided some things in _/src/site_: _settings.php_ contains some generalized code that is meant to load any other setting files present, as long as they follow the _settings._\<something\>_.php_ pattern. All of the special settings that you previously had in _settings.php_ or other drupal configuration files should live in _settings.custom.php_ or a similarly-named file in _/src/site_.
+
+After all of our contributed dependencies and other custom configuration have been properly captured in _drupal.make_, we can get and set up the dependencies:
 
 ```
+dktl make
+```
+
+Finally, if all our configuration is in files, we can now install dkan and enble any other modules that control the configuration of our site.
+
+## Restoring a database dump or site files
+
+DKAN Tools' `restore` commands can restore from a local or remote dump of the database, as well as restore a files archive. This simplest way to do this is:
+
+```bash
 dktl dkan:restore --db_url=<path_to_db> --files_url=<path_to_files>
 ```
 
-After our database and files have been installed. We can access our site with `dktl drush:uli.``
+Additional documentation coming soon...
 
 ## Usage
 
@@ -133,24 +134,26 @@ Typing `dktl` alone will show you all the commands available to you from anywher
 
 To run any other `dktl` commands, you must first bring up the project's Docker containers. From the root directory of the project, type:
 ```
-dktl docker-compose up
+dktl docker:compose up -d
 ```
-You should see some standard docker output and a message that you containers are running. Type `dktl` (with no arguments) to see a list of the commands now available to you.
+
+(There is also an alias, `dc`, to make docker-compose commands easier to type. So try `dktl dc up -d`.)
+
+You should see some standard docker output and a message that your containers are running. Type `dktl` (with no arguments) to see a list of the commands now available to you.
 
 ### Configuring DKTL commands
 
-You will probably want to set up some default arguments for certain commands, especially the urls for your `dkan:deploy` command. This is what the dkan.yml file is for. You can provide options for any DKTL command in dkan.yml. For instance:
+You will probably want to set up some default arguments for certain commands, especially the urls for your `restore` command. This is what the dkan.yml file is for. You can provide options for any DKTL command in dkan.yml. For instance:
 
 ```yaml
 command:
-  dkan:
-    restore:
-      options:
-        db_url: "s3://my-backups-bucket/my-db.sql.gz"
-        files_url: "s3://my-backups-bucket/my-files.tar.gz"
+  restore:
+    options:
+      db_url: "s3://my-backups-bucket/my-db.sql.gz"
+      files_url: "s3://my-backups-bucket/my-files.tar.gz"
 ```
 
-If you include this in your dktl.yml file, typing `dktl dkan:restore` without any arguments will load these two options.
+If you include this in your dktl.yml file, typing `dktl restore` without any arguments will load these two options.
 
 ## DKAN Tools Custom Commands
 
