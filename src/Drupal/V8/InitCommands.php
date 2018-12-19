@@ -47,7 +47,7 @@ class InitCommands extends \Robo\Tasks
     {
         $this->_mkdir('src');
 
-        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
+        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command', 'make'];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
@@ -60,6 +60,7 @@ class InitCommands extends \Robo\Tasks
         $this->createSiteFilesDirectory();
         $this->createSettingsFiles($host);
         $this->setupScripts();
+        $this->createMakeFiles();
     }
 
     private function setupScripts() {
@@ -84,17 +85,13 @@ class InitCommands extends \Robo\Tasks
     {
         $dktlRoot = Util::getDktlDirectory();
 
-        $files = ['drupal', 'dkan'];
+        $files = ['composer'];
 
         foreach ($files as $file) {
-            $f = "src/make/{$file}.make";
+            $f = "src/make/{$file}.json";
 
             $task = $this->taskWriteToFile($f)
-                ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
-            if ($file == "drupal") {
-                $task->text("defaults:\n  projects:\n    subdir: contrib\n");
-                $task->text("projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'");
-            }
+                ->textFromFile("$dktlRoot/assets/d8/composer.json");
             $result = $task->run();
 
             $this->directoryAndFileCreationCheck($result, $f);
