@@ -40,7 +40,7 @@ class InitCommands extends \Robo\Tasks
             ->textFromFile("$dktlRoot/assets/dktl.yml")
             ->run();
 
-        $this->directoryAndFileCreationCheck($result, $f);
+        Util::directoryAndFileCreationCheck($result, $f, $this->io);
     }
 
     private function createSrcDirectory($host = "")
@@ -54,7 +54,7 @@ class InitCommands extends \Robo\Tasks
 
             $result = $this->_mkdir($dir);
 
-            $this->directoryAndFileCreationCheck($result, $dir);
+            Util::directoryAndFileCreationCheck($result, $dir, $this->io);
         }
 
         $this->createMakeFiles();
@@ -77,7 +77,7 @@ class InitCommands extends \Robo\Tasks
             $result = $task->run();
             $this->_exec("chmod +x {$project_dir}/src/script/{$file}.sh");
 
-            $this->directoryAndFileCreationCheck($result, $f);
+            Util::directoryAndFileCreationCheck($result, $f, $this->io);
         }
     }
 
@@ -98,7 +98,7 @@ class InitCommands extends \Robo\Tasks
             }
             $result = $task->run();
 
-            $this->directoryAndFileCreationCheck($result, $f);
+            Util::directoryAndFileCreationCheck($result, $f, $this->io);
         }
     }
 
@@ -108,7 +108,7 @@ class InitCommands extends \Robo\Tasks
         $this->_mkdir($directory);
         $result = $this->_exec("chmod 777 {$directory}");
 
-        $this->directoryAndFileCreationCheck($result, $directory);
+        Util::directoryAndFileCreationCheck($result, $directory, $this->io);
     }
 
     private function createSettingsFiles($host = "")
@@ -122,7 +122,7 @@ class InitCommands extends \Robo\Tasks
             $result = $this->taskWriteToFile($f)
                 ->textFromFile("$dktlRoot/assets/site/{$setting}")
                 ->run();
-            $this->directoryAndFileCreationCheck($result, $f);
+            Util::directoryAndFileCreationCheck($result, $f, $this->io);
         }
 
         if (!empty($host)) {
