@@ -92,6 +92,13 @@ class TestCommands extends \Robo\Tasks
         return $phpunitExec->run();
     }
 
+    public function testCypress()
+    {
+        $proj_dir = Util::getProjectDirectory();
+        $this->_exec("npm install cypress");
+        $this->_exec("CYPRESS_baseUrl=http://web {$proj_dir}/node_modules/cypress/bin/cypress run");
+    }
+
     private function getVendorCommand($binary_name) {
         $dktl_dir = Util::getDktlDirectory();
         return "{$dktl_dir}/vendor/bin/{$binary_name}";

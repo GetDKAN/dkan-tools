@@ -73,4 +73,14 @@ class Util
         }
         return $files_with_extension;
     }
+
+    public static function directoryAndFileCreationCheck(\Robo\Result $result, $df, $io)
+    {
+        if ($result->getExitCode() == 0 && file_exists($df)) {
+            $io->success("{$df} was created.");
+        } else {
+            $io->error("{$df} was not created.");
+            exit;
+        }
+    }
 }

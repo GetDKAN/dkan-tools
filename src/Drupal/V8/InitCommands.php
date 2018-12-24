@@ -1,11 +1,10 @@
 <?php
 
-namespace DkanTools\Command;
+namespace DkanTools\Drupal\V8;
 
 use DkanTools\Util\Util;
-use Robo\Result;
 
-class initCommands extends \Robo\Tasks
+class InitCommands extends \Robo\Tasks
 {
     /**
      * Initialize DKAN project directory.
@@ -32,27 +31,6 @@ class initCommands extends \Robo\Tasks
         }
     }
 
-    /**
-     * Generates basic configuration for a DKAN project to work with CircleCI.
-     */
-    public function initCircleCI() {
-        $dktl_dir = Util::getDktlDirectory();
-        $project_dir = Util::getProjectDirectory();
-        return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
-    }
-
-    /**
-     * Generates basic configuration for a DKAN project to work with ProboCI.
-     */
-    public function initProboCI() {
-        $dktl_dir = Util::getDktlDirectory();
-        $project_dir = Util::getProjectDirectory();
-        $collection = $this->collectionBuilder();
-        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/.probo.yml {$project_dir}"));
-        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/settings.probo.php {$project_dir}/src/site"));
-        return $collection->run();
-
-    }
 
     private function createDktlYmlFile()
     {
@@ -69,7 +47,7 @@ class initCommands extends \Robo\Tasks
     {
         $this->_mkdir('src');
 
-        $directories = ['docker', 'make', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
+        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command', 'make'];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
@@ -79,10 +57,10 @@ class initCommands extends \Robo\Tasks
             $this->directoryAndFileCreationCheck($result, $dir);
         }
 
-        $this->createMakeFiles();
         $this->createSiteFilesDirectory();
         $this->createSettingsFiles($host);
         $this->setupScripts();
+        $this->createMakeFiles();
     }
 
     private function setupScripts() {
@@ -107,17 +85,13 @@ class initCommands extends \Robo\Tasks
     {
         $dktlRoot = Util::getDktlDirectory();
 
-        $files = ['drupal', 'dkan'];
+        $files = ['composer'];
 
         foreach ($files as $file) {
-            $f = "src/make/{$file}.make";
+            $f = "src/make/{$file}.json";
 
             $task = $this->taskWriteToFile($f)
-                ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
-            if ($file == "drupal") {
-                $task->text("defaults:\n  projects:\n    subdir: contrib\n");
-                $task->text("projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'");
-            }
+                ->textFromFile("$dktlRoot/assets/d8/composer.json");
             $result = $task->run();
 
             $this->directoryAndFileCreationCheck($result, $f);
@@ -137,12 +111,12 @@ class initCommands extends \Robo\Tasks
     {
         $dktlRoot = Util::getDktlDirectory();
 
-        $settings = ["settings.php", "settings.docker.php"];
+        $settings = ["default.settings.php", "settings.php", "settings.docker.php"];
 
         foreach ($settings as $setting) {
             $f = "src/site/{$setting}";
             $result = $this->taskWriteToFile($f)
-                ->textFromFile("$dktlRoot/assets/site/{$setting}")
+                ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
                 ->run();
             $this->directoryAndFileCreationCheck($result, $f);
         }
@@ -184,7 +158,7 @@ class initCommands extends \Robo\Tasks
         return $result;
     }
 
-    private function directoryAndFileCreationCheck(Result $result, $df)
+    private function directoryAndFileCreationCheck(\Robo\Result $result, $df)
     {
         if ($result->getExitCode() == 0 && file_exists($df)) {
             $this->io()->success("{$df} was created.");
@@ -193,4 +167,5 @@ class initCommands extends \Robo\Tasks
             exit;
         }
     }
+
 }

@@ -1,5 +1,5 @@
 <?php
-namespace DkanTools\Command;
+namespace DkanTools\Command\Drupal\V7;
 
 use DkanTools\Util\Util;
 
@@ -8,80 +8,104 @@ use DkanTools\Util\Util;
  *
  * @see http://robo.li/
  */
-class DrupalCommands extends \Robo\Tasks
+class MakeCommands extends \Robo\Tasks
 {
+
+    /**
+    * Fully make DKAN and Drupal core, overwriting existing files.
+    *
+    * To overwrite either Drupal core or DKAN make files, use the files in
+    * /src/make
+    *
+    * @option $yes
+    *   Remove all existing files without asking for confirmation
+    * @option $keep-gitignores
+    *   Skip default behavior of deleting all .gitignore files in /docroot
+    */
+    public function make($opts = ['yes|y' => false, 'keep-gitignores' => false])
+    {
+        makeProfile([$opts['yes|y']]);
+        makeDrupal($opts);
+    }
+
+    /**
+    * Run the DKAN make file and apply any overrides from /config.
+    *
+    * @option $yes
+    *   Remove all existing files without asking for confirmation
+    */
+    public function makeProfile($opts = ['yes|y' => false])
+    {
+      if (file_exists('dkan')) {
+          if (!$opts['yes'] && !$this->io()->confirm('dkan folder alredy exists. Delete it and reinstall drupal?')) {
+              $this->io()->warning('Make aborted');
+              return false;
+          }
+          $this->_deleteDir([
+              'dkan/modules/contrib',
+              'dkan/themes/contrib',
+              'dkan/libraries'
+          ]);
+      }
+
+      $this->taskExec('drush -y make dkan/drupal-org.make')
+          ->arg('--contrib-destination=./')
+          ->arg('--no-core')
+          ->arg('--root=docroot')
+          ->arg('--no-recursion')
+          ->arg('--no-cache')
+          ->arg('--verbose')
+          ->arg('--overrides=src/make/dkan.make')
+          ->arg('--concurrency=' . Util::drushConcurrency())
+          ->arg('dkan')
+          ->run();
+    }
+
     /**
      * Run make for Drupal core.
+     *
+     * @option $yes
+     *   Remove all existing files without asking for confirmation
+     * @option $keep-gitignores
+     *   Skip default behavior of deleting all .gitignore files in /docroot
      */
-    public function drupalMake($opts = ['yes|y' => false])
+    public function makeDrupal($opts = ['yes|y' => false, 'keep-gitignores' => false])
     {
-        if (file_exists('dkan')) {
-            if (file_exists('docroot')) {
-                if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. Delete it and reinstall drupal?')) {
-                    $this->io()->warning('Make aborted');
-                    exit;
-                }
-                $this->_deleteDir('docroot');
-            }
-
-            $concurrency = Util::drushConcurrency();
-
-            $result = $this->taskExec('drush make -y dkan/drupal-org-core.make')
-            ->arg('--root=docroot')
-            ->arg('--concurrency=' . $concurrency)
-            ->arg('--prepare-install')
-            ->arg('--overrides=../src/make/drupal.make')
-            ->arg('docroot')
-            ->run();
-
-            if ($result->getExitCode() == 0 && file_exists('docroot')) {
-                $this->io()->success('Drupal core successfully downloaded to docroot folder.');
-            }
-
-            $this->linkDkan();
-            $this->linkSitesDefault();
-            $this->linkModules();
-            $this->linkThemes();
-        } else {
-            $this->io()->error('We need DKAN before making Drupal');
+        if (!file_exists('dkan')) {
+            throw \Exception('We need DKAN before making Drupal');
+            return false;
         }
-    }
-
-    /**
-     * Run Drupal minimal installation script. Takes mysql url as optional
-     * argument.
-     *
-     * @todo Implement settings.php rewrite function from ahoy.
-     *
-     * @param string $db Mysql connection string.
-     */
-    public function drupalInstallMin($db = null)
-    {
-        $db = $db ? $db : $this->getDbUrl();
-        $update = "install_configure_form.update_status_module='array(false,false)'";
-
-        $result = $this->taskExec('drush -y si minimal')->dir('docroot')
-            ->arg('--verbose')
-            ->arg('--sites-subdir=default')
-            ->arg('--account-pass=admin')
-            ->arg("--db-url=$db")
-            ->rawArg($update)
-            ->run();
-        if ($result->getExitCode() == 0) {
-            $this->io()->success('Drupal successfully installed with minimal profile. Type "dktl docker:url" to test.');
+        if (file_exists('docroot')) {
+            if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. Delete it and reinstall drupal?')) {
+                $this->io()->warning('Make aborted');
+                return false;
+            }
+            $this->_deleteDir('docroot');
         }
-    }
 
-    /**
-     * Get the mysql connection string.
-     *
-     * @todo Stop hardcoding and get from env or make dynamic.
-     */
-    public function getDbUrl()
-    {
-        return 'mysql://drupal:123@db/drupal';
-    }
+        $concurrency = Util::drushConcurrency();
 
+        $result = $this->taskExec('drush make -y dkan/drupal-org-core.make')
+        ->arg('--root=docroot')
+        ->arg('--concurrency=' . $concurrency)
+        ->arg('--prepare-install')
+        ->arg('--overrides=../src/make/drupal.make')
+        ->arg('docroot')
+        ->run();
+
+        if ($result->getExitCode() == 0 && file_exists('docroot')) {
+            $this->io()->success('Drupal core successfully downloaded to docroot folder.');
+        }
+
+        $this->linkDkan();
+        $this->linkSitesDefault();
+        $this->linkModules();
+        $this->linkThemes();
+        if (!$opts['keep-gitignores']) {
+          $this->removeGitIgnores();
+        }
+
+    }
     /**
      * Link the DKAN folder to docroot/profiles.
      */
@@ -156,7 +180,7 @@ class DrupalCommands extends \Robo\Tasks
     /**
      * Remove all gitignores from docroot.
      */
-    public function drupalRemoveGitIgnores() {
+    private function removeGitIgnores() {
         $gitignores = [];
         exec("find docroot -type f -name '.gitignore'", $gitignores);
 
@@ -171,4 +195,5 @@ class DrupalCommands extends \Robo\Tasks
             `rm {$gitignore}`;
         }
     }
+
 }
