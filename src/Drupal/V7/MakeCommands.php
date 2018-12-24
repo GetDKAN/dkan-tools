@@ -1,5 +1,5 @@
 <?php
-namespace DkanTools\Command\Drupal\V7;
+namespace DkanTools\Drupal\V7;
 
 use DkanTools\Util\Util;
 
@@ -24,8 +24,11 @@ class MakeCommands extends \Robo\Tasks
     */
     public function make($opts = ['yes|y' => false, 'keep-gitignores' => false])
     {
-        makeProfile([$opts['yes|y']]);
-        makeDrupal($opts);
+        $yes = (isset($opts['yes|y'])) ? $opts['yes|y'] : false;
+        $make_opts = ['yes|y' => $yes];
+
+        $this->makeProfile($make_opts);
+        $this->makeDrupal($opts);
     }
 
     /**
@@ -36,8 +39,8 @@ class MakeCommands extends \Robo\Tasks
     */
     public function makeProfile($opts = ['yes|y' => false])
     {
-      if (file_exists('dkan')) {
-          if (!$opts['yes'] && !$this->io()->confirm('dkan folder alredy exists. Delete it and reinstall drupal?')) {
+      if (file_exists('dkan/modules/contrib')) {
+          if (!$opts['yes|y'] && !$this->io()->confirm('DKAN dependencies have already been dowloaded. Would you like to delete and dowload them again?')) {
               $this->io()->warning('Make aborted');
               return false;
           }
