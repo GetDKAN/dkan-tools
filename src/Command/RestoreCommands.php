@@ -214,7 +214,7 @@ class RestoreCommands extends \Robo\Tasks
             $parser = new \Aws\S3\S3UriParser();
             $info = $parser->parse($url);
             $filename = $info['key'];
-            $approach = "aws s3 cp {$url} {$tmp_dir_path}";
+            $approach = "aws s3 cp {$url} {$tmp_dir_path}/";
         }
         else {
             $this->io()->error("Unsupported file protocol.");
