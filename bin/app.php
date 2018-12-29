@@ -3,7 +3,7 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$drupalVersion = "V7";
+$drupalVersion = isset($_SERVER['DRUPAL_VERSION']) ? $_SERVER['DRUPAL_VERSION'] : "V7";
 
 $dktl_directory = DkanTools\Util\Util::getDktlDirectory();
 $dktl_project_directory = DkanTools\Util\Util::getProjectDirectory();
