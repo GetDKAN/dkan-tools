@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set Drupal version if it doesn't exits.
+DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
+
 find-up () {
   path=$(pwd)
   while [[ "$path" != "" && ! -e "$path/$1" ]]; do
@@ -126,7 +129,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
 
   # Proxy pass to internal DKTL
-  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli dktl $1 "${@:2}"
+  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
 
   if [ -z $DKTL_CHOWN ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:
