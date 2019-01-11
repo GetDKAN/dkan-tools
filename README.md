@@ -17,16 +17,16 @@ It is also possible to run most DKAN Tools commands using a local webserver, dat
 ## Installation
 
 1. Download or clone this repository into any location on your development machine.
-2. Add _bin/dktl_ to your `$PATH` somehow. This is often accomplished by adding a symbolic link to a folder already in your path, like _~/bin_. For instance: 
+2. Add _bin/dktl_ to your `$PATH` somehow. This is often accomplished by adding a symbolic link to a folder already in your path, like _~/bin_. For instance, if DKAN Tools is located in _/myworkspace_: 
 
 ```bash
-ln -s /my/dktl/location/bin/dktl ~/bin/dktl
+ln -s  /myworkspace/dkan-tools/bin/dktl ~/bin/dktl
 ```
 
 Alternatively, you could add _/my/dktl/location/bin_ directly to your `$PATH`. Enter this in your terminal or add it to your session permanently by adding a line in _.bashrc_ or _.bash_profile_:
 
 ```bash
-export PATH=$PATH:/my/dktl/location/bin
+export PATH=$PATH:/myworkspace/dkan-tools/bin
 ```
 
 Once you are working in a valid project folder (see next section) you can type `dktl` at any time to see a list of available commands.
@@ -46,13 +46,13 @@ dktl init
 
 This will automatically start up the Docker containers, which can also be started manually with `dktl docker:compose up -d`. Any other docker-compose commands can be run via `dktl docker:compose <args>` or simply `dktl dc <args>`.
 
-After initialization, we want to get DKAN ready. You can use `git clone` (recommended if you are working directly on DKAN core and will want to commit and push changes to the DKAN project) or download a tarball of the DKAN source from [GitHub](https://github.com/GetDKAN/dkan), but the easiest method is using this command:
+After initialization, we want to get DKAN ready. We can use `git clone` (recommended if you are working directly on DKAN core and will want to commit and push changes to the DKAN project) or download a tarball of the DKAN source from [GitHub](https://github.com/GetDKAN/dkan), but the easiest method is using this command:
 
 ```bash
 dktl dkan:get <version_number>
 ```
 
-Versions of DKAN look like this: ``7.x-1.15.3``. You can see all of [DKAN's releases](https://github.com/getDkan/dkan/releases) in Github.
+Versions of DKAN look like this: ``7.x-1.15.3``. We can see all of [DKAN's releases](https://github.com/getDkan/dkan/releases) in Github.
 
 Now run the "make" command:
 
@@ -68,13 +68,13 @@ Finally, let's install DKAN.
 dktl install
 ```
 
-You can find your local site URL by typing `dktl docker:surl`.
+You can find the local site URL by typing `dktl docker:surl`.
 
 ## Structure of a DKAN-Tools-based project
 
 One of the many reasons for using DKTL is to create a clear separation between the code specific to a particular DKAN site (i.e. "custom code") and the dependencies we pull in from other sources (primarily, DKAN core and Drupal core). 
 
-To accomplish this, DKAN Tools projects will have the following basic directory structure, created when you run `dktl init`.
+To accomplish this, DKAN Tools projects will have the following basic directory structure, created when we run `dktl init`.
 
     ├── dkan              # The upstream DKAN core codebase
     ├── docroot           # Drupal core, and contrib modules not from DKAN
@@ -85,6 +85,8 @@ To accomplish this, DKAN Tools projects will have the following basic directory 
     |   └── site          # Symlinked to docroot/sites/default
     │       └── files     # The main site files
     └── dktl.yml          # DKAN Tools configuration
+
+We may wish to create two additional folders in the root of your project later on: _/src/patches_, where we can store local patches to be applied via the make files in _/src/make_; and _/backups_, where database dumps can be stored. The first time we run `dktl install` the _/backups_ folder will be created if it does not already exist.
 
 ### The /src/make folder
 
@@ -109,6 +111,18 @@ In _/src/make/drupal.make_ we can also define the contributed modules, themes, a
 projects:
   deploy:
     version: '3.1'
+```
+
+
+If our site requires a custom patch to the deploy module, we add it to _/src/patches_. For remote patches (usually from [Drupal.org](https://www.drupal.org)) we just need the url to the patch:
+
+```yaml
+projects:
+  deploy:
+    version: '3.1'
+    patch:
+      1: '../patches/custom_patch.patch'
+      3005415: 'https://www.drupal.org/files/issues/2018-10-09/use_plain_text_format-3005415.patch'
 ```
 
 ### The src/site folder
