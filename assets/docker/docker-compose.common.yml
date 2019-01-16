@@ -15,10 +15,9 @@ services:
       - solr
     volumes:
       # PHP configuration overrides
-      - "${DKTL_PROJECT_DIRECTORY}:/var/www/"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/php.ini:/etc/php5/fpm/conf.d/z_php.ini"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-linux.ini:/etc/php5/xdebug-linux.ini"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php5/xdebug-macos.ini:/etc/php5/xdebug-macos.ini"
+      - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php:/var/www/.docker/etc/php"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php-templates:/var/www/.docker/etc/php-templates"
     network_mode: bridge
     labels:
       - "traefik.frontend.rule=Host:${DKTL_SLUG}.${DKTL_PROXY_DOMAIN}"
@@ -44,7 +43,7 @@ services:
        # MySQL configuration overrides
        - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
        # Permanent DB data storage
-       - /var/lib/mysql
+       - database_data:/var/lib/mysql:delegated
     labels:
       - traefik.enable=false
     network_mode: bridge
@@ -72,9 +71,11 @@ services:
     ports:
       - "8888"
     volumes:
-      - "${DKTL_PROJECT_DIRECTORY}:/var/www/"
+      - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
       # Load the DKAN tools dir
       - "${DKTL_DIRECTORY}/:/usr/local/dkan-tools"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php:/var/www/.docker/etc/php"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/php-templates:/var/www/.docker/etc/php-templates"
       # Host SSH keys mapping. Uncomment one of the lines below based on your setup.
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws
@@ -137,3 +138,5 @@ services:
     labels:
       - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
     network_mode: bridge
+volumes:
+  database_data:

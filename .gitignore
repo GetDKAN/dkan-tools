@@ -1,3 +1,4 @@
 /vendor
 /temp
 .swp
+assets/docker/etc/php
