@@ -101,6 +101,27 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   elif [ "$1" = "docker:surl" ]; then
     echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
     exit 0
+  elif [ "$1" = "xdebug:start" ]; then
+    PLATFORM=`uname`
+    if [[ $PLATFORM == "Darwin" ]]; then
+      ln -s ../php-templates/xdebug-macos.ini $DKTL_DIRECTORY/assets/docker/etc/php/xdebug.ini
+    else
+      ln -s ../php-templates/xdebug-linux.ini $DKTL_DIRECTORY/assets/docker/etc/php/xdebug.ini
+    fi
+    containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
+    if [ ! -z "$containers" ]; then
+      $BASE_DOCKER_COMPOSE_COMMAND restart web
+      $BASE_DOCKER_COMPOSE_COMMAND restart cli
+    fi
+    exit 0
+  elif [ "$1" = "xdebug:stop" ]; then
+    rm -f $DKTL_DIRECTORY/assets/docker/etc/php/xdebug.ini
+    containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
+    if [ ! -z "$containers" ]; then
+      $BASE_DOCKER_COMPOSE_COMMAND restart web
+      $BASE_DOCKER_COMPOSE_COMMAND restart cli
+    fi
+    exit 0
   fi
 fi
 
