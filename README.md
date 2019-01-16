@@ -17,13 +17,13 @@ It is also possible to run most DKAN Tools commands using a local webserver, dat
 ## Installation
 
 1. Download or clone this repository into any location on your development machine.
-2. Add _bin/dktl_ to your `$PATH` somehow. This is often accomplished by adding a symbolic link to a folder already in your path, like _~/bin_. For instance, if DKAN Tools is located in _/myworkspace_: 
+2. Add _bin/dktl_ to your `$PATH` somehow. This is often accomplished by adding a symbolic link to a folder already in your path, like _~/bin_. For instance, if DKAN Tools is located in _/myworkspace_:
 
 ```bash
 ln -s  /myworkspace/dkan-tools/bin/dktl ~/bin/dktl
 ```
 
-Alternatively, you could add _/my/dktl/location/bin_ directly to your `$PATH`. Enter this in your terminal or add it to your session permanently by adding a line in _.bashrc_ or _.bash_profile_:
+Alternatively, you could add _/myworkspace/dkan-tools/bin_ directly to your `$PATH`. Enter this in your terminal or add it to your session permanently by adding a line in _.bashrc_ or _.bash_profile_:
 
 ```bash
 export PATH=$PATH:/myworkspace/dkan-tools/bin
@@ -72,7 +72,7 @@ You can find the local site URL by typing `dktl docker:surl`.
 
 ## Structure of a DKAN-Tools-based project
 
-One of the many reasons for using DKTL is to create a clear separation between the code specific to a particular DKAN site (i.e. "custom code") and the dependencies we pull in from other sources (primarily, DKAN core and Drupal core). 
+One of the many reasons for using DKTL is to create a clear separation between the code specific to a particular DKAN site (i.e. "custom code") and the dependencies we pull in from other sources (primarily, DKAN core and Drupal core).
 
 To accomplish this, DKAN Tools projects will have the following basic directory structure, created when we run `dktl init`.
 
@@ -129,7 +129,7 @@ projects:
 
 Most configuration in Drupal sites is placed in the _/sites/default_ directory.
 
-The _/src/site_ folder will replace _/docroot/sites/default_ once Drupal is installed. _/src/site_ should then contain all of the configuration that will be in _/docroot/sites/default_. 
+The _/src/site_ folder will replace _/docroot/sites/default_ once Drupal is installed. _/src/site_ should then contain all of the configuration that will be in _/docroot/sites/default_.
 
 DKTL should have already provided some things in _/src/site_: _settings.php_ contains some generalized code that is meant to load any other setting files present, as long as they follow the _settings._\<something\>_.php_ pattern. All of the special settings that you previously had in _settings.php_ or other drupal configuration files should live in _settings.custom.php_ or a similarly-named file in _/src/site_.
 
