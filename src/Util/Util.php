@@ -10,6 +10,11 @@ class Util
 {
     const TMP_DIR = "/tmp/dktl";
 
+    public static function getPlatform()
+    {
+        return getenv("PLATFORM");
+    }
+
     public static function getDktlDirectory()
     {
         return getenv("DKTL_DIRECTORY");

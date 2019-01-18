@@ -3,7 +3,7 @@ version: "2"
 services:
   web:
     hostname: web
-    image: getdkan/dkan-docker:php7-web
+    image: php7-web-xdebug
     ports:
       - "80"
       - "443"
@@ -16,8 +16,6 @@ services:
     volumes:
       # PHP configuration overrides
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php:/var/www/.docker/etc/php"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php-templates:/var/www/.docker/etc/php-templates"
     network_mode: bridge
     labels:
       - "traefik.frontend.rule=Host:${DKTL_SLUG}.${DKTL_PROXY_DOMAIN}"
@@ -59,6 +57,7 @@ services:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - PROXY_DOMAIN
+      - PLATFORM
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
@@ -74,8 +73,6 @@ services:
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
       # Load the DKAN tools dir
       - "${DKTL_DIRECTORY}/:/usr/local/dkan-tools"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php:/var/www/.docker/etc/php"
-      - "${DKTL_DIRECTORY}/assets/docker/etc/php-templates:/var/www/.docker/etc/php-templates"
       # Host SSH keys mapping. Uncomment one of the lines below based on your setup.
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws

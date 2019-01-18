@@ -1,18 +1,9 @@
 #!/bin/bash
 
-# Set Drupal version if it doesn't exits.
+# Set Drupal version if it isn't set.
 DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
 
-find-up () {
-  path=$(pwd)
-  while [[ "$path" != "" && ! -e "$path/$1" ]]; do
-    path=${path%/*}
-  done
-  echo "$path"
-}
-
 # Determine whether we want to run inside the docker container or in the host machine.
-
 if [ -z $DKTL_MODE ] || [ "$DKTL_MODE" = "DOCKER" ]; then
   DKTL_MODE="DOCKER"
 elif [ "$DKTL_MODE" = "HOST" ]; then
@@ -23,7 +14,6 @@ else
 fi
 
 # Check dependencies.
-
 if [ "$DKTL_MODE" = "DOCKER" ]; then
   if [ -z `which docker` ] || [ -z `which docker-compose` ]; then
       echo "docker and docker-compose are required. Exiting."
@@ -36,7 +26,14 @@ else
   fi
 fi
 
-# Basic Information
+# Function to find project root so we can run from anywhere
+find-up () {
+  path=$(pwd)
+  while [[ "$path" != "" && ! -e "$path/$1" ]]; do
+    path=${path%/*}
+  done
+  echo "$path"
+}
 
 DKTL_PROJECT_DIRECTORY=$(find-up dktl.yml)
 if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
@@ -64,9 +61,8 @@ if [ -z "$DKTL_SLUG" ]; then
   export DKTL_SLUG
 fi
 
-# Setup for Docker mode and Docker specific commands.
+# Setup for Docker mode and Docker-specific commands.
 if [ "$DKTL_MODE" = "DOCKER" ]; then
-
   # Check for proxy container, get domain from that.
   if [ -z "$PROXY_DOMAIN" ]; then
     PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
@@ -77,6 +73,8 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     PROXY_DOMAIN=${WEB_DOMAIN}
   fi
   export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
+  
+  PLATFORM=`uname` && export PLATFORM
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
@@ -86,12 +84,9 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
   fi
   # Check for interactive shell
-  if [ -t 1 ]; then
-    EXEC_OPTS=''
-  else
-    EXEC_OPTS='-T'
-  fi
+  if [ -t 1 ]; then EXEC_OPTS=''; else EXEC_OPTS='-T'; fi
 
+  # Run docker commands immediately then exit
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
     exit 0
@@ -101,41 +96,9 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   elif [ "$1" = "docker:surl" ]; then
     echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
     exit 0
-  elif [ "$1" = "xdebug:start" ]; then
-    PLATFORM=`uname`
-    if [[ $PLATFORM == "Darwin" ]]; then
-      ln -s ../php-templates/xdebug-macos.ini $DKTL_DIRECTORY/assets/docker/etc/php/xdebug.ini
-    else
-      ln -s ../php-templates/xdebug-linux.ini $DKTL_DIRECTORY/assets/docker/etc/php/xdebug.ini
-    fi
-    containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
-    if [ ! -z "$containers" ]; then
-      $BASE_DOCKER_COMPOSE_COMMAND restart web
-      $BASE_DOCKER_COMPOSE_COMMAND restart cli
-    fi
-    exit 0
-  elif [ "$1" = "xdebug:stop" ]; then
-    rm -f $DKTL_DIRECTORY/assets/docker/etc/php/xdebug.ini
-    containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
-    if [ ! -z "$containers" ]; then
-      $BASE_DOCKER_COMPOSE_COMMAND restart web
-      $BASE_DOCKER_COMPOSE_COMMAND restart cli
-    fi
-    exit 0
   fi
-fi
-
-if [ "$DKTL_MODE" = "HOST" ]; then
-  if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ] || [ "$1" = "docker:url" ] || [ "$1" = "docker:surl" ]; then
-    echo "${1} is not available in 'HOST' mode"
-    exit 1
-  fi
-fi
-
-# Other commands
-if [ "$DKTL_MODE" = "DOCKER" ]; then
-
-  # Check containers state if in DOCKER mode
+  
+  # Check containers state
   containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
   if [ -z "$containers" ]; then
     echo "Starting docker containers."
@@ -152,6 +115,12 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   # Proxy pass to internal DKTL
   $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
 
+  # Reset web and cli containers if xdebug
+  if [ $? -eq 0 ] && [[ $1 == "xdebug"* ]]; then
+    $BASE_DOCKER_COMPOSE_COMMAND restart web
+    $BASE_DOCKER_COMPOSE_COMMAND restart cli
+  fi
+
   if [ -z $DKTL_CHOWN ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:
     if [ ! -z `find $DKTL_PROJECT_DIRECTORY -user root -print -quit` ]; then
@@ -160,9 +129,12 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
       echo -e "\e[32m$CHOWN_CMD\e[39m" && $CHOWN_CMD
     fi
   fi
-fi
 
-if [ "$DKTL_MODE" = "HOST" ]; then
+elif [ "$DKTL_MODE" = "HOST" ]; then
+  if [[ "$1" == "docker"* ]] || [ "$1" = "dc" ]; then
+    echo "${1} is not available in 'HOST' mode"
+    exit 1
+  fi
   if [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "test:phpunit" ] || [ "$1" = "test:lint" ] || [ "$1" = "test:lint-fix" ]; then
     # For several commands, we want to insert a "--" to pass all arguments as an array.
     php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"

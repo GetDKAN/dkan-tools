@@ -101,4 +101,30 @@ class BasicCommands extends \Robo\Tasks
             $this->_exec($command);
         }
     }
+
+    public function xdebugStart() 
+    {
+        $sourceFile = (Util::getPlatform() == 'Linux') ? 'xdebug-linux.ini' : 'xdebug-macos.ini';
+        $dktlRoot = Util::getDktlDirectory();
+        $this->say("$dktlRoot/assets/docker/etc/php/$sourceFile");
+        $f = 'src/docker/etc/php/xdebug.ini';
+        $result = $this->taskWriteToFile($f)
+            ->textFromFile("$dktlRoot/assets/docker/etc/php/$sourceFile")
+            ->run();
+
+        Util::directoryAndFileCreationCheck($result, $f, $this->io());
+    }
+
+    public function xdebugStop()
+    {
+        $f = 'src/docker/etc/php/xdebug.ini';
+        $result = unlink($f);
+        if ($result) {
+            $this->io()->success("Removed xdebug.ini; restarting.");
+            return $result;
+        }
+        else {
+            throw new \Exception("Failed, xdebug.ini not found.");
+        }
+    }
 }
