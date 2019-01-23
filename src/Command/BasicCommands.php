@@ -104,10 +104,16 @@ class BasicCommands extends \Robo\Tasks
 
     public function xdebugStart() 
     {
-        $sourceFile = (Util::getPlatform() == 'Linux') ? 'xdebug-linux.ini' : 'xdebug-macos.ini';
+        $platform = getenv("PLATFORM");
+        $sourceFile = ($platform == 'Darwin') ? 'xdebug-macos.ini' : 'xdebug-linux.ini';
         $dktlRoot = Util::getDktlDirectory();
-        $this->say("$dktlRoot/assets/docker/etc/php/$sourceFile");
+        $this->io()->text("Creating new xdebug.ini file for {$platform} platform.");
+        
         $f = 'src/docker/etc/php/xdebug.ini';
+        if (file_exists($f)) {
+            throw new \Exception("File {$f} already exists.");
+        } 
+
         $result = $this->taskWriteToFile($f)
             ->textFromFile("$dktlRoot/assets/docker/etc/php/$sourceFile")
             ->run();

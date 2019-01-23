@@ -10,29 +10,23 @@ class Util
 {
     const TMP_DIR = "/tmp/dktl";
 
-    public static function getPlatform()
-    {
-        return getenv("PLATFORM");
-    }
-
     public static function getDktlDirectory()
     {
         return getenv("DKTL_DIRECTORY");
     }
 
-    public static function getProjectDirectory() {
-        $directory = exec("pwd");
-
-        $argv = $_SERVER['argv'];
-
-        if (isset($argv[1]) && $argv[1] == "init") {
+    public static function getProjectDirectory() 
+    {        
+        if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "init") {
+            $directory = exec("pwd");
             return $directory;
         }
 
         return getenv("DKTL_PROJECT_DIRECTORY");
     }
 
-    public static function getProjectDocroot() {
+    public static function getProjectDocroot() 
+    {
         return self::getProjectDirectory() . "/docroot";
     }
 
