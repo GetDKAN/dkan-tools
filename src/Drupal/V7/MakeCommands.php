@@ -83,7 +83,7 @@ class MakeCommands extends \Robo\Tasks
             throw \Exception('We need DKAN before making Drupal');
             return false;
         }
-        if (!Yaml::parse(file_get_contents(Util::getProjectDirectory() . '/src/make/dkan.make'))) {
+        if (!Yaml::parse(file_get_contents(Util::getProjectDirectory() . '/src/make/drupal.make'))) {
             return false;
         }
         if (file_exists('docroot')) {
