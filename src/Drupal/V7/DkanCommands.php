@@ -69,8 +69,8 @@ class DkanCommands extends \Robo\Tasks
         }
 
         if (!isset($source)) {
-            $this->io()->error("No archive available for DKAN $version.");
-            return;
+            throw new \Exception("No archive available for DKAN $version.");
+            return false;
         }
 
         $this->io()->section("Getting DKAN from {$source}");
