@@ -2,6 +2,7 @@
 namespace DkanTools\Drupal\V7;
 
 use DkanTools\Util\Util;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -40,7 +41,11 @@ class MakeCommands extends \Robo\Tasks
     public function makeProfile($opts = ['yes|y' => false])
     {
       if (file_exists('dkan/modules/contrib')) {
-          if (!$opts['yes|y'] && !$this->io()->confirm('DKAN dependencies have already been dowloaded. Would you like to delete and dowload them again?')) {
+          if (!Yaml::parse(file_get_contents(Util::getProjectDirectory() . '/src/make/dkan.make'))) {
+              return false;
+          }
+          $confirmText = 'DKAN dependencies have already been dowloaded. Would you like to delete and dowload them again?';
+          if (!$opts['yes|y'] && !$this->io()->confirm($confirmText)) {
               $this->io()->warning('Make aborted');
               return false;
           }
@@ -76,6 +81,9 @@ class MakeCommands extends \Robo\Tasks
     {
         if (!file_exists('dkan')) {
             throw \Exception('We need DKAN before making Drupal');
+            return false;
+        }
+        if (!Yaml::parse(file_get_contents(Util::getProjectDirectory() . '/src/make/drupal.make'))) {
             return false;
         }
         if (file_exists('docroot')) {
