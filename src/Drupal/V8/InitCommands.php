@@ -111,7 +111,7 @@ class InitCommands extends \Robo\Tasks
     {
         $dktlRoot = Util::getDktlDirectory();
 
-        $settings = ["default.settings.php", "settings.php", "settings.docker.php"];
+        $settings = ["default.settings.php", "settings.php", "settings.docker.php", "default.services.yml"];
 
         foreach ($settings as $setting) {
             $f = "src/site/{$setting}";
