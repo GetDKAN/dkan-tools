@@ -48,7 +48,7 @@ export DKTL_PROJECT_DIRECTORY
 
 DKTL_DIRECTORY=$(which dktl)
 if [[ -L $(which dktl) ]]; then
-  DKTL_DIRECTORY=$(readlink $DKTL_DIRECTORY)
+  DKTL_DIRECTORY=$(readlink -f $DKTL_DIRECTORY)
 fi
 DKTL_DIRECTORY=$(dirname $(dirname $DKTL_DIRECTORY))
 export DKTL_DIRECTORY
