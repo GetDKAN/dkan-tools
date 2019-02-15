@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Set Drupal version if it isn't set.
 DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
