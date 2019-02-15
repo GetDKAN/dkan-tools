@@ -34,9 +34,9 @@ class DockerCommands extends \Robo\Tasks
     }
 
     /**
-     * Display the web URL for the current project.
+     * Display the insecure (http) web URL for the current project.
      */
-    public function dockerUrl()
+    public function url()
     {
         throw new \Exception(DKTL_DOCKER_PHP_ERROR);
     }
@@ -44,7 +44,23 @@ class DockerCommands extends \Robo\Tasks
     /**
      * Display the secure (https) web URL for the current project.
      */
-    public function dockerSurl()
+    public function surl()
+    {
+        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+    }
+
+    /**
+     * Show clickable admin login link for insecure web URL (http)
+     */
+    public function uli()
+    {
+        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+    }
+
+    /**
+     * Show clickable admin login link for secure URL (https)
+     */
+    public function suli()
     {
         throw new \Exception(DKTL_DOCKER_PHP_ERROR);
     }
