@@ -3,6 +3,9 @@
 # Set Drupal version if it isn't set.
 DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
 
+# Which platform we're running on (linux and mac supported)
+PLATFORM=`uname` && export PLATFORM
+
 # Determine whether we want to run inside the docker container or in the host machine.
 if [ -z $DKTL_MODE ] || [ "$DKTL_MODE" = "DOCKER" ]; then
   DKTL_MODE="DOCKER"
@@ -48,7 +51,9 @@ export DKTL_PROJECT_DIRECTORY
 
 DKTL_DIRECTORY=$(which dktl)
 if [[ -L $(which dktl) ]]; then
-  DKTL_DIRECTORY=$(readlink -f $DKTL_DIRECTORY)
+  # readlink command needs -f to work properly in linux
+  if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
+  DKTL_DIRECTORY=$(readlink $RL_OPT $DKTL_DIRECTORY)
 fi
 DKTL_DIRECTORY=$(dirname $(dirname $DKTL_DIRECTORY))
 export DKTL_DIRECTORY
@@ -74,8 +79,6 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
   export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
   
-  PLATFORM=`uname` && export PLATFORM
-
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
