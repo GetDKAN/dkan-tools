@@ -7,19 +7,11 @@
             "url": "https://github.com/getdkan/dkan2"
         },
         {
-            "type": "vcs",
-            "url": "https://github.com/fmizzell/sae"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/fmizzell/datastore"
-        },
-        {
             "type": "composer",
             "url": "https://asset-packagist.org"
         }
     ],
     "require": {
-        "getdkan/dkan2": "dev-master"
+        "getdkan/dkan2": "dev-development"
     }
 }
