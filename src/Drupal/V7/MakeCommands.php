@@ -2,6 +2,7 @@
 namespace DkanTools\Drupal\V7;
 
 use DkanTools\Util\Util;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -81,6 +82,9 @@ class MakeCommands extends \Robo\Tasks
     {
         if (!file_exists('dkan')) {
             throw \Exception('We need DKAN before making Drupal');
+            return false;
+        }
+        if (!Yaml::parse(file_get_contents(Util::getProjectDirectory() . '/src/make/drupal.make'))) {
             return false;
         }
         if (file_exists('docroot')) {
