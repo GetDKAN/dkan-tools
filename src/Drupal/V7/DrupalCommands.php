@@ -42,28 +42,4 @@ class DrupalCommands extends \Robo\Tasks
     {
         return 'mysql://drupal:123@db/drupal';
     }
-
-    /**
-     * Remove all gitignores from docroot.
-     */
-    public function drupalRemoveGitIgnores() {
-        foreach(['docroot', 'dkan'] as $dir) {
-            $gitignores = [];
-            exec("find {$dir} -type f -name '.gitignore'", $gitignores);
-
-            foreach ($gitignores as $gitignore) {
-                `rm {$gitignore}`;
-                $this->io()->note("Removing: {$gitignore}");
-            }
-
-            $gits = [];
-            exec("find {$dir} -type d -name '.git'", $gits);
-
-            foreach ($gits as $git) {
-                `rm -R {$git}`;
-                $this->io()->note("Removing: {$git}");
-            }
-        }
-    }
-
 }

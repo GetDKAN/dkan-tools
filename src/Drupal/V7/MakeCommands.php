@@ -20,10 +20,10 @@ class MakeCommands extends \Robo\Tasks
     *
     * @option $yes
     *   Remove all existing files without asking for confirmation
-    * @option $keep-gitignores
+    * @option $keep-git
     *   Skip default behavior of deleting all .gitignore files in /docroot
     */
-    public function make($opts = ['yes|y' => false, 'keep-gitignores' => false])
+    public function make($opts = ['yes|y' => false, 'keep-git' => false])
     {
         $yes = (isset($opts['yes|y'])) ? $opts['yes|y'] : false;
         $make_opts = ['yes|y' => $yes];
@@ -74,10 +74,10 @@ class MakeCommands extends \Robo\Tasks
      *
      * @option $yes
      *   Remove all existing files without asking for confirmation
-     * @option $keep-gitignores
+     * @option $keep-git
      *   Skip default behavior of deleting all .gitignore files in /docroot
      */
-    public function makeDrupal($opts = ['yes|y' => false, 'keep-gitignores' => false])
+    public function makeDrupal($opts = ['yes|y' => false, 'keep-git' => false])
     {
         if (!file_exists('dkan')) {
             throw \Exception('We need DKAN before making Drupal');
@@ -112,8 +112,8 @@ class MakeCommands extends \Robo\Tasks
         $this->linkSitesDefault();
         $this->linkModules();
         $this->linkThemes();
-        if (!$opts['keep-gitignores']) {
-          $this->removeGitIgnores();
+        if (!$opts['keep-git']) {
+           $this->makeRmGit();
         }
 
     }
@@ -189,21 +189,25 @@ class MakeCommands extends \Robo\Tasks
     }
 
     /**
-     * Remove all gitignores from docroot.
+     * Remove all .git and .gitignore files from docroot and dkan.
      */
-    private function removeGitIgnores() {
-        $gitignores = [];
-        exec("find docroot -type f -name '.gitignore'", $gitignores);
+    public function makeRmGit() {
+        foreach (['docroot', 'dkan'] as $dir) {
+            $gitignores = [];
+            exec("find {$dir} -type f -name '.gitignore'", $gitignores);
 
-        foreach ($gitignores as $gitignore) {
-            `rm {$gitignore}`;
-        }
+            foreach ($gitignores as $gitignore) {
+                `rm {$gitignore}`;
+                $this->io()->note("Removing: {$gitignore}");
+            }
 
-        $gitignores = [];
-        exec("find dkan -type f -name '.gitignore'", $gitignores);
+            $gits = [];
+            exec("find {$dir} -type d -name '.git'", $gits);
 
-        foreach ($gitignores as $gitignore) {
-            `rm {$gitignore}`;
+            foreach ($gits as $git) {
+                `rm -R {$git}`;
+                $this->io()->note("Removing: {$git}");
+            }
         }
     }
 
