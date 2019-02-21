@@ -28,8 +28,11 @@ class MakeCommands extends \Robo\Tasks
         $yes = (isset($opts['yes|y'])) ? $opts['yes|y'] : false;
         $make_opts = ['yes|y' => $yes];
 
-        $this->makeProfile($make_opts);
-        $this->makeDrupal($opts);
+        $result = $this->makeProfile($make_opts);
+        if ($result->getExitCode() === 0) {
+            $result = $this->makeDrupal($opts);
+        }
+        return $result;
     }
 
     /**
@@ -40,33 +43,31 @@ class MakeCommands extends \Robo\Tasks
     */
     public function makeProfile($opts = ['yes|y' => false])
     {
-      if (file_exists('dkan/modules/contrib')) {
-          if (!Yaml::parse(file_get_contents(Util::getProjectDirectory() . '/src/make/dkan.make'))) {
-              return false;
-          }
-          $confirmText = 'DKAN dependencies have already been dowloaded. Would you like to delete and dowload them again?';
-          if (!$opts['yes|y'] && !$this->io()->confirm($confirmText)) {
-              $this->io()->warning('Make aborted');
-              return false;
-          }
-          $this->_deleteDir([
-              'dkan/modules/contrib',
-              'dkan/themes/contrib',
-              'dkan/libraries'
-          ]);
-      }
+        if (file_exists('dkan/modules/contrib')) {
+            if (!$opts['yes|y'] && !$this->io()->confirm('DKAN dependencies have already been dowloaded. Would you like to delete and dowload them again?')) {
+                $this->io()->warning('Make aborted');
+                return false;
+            }
+            $this->_deleteDir([
+                'dkan/modules/contrib',
+                'dkan/themes/contrib',
+                'dkan/libraries'
+            ]);
+        }
 
-      $this->taskExec('drush -y make dkan/drupal-org.make')
-          ->arg('--contrib-destination=./')
-          ->arg('--no-core')
-          ->arg('--root=docroot')
-          ->arg('--no-recursion')
-          ->arg('--no-cache')
-          ->arg('--verbose')
-          ->arg('--overrides=src/make/dkan.make')
-          ->arg('--concurrency=' . Util::drushConcurrency())
-          ->arg('dkan')
-          ->run();
+        $result = $this->taskExec('drush -y make dkan/drupal-org.make')
+            ->arg('--contrib-destination=./')
+            ->arg('--no-core')
+            ->arg('--root=docroot')
+            ->arg('--no-recursion')
+            ->arg('--no-cache')
+            ->arg('--verbose')
+            ->arg('--overrides=src/make/dkan.make')
+            ->arg('--concurrency=' . Util::drushConcurrency())
+            ->arg('dkan')
+            ->run();
+
+        return $result;
     }
 
     /**
