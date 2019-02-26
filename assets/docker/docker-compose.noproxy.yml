@@ -1,6 +1,7 @@
 version: "2"
 services:
   web:
+    hostname: "dkan"
     environment:
       - VIRTUAL_HOST=dkan
       - no_proxy=localhost
