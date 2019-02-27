@@ -93,11 +93,17 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
     exit 0
-  elif [ "$1" = "docker:url" ]; then
+  elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
     echo "http://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2)"
     exit 0
-  elif [ "$1" = "docker:surl" ]; then
+  elif [ "$1" = "surl" ] || [ "$1" = "docker:surl" ]; then
     echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
+    exit 0
+  elif [ "$1" = "uli" ]; then
+    dktl drush uli --uri=`dktl url`
+    exit 0
+  elif [ "$1" = "suli" ]; then
+    dktl drush uli --uri=`dktl surl`
     exit 0
   fi
   
