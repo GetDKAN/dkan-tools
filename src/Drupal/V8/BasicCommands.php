@@ -199,7 +199,7 @@ class BasicCommands extends \Robo\Tasks
     private function buildInterra()
     {
 
-        $result = $this->_exec('sed -i "s/https:\/\/interra.github.io\/data-catalog-frontend/data-catalog-frontend\/build/g" docroot/data-catalog-frontend/package.json');
+        $result = $this->_exec('sed -i "s/https:\/\/interra.github.io\/data-catalog-frontend/\/data-catalog-frontend\/build/g" docroot/data-catalog-frontend/package.json');
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not install Interra front-end node modules');
             return $result;
