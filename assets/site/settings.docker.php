@@ -1,5 +1,5 @@
 <?php
-if (getenv("DKTL_MODE") == "HOST") {
+if (getenv("DKTL_DOCKER") == "1") {
   $databases = array(
     'default' => array(
       'default' => array(
