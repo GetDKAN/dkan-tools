@@ -1,5 +1,5 @@
 <?php
-if (getenv("VIRTUAL_HOST") == "dkan.local") {
+if (getenv("DKTL_MODE") == "HOST") {
   $databases = array(
     'default' => array(
       'default' => array(
