@@ -83,14 +83,14 @@ class BasicCommands extends \Robo\Tasks
      */
     public function make($opts = ['yes|y' => false])
     {
-        //$this->mergeComposerConfig();
-        //$docroot = Util::getProjectDirectory() . "/docroot";
-        //$this->_exec("composer --working-dir={$docroot} update");
-        //$this->linkSitesDefault();
-        //$this->linkModules();
-        //$this->linkThemes();
-        //$this->downloadInterra();
-        //$this->installInterra();
+        $this->mergeComposerConfig();
+        $docroot = Util::getProjectDirectory() . "/docroot";
+        $this->_exec("composer --working-dir={$docroot} update");
+        $this->linkSitesDefault();
+        $this->linkModules();
+        $this->linkThemes();
+        $this->downloadInterra();
+        $this->installInterra();
         $this->buildInterra();
 
     }
