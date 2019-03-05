@@ -121,9 +121,10 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
       $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 
-  # Proxy pass to internal DKTL
+  # Proxy pass to internal DKTL and save exit status
   $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
-
+  exit_status=$?
+  
   # Reset web and cli containers if xdebug
   if [ $? -eq 0 ] && [[ $1 == "xdebug"* ]]; then
     $BASE_DOCKER_COMPOSE_COMMAND restart web
@@ -139,6 +140,12 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     fi
   fi
 
+  # Now that we've run some cleanup ...
+  # if we encountered a non-zero exit status during the docker exec, pass it on
+  
+  if [ $exit_status -ne 0 ]; then
+    exit $exit_status
+  fi
 elif [ "$DKTL_MODE" = "HOST" ]; then
   if [[ "$1" == "docker"* ]] || [ "$1" = "dc" ]; then
     echo "${1} is not available in 'HOST' mode"
