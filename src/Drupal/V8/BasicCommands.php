@@ -89,8 +89,10 @@ class BasicCommands extends \Robo\Tasks
         $this->linkSitesDefault();
         $this->linkModules();
         $this->linkThemes();
-        $this->linkInterra();
-        $this->linkJsonForm();
+        $this->downloadInterra();
+        $this->installInterra();
+        $this->buildInterra();
+
     }
 
     private function mergeComposerConfig() {
@@ -157,16 +159,58 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Link src/themes to  docroot/sites/all/modules/themes.
+     * Download Interra frontend.
      */
-    private function linkInterra()
+    private function downloadInterra()
     {
-        $result = $this->_exec('ln -s profiles/contrib/dkan2/modules/custom/interra_frontend/interra docroot/interra');
+        $result = $this->_exec('git clone --depth=1 --branch=master https://github.com/interra/data-catalog-frontend.git docroot/data-catalog-frontend');
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
+            $this->io()->error('Could not download Interra front-end');
+            return $result;
+        }
+        $result = $this->_exec('rm -r docroot/data-catalog-frontend/.git');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not remove Interra front-end git folder');
             return $result;
         }
 
+        $this->io()->success('Successfull');
+    }
+
+    /**
+     * Install Interra frontend.
+     */
+    private function installInterra()
+    {
+
+        $task = $this->taskExec("npm install")->dir("docroot/data-catalog-frontend");
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not install Interra front-end node modules');
+            return $result;
+        }
+
+        $this->io()->success('Successfull');
+    }
+
+    /**
+     * Build Interra frontend.
+     */
+    private function buildInterra()
+    {
+
+        $result = $this->_exec('sed -i "s/https:\/\/interra.github.io\/data-catalog-frontend/\/data-catalog-frontend\/build/g" docroot/data-catalog-frontend/package.json');
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not install Interra front-end node modules');
+            return $result;
+        }
+
+        $task = $this->taskExec("npm run build")->dir("docroot/data-catalog-frontend");
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not install Interra front-end node modules');
+            return $result;
+        }
         $this->io()->success('Successfull');
     }
 
