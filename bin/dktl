@@ -87,9 +87,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
   fi
   # Check for interactive shell
-  # REMIND - under circle ci, we also seem to need -T; hardwire for the moment
-  EXEC_OPTS='-T'
-  # if [ -t 1 ]; then EXEC_OPTS='-T'; else EXEC_OPTS='-T'; fi
+  if [ -t 1 ]; then EXEC_OPTS='-it'; else EXEC_OPTS=''; fi
 
   # Run docker commands immediately then exit
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
@@ -116,15 +114,21 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND up -d
   fi
 
+  cli_container=$($BASE_DOCKER_COMPOSE_COMMAND ps -q cli)
+  BASE_DOCKER_EXEC_COMMAND="docker exec $EXEC_OPTS $cli_container"
+  
   # The containers are running, set DKTL inside the cli container.
-  ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
+  ALIAS="$(docker exec $cli_container which dktl)"
   if [ -z "$ALIAS" ]; then
-      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chmod 777 /usr/local/dkan-tools/bin/dktl
-      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
+      $BASE_DOCKER_EXEC_COMMAND chmod 777 /usr/local/dkan-tools/bin/dktl
+      $BASE_DOCKER_EXEC_COMMAND ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
+#      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chmod 777 /usr/local/dkan-tools/bin/dktl
+#      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 
   # Proxy pass to internal DKTL and save exit status
-  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
+  $BASE_DOCKER_EXEC_COMMAND env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
+#  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
   exit_status=$?
   
   # Reset web and cli containers if xdebug
