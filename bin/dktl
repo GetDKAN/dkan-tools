@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Set Drupal version if it isn't set.
 DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
@@ -86,8 +86,10 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   if [ -f $OVERRIDES_CONF ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
   fi
+
   # Check for interactive shell
-  if [ -t 1 ]; then EXEC_OPTS='-it'; else EXEC_OPTS='-t'; fi
+  EXEC_OPTS='-it'
+  # if [ -t 1 ]; then EXEC_OPTS='-it'; else EXEC_OPTS='-t'; fi
 
   # Run docker commands immediately then exit
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
@@ -116,7 +118,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 
   cli_container=$($BASE_DOCKER_COMPOSE_COMMAND ps -q cli)
   BASE_DOCKER_EXEC_COMMAND="docker exec $EXEC_OPTS $cli_container"
-  
+
   # The containers are running, set DKTL inside the cli container.
   ALIAS="$(docker exec $cli_container which dktl)"
   if [ -z "$ALIAS" ]; then
