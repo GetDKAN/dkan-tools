@@ -86,8 +86,13 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   if [ -f $OVERRIDES_CONF ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
   fi
-  # Check for interactive shell
-  if [ -t 1 ]; then EXEC_OPTS=''; else EXEC_OPTS='-T'; fi
+
+  # Check for interactive shell if DKTL_NO_PTY is not set
+  if [ -z "$DKTL_NO_PTY" ] || [ -t 1 ]; then
+    EXEC_OPTS=''
+  else 
+    EXEC_OPTS='-T';
+  fi
 
   # Run docker commands immediately then exit
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
@@ -117,8 +122,8 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   # The containers are running, set DKTL inside the cli container.
   ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
   if [ -z "$ALIAS" ]; then
-      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chmod 777 /usr/local/dkan-tools/bin/dktl
-      $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
+    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chmod 777 /usr/local/dkan-tools/bin/dktl
+    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 
   # Proxy pass to internal DKTL and save exit status
