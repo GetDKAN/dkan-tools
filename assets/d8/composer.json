@@ -12,6 +12,6 @@
         }
     ],
     "require": {
-        "getdkan/dkan2": "dev-development"
+        "getdkan/dkan2": "dev-master"
     }
 }
