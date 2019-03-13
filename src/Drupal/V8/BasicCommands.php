@@ -92,7 +92,14 @@ class BasicCommands extends \Robo\Tasks
         $this->downloadInterra();
         $this->installInterra();
         $this->buildInterra();
+        $this->updateDrush();
+    }
 
+    private function updateDrush() {
+        $this->_exec("rm -rf /root/.composer/vendor");
+        $this->_exec("rm -rf /root/.composer/composer.lock");
+        $this->_exec("rm -rf /root/.composer/composer.json");
+        $this->_exec("composer global require drush/drush:9.5.2");
     }
 
     private function mergeComposerConfig() {
