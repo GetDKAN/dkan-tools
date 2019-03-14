@@ -88,7 +88,9 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
 
   # Check for interactive shell if DKTL_NO_PTY is not set
-  if [ -z "$DKTL_NO_PTY" ] || [ -t 1 ]; then
+  if [ ! -z "$DKTL_NO_PTY" ]; then
+    EXEC_OPTS='-T'
+  elif [ -t 1 ]; then
     EXEC_OPTS=''
   else 
     EXEC_OPTS='-T';
