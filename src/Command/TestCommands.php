@@ -181,7 +181,7 @@ class TestCommands extends \Robo\Tasks
      * equal to the username.
      *
      * @option $workflow Create workflow users as well.
-     * @optoin $yes Use workflow option w/o checking for module.
+     * @option $yes Use workflow option w/o checking for module.
      */
     public function testQaUsers($opts = ['yes|y' => false, 'workflow|w' => false]) {
         $users = [
