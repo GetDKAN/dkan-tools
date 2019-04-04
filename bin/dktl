@@ -159,16 +159,22 @@ elif [ "$DKTL_MODE" = "HOST" ]; then
     exit 1
   fi
 
-  if [ "$1" = "drush" ] || [ "$1" = "test:behat" ] || [ "$1" = "phpunit" ] || [ "$1" = "test:phpunit" ] || [ "$1" = "dkan:test-phpunit" ] || [ "$1" = "test:lint" ] || [ "$1" = "test:lint-fix" ]; then
-    # For several commands, we want to insert a "--" to pass all arguments as an array.
-    php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"
-  else
-    # Check whether dkan-tools' dependencies have been initialized.
-    VENDOR="$(ls -lha $DKTL_DIRECTORY | grep vendor)"
-    if [ -z "$VENDOR" ]; then
-      echo "Composer Install"
-      composer install --working-dir=$DKTL_DIRECTORY
-    fi
-    php $DKTL_DIRECTORY/bin/app.php $1 "${@:2}"
+  # Check whether dkan-tools' dependencies have been initialized.
+  VENDOR="$(ls -lha $DKTL_DIRECTORY | grep vendor)"
+  if [ -z "$VENDOR" ]; then
+    echo "Composer Install"
+    composer install --working-dir=$DKTL_DIRECTORY
   fi
+
+  
+  # For several commands, we want to insert a "--" to pass all arguments as an array.
+
+  case $1 in
+      drush | phpunit | test:phpunit* | dkan:test-phpunit | test:behat* | test:lint | test:lint-fix)
+          php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"          
+          ;;
+      *)
+          php $DKTL_DIRECTORY/bin/app.php $1 "${@:2}"
+          ;;
+  esac
 fi

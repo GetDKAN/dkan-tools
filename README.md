@@ -83,7 +83,8 @@ To accomplish this, DKAN Tools projects will have the following basic directory 
     │   ├── modules       # Symlinked to docroot/sites/all/modules/custom
     │   ├── script        # Deployment script and other misc utilities
     |   └── site          # Symlinked to docroot/sites/default
-    │       └── files     # The main site files
+    │   │   └── files     # The main site files
+    │   └── test          # Custom tests
     └── dktl.yml          # DKAN Tools configuration
 
 We may wish to create two additional folders in the root of your project later on: _/src/patches_, where we can store local patches to be applied via the make files in _/src/make_; and _/backups_, where database dumps can be stored. The first time we run `dktl install` the _/backups_ folder will be created if it does not already exist.
@@ -132,6 +133,38 @@ Most configuration in Drupal sites is placed in the _/sites/default_ directory.
 The _/src/site_ folder will replace _/docroot/sites/default_ once Drupal is installed. _/src/site_ should then contain all of the configuration that will be in _/docroot/sites/default_.
 
 DKTL should have already provided some things in _/src/site_: _settings.php_ contains some generalized code that is meant to load any other setting files present, as long as they follow the _settings._\<something\>_.php_ pattern. All of the special settings that you previously had in _settings.php_ or other drupal configuration files should live in _settings.custom.php_ or a similarly-named file in _/src/site_.
+
+### The src/test folder (custom tests)
+
+DKAN Tools supports custom PHPUnit and Behat tests found in the _src/test_ directory.
+
+To run custom tests:
+
+```bash
+dktl test:phpunit-custom
+```
+
+and
+
+```bash
+dktl test:behat-custom
+```
+
+To configure PHPUnit tests:
+
+1. Create _src/test/phpunit_
+2. Place a _phpunit.xml_ configuration file in _src/test/phpunit_.  You can use the _phpunit.xml_ file in _dkan/test/phpunit_ as an example.
+3. Store your tests in _src/test/phpunit_.
+
+JUnit style test results will be written to _src/test/assets/junit_.
+
+To configure Behat tests:
+
+1. Create _src/test/features_
+2. Place Behat configuration files _behat.yml_ and _behat.docker.yml_ in _src/test_.  You can use the corresponding files in _dkan/test_ as references.
+3. Store you tests in _src/test/features_.
+
+JUnit style test results will be written to _src/test/assets/junit_.
 
 ## Restoring a database dump or site files
 
