@@ -54,6 +54,10 @@ class InitCommands extends \Robo\Tasks
 
             $result = $this->_mkdir($dir);
 
+            if ($directory == "site") {
+                $this->_exec("chmod -R 777 {$dir}");
+            }
+
             $this->directoryAndFileCreationCheck($result, $dir);
         }
 
