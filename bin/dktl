@@ -4,7 +4,9 @@
 DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
 
 # Which platform we're running on (linux and mac supported)
-PLATFORM=`uname` && export PLATFORM
+if [ -z $PLATFORM ]; then
+  PLATFORM=`uname` && export PLATFORM
+fi
 
 # Determine whether we want to run inside the docker container or in the host machine.
 if [ -z $DKTL_MODE ] || [ "$DKTL_MODE" = "DOCKER" ]; then
