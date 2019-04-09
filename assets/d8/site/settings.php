@@ -6,3 +6,6 @@ foreach (scandir(__DIR__) as $file) {
     include __DIR__ . "/{$file}";
   }
 }
+
+$config_directories['sync'] = '../config/sync';
+$settings['hash_salt'] = '{HASH_SALT}';
