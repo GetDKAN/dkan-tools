@@ -2,7 +2,7 @@
 
 
 
-class DktlV7Test extends \PHPUnit\Framework\TestCase
+class DktlV8Test extends \PHPUnit\Framework\TestCase
 {
 
   protected function setUp()
