@@ -82,4 +82,11 @@ class Util
             exit;
         }
     }
+
+    /**
+     * Copy of \Drupal\Component\Utility\Crypt::randomBytesBase64()
+     */
+    public static function generateHashSalt($count = 32) {
+        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(random_bytes($count)));
+    }
 }
