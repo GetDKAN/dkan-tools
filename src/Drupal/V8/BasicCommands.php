@@ -141,7 +141,7 @@ class BasicCommands extends \Robo\Tasks
 
         $result = $this->_exec('ln -s ../../src/modules docroot/modules/custom');
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
+            $this->io()->error('Could not create link');
             return $result;
         }
         $this->io()->success('Successfully linked src/modules to docroot/sites/all/modules/custom');
@@ -158,7 +158,7 @@ class BasicCommands extends \Robo\Tasks
         }
         $result = $this->_exec('ln -s ../../src/themes docroot/themes/custom');
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
+            $this->io()->error('Could not create link');
             return $result;
         }
 
@@ -228,7 +228,7 @@ class BasicCommands extends \Robo\Tasks
     {
         $result = $this->_exec('ln -s vendor/bower-asset docroot/libraries');
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not crete link');
+            $this->io()->error('Could not create link');
             return $result;
         }
 
