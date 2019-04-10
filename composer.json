@@ -5,7 +5,8 @@
         "pear/archive_tar": "^1.4",
         "aws/aws-sdk-php": "^3.67",
         "dealerdirect/phpcodesniffer-composer-installer": "*",
-        "drupal/coder": "8.2.12"
+        "drupal/coder": "8.2.12",
+        "phpunit/phpunit": "^6.5"
     },
     "autoload": {
         "psr-4": {
