@@ -26,7 +26,7 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * Run DKAN PhpUnit Tests. Additional pgpunit CLI options can be passed.
+     * Run DKAN PhpUnit Tests. Additional phpunit CLI options can be passed.
      * 
      * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions 
      * @param array $args  Arguments to append to phpunit command.
