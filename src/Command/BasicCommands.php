@@ -41,30 +41,7 @@ class BasicCommands extends \Robo\Tasks
         }
         return $exec->run();
     }
-    
-    /**
-     * Proxy to phpunit.
-     */
-    public function phpunit(array $cmd) {
-        
-        $projDir = Util::getProjectDirectory();
-        $phpunitExecutable = "{$projDir}/docroot/vendor/bin/phpunit";
-        
-        $exec = $this->taskExec($phpunitExecutable);
-        
-        // currently dktl only passes args as an array to the commands.
-        // some sanitisation is needed.
-        foreach ($cmd as $arg) {
-            if (strpos($arg, '=')) {
-                list($option, $value) = explode('=', $arg, 2);
-                $exec->option($option, $value);
-            } else {
-                $exec->option($arg);
-            }
-        }
-        
-        return $exec->run();
-    }
+
 
     /**
      * Performs common tasks when switching databases or code bases.
