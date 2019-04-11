@@ -53,7 +53,8 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("sed -i.bak 's/trigger_error/\/\/trigger_error/' {$file}")
             ->run();
 
-        $phpunitExec = $this->taskExec("{$phpunit_executable} --testsuite=\"DKAN Test Suite\"")
+        $phpunitExec = $this->taskExec($phpunit_executable)
+            ->option('testsuite', 'DKAN Test Suite')
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2");
         
         // currently dktl only passes args as an array to the commands.
