@@ -114,14 +114,23 @@ class InitCommands extends \Robo\Tasks
     private function createSettingsFiles($host = "")
     {
         $dktlRoot = Util::getDktlDirectory();
+        $hash_salt = Util::generateHashSalt(55);
 
         $settings = ["default.settings.php", "settings.php", "settings.docker.php", "default.services.yml"];
 
         foreach ($settings as $setting) {
             $f = "src/site/{$setting}";
-            $result = $this->taskWriteToFile($f)
+            if ($setting == 'settings.php') {
+              $result = $this->taskWriteToFile($f)
+                ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
+                ->place('HASH_SALT', $hash_salt)
+                ->run();
+            }
+            else {
+              $result = $this->taskWriteToFile($f)
                 ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
                 ->run();
+            }
             $this->directoryAndFileCreationCheck($result, $f);
         }
 
