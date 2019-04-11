@@ -26,19 +26,8 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * Run DKAN PhpUnit Tests.
+     * Run DKAN PhpUnit Tests. Additional pgpunit CLI options can be passed.
      * 
-     * Because of a limitation of using the single `$args` array to pass all
-     * additional arguments, the phpunit specific arguments can be only be
-     * passed without the `--` prefix to avoid conflicting with Robo\Tasks
-     * built in arguments.
-     * 
-     * e.g. dtlk dkan:test-phpunit debug verbose coverage-html=../logs/coverage
-     *
-     * Note that only full option names will work and not single letter arguments
-     * i.e. use `verbose` instead of `v`
-     * 
-     * @todo currently `--testsuite` is a hardoced argument. Could refactor if additional test suites are added
      * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions 
      * @param array $args  Arguments to append to phpunit command.
      */
@@ -57,20 +46,10 @@ class DkanCommands extends \Robo\Tasks
             ->option('testsuite', 'DKAN Test Suite')
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2");
         
-        // currently dktl only passes args as an array to the commands.
-        // some sanitisation is needed.
         foreach ($args as $arg) {
-            
-            if(strpos($arg,'=')) {
-                list($option, $value) = explode('=', $arg, 2);
-                $phpunitExec->option($option, $value);
-            }
-            else
-            {
-                $phpunitExec->option($arg);
-            }
+            $phpunitExec->arg($arg);
         }
-        
+
         $phpunitExec->run();
         
         $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
