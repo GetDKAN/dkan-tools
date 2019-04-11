@@ -180,15 +180,16 @@ class TestCommands extends \Robo\Tasks
      * equal to the username.
      *
      * @option $workflow Create workflow users as well.
+     * @option $yes Use workflow option w/o checking for module.
      */
-    public function testQaUsers($opts = ['workflow|w' => false]) {
+    public function testQaUsers($opts = ['yes|y' => false, 'workflow|w' => false]) {
         $users = [
             'sitemanager' => ['site manager'],
             'editor' => ['editor'],
             'creator' => ['content creator']
         ];
         if ($opts['workflow']) {
-            if ($this->hasWorkflow()) {
+            if ($this->hasWorkflow() || $opts['yes']) {
                 $users += [
                     'contributor' => ['content creator', 'Workflow Contributor'],
                     'moderator' => ['editor' , 'Workflow Moderator'],
@@ -210,7 +211,6 @@ class TestCommands extends \Robo\Tasks
         $result = $stack->run();
         return $result;
     }
-
     /**
      * Use Drush to check if dkan_workflow_permissions module is enabled.
      */
@@ -226,5 +226,4 @@ class TestCommands extends \Robo\Tasks
         else {
           throw new \Exception('Drush command failed; aborting');
         }
-    }
-}
+    }}
