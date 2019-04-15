@@ -134,12 +134,17 @@ class BasicCommands extends \Robo\Tasks
      */
     private function linkModules()
     {
+
+        $project_dir = Util::getProjectDirectory();
+
         if (!file_exists('src/modules') || !file_exists('docroot')) {
             $this->io()->error("Could not link modules. Folders 'src/modules' and 'docroot' must both be present to create link.");
             exit;
         }
 
-        $result = $this->_exec('ln -s ../../src/modules docroot/modules/custom');
+        $task = $this->taskExec("ln -s ../../src/modules custom")->dir("{$project_dir}/docroot/modules");
+        $result = $task->run();
+
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not create link');
             return $result;
@@ -152,11 +157,15 @@ class BasicCommands extends \Robo\Tasks
      */
     private function linkThemes()
     {
+        $project_dir = Util::getProjectDirectory();
+
         if (!file_exists('src/themes') || !file_exists('docroot')) {
             throw new \Exception("Could not link themes. Folders 'src/themes' and 'docroot' must both be present to create link.");
             return;
         }
-        $result = $this->_exec('ln -s ../../src/themes docroot/themes/custom');
+
+        $task = $this->taskExec("ln -s ../../src/themes custom")->dir("{$project_dir}/docroot/themes");
+        $result = $task->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not create link');
             return $result;
