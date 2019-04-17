@@ -247,4 +247,25 @@ class BasicCommands extends \Robo\Tasks
     public function install() {
         $this->_exec("dktl drush si -y");
     }
+    
+    /**
+     * Proxy to the phpunit binary.
+     *
+     * @param array $args  Arguments to append to full phpunit command.
+     */
+    public function phpunit(array $args) {
+
+        $proj_dir = Util::getProjectDirectory();
+
+        $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
+
+        $phpunitExec = $this->taskExec($phpunit_executable);
+
+        foreach ($args as $arg) {
+            $phpunitExec->arg($arg);
+        }
+
+        return $phpunitExec->run();
+    }
+
 }

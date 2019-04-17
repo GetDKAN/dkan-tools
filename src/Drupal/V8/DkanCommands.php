@@ -26,9 +26,13 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * Run DKAN PhpUnit Tests.
+     * Run DKAN PhpUnit Tests. Additional phpunit CLI options can be passed.
+     * 
+     * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions 
+     * @param array $args  Arguments to append to phpunit command.
      */
-    public function dkanTestPhpunit() {
+    public function dkanTestPhpunit(array $args) {
+
         $proj_dir = Util::getProjectDirectory();
 
         $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
@@ -38,10 +42,16 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("sed -i.bak 's/trigger_error/\/\/trigger_error/' {$file}")
             ->run();
 
-        $this->taskExec("{$phpunit_executable} --testsuite=\"DKAN Test Suite\"")
-            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
-            ->run();
+        $phpunitExec = $this->taskExec($phpunit_executable)
+            ->option('testsuite', 'DKAN Test Suite')
+            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2");
+        
+        foreach ($args as $arg) {
+            $phpunitExec->arg($arg);
+        }
 
+        $phpunitExec->run();
+        
         $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
             ->run();
     }

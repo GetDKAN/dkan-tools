@@ -43,5 +43,21 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->success('Backup created in "backups" folder.');
         }
     }
+    
+    /**
+     * Proxy to the phpunit binary.
+     *
+     * @param array $args  Arguments to append to full phpunit command.
+     */
+    public function phpunit(array $args)
+    {
+        $phpunitExec = $this->taskExec('bin/phpunit');
+
+        foreach ($args as $arg) {
+            $phpunitExec->arg($arg);
+        }
+        
+        return $phpunitExec->run();
+    }
 
 }
