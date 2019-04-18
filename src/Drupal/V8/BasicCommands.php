@@ -89,6 +89,7 @@ class BasicCommands extends \Robo\Tasks
         $this->linkSitesDefault();
         $this->linkModules();
         $this->linkThemes();
+        $this->linkLibraries();
         $this->downloadInterra();
         $this->installInterra();
         $this->buildInterra();
@@ -172,6 +173,28 @@ class BasicCommands extends \Robo\Tasks
         }
 
         $this->io()->success('Successfully linked src/themes to docroot/sites/all/themes/custom');
+    }
+
+    /**
+     * Link docroot/vendor/bower-asset to  docroot/libraries.
+     */
+    private function linkLibraries()
+    {
+        $project_dir = Util::getProjectDirectory();
+
+        if (!file_exists('docroot/vendor/bower-asset')) {
+            throw new \Exception("Could not link bower-asset as libraries");
+            return;
+        }
+
+        $task = $this->taskExec("ln -s vendor/bower-asset libraries")->dir("{$project_dir}/docroot");
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not create link');
+            return $result;
+        }
+
+        $this->io()->success('Successfully linked libraries');
     }
 
     /**
