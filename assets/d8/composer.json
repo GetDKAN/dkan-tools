@@ -4,7 +4,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/getdkan/dkan2"
+            "url": "https://github.com/fmizzell/json_form"
         },
         {
             "type": "composer",
