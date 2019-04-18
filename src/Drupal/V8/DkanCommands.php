@@ -55,4 +55,42 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
             ->run();
     }
+
+    /**
+     * Run DKAN PhpUnit Tests and send a coverage report to CodeClimate.
+     */
+    public function dkanTestPhpunitCoverage($code_climate_reporter_id) {
+
+        putenv("CC_TEST_REPORTER_ID={$code_climate_reporter_id}");
+
+        $proj_dir = Util::getProjectDirectory();
+        $dkan_dir = "{$proj_dir}/docroot/profiles/contrib/dkan2";
+
+        if (!file_exists("{$dkan_dir}/cc-test-reporter")) {
+            $this->taskExec("curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter")
+                ->dir($dkan_dir)->run();
+            $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkan_dir)->run();
+        }
+
+        $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
+
+        $file = "{$proj_dir}/docroot/core/lib/Drupal/Component/PhpStorage/FileStorage.php";
+
+        $this->taskExec("sed -i.bak 's/trigger_error/\/\/trigger_error/' {$file}")
+            ->run();
+
+        $this->taskExec("./cc-test-reporter before-build")->dir($dkan_dir)->run();
+
+        $phpunitExec = $this->taskExec($phpunit_executable)
+            ->option('testsuite', 'DKAN Test Suite')
+            ->option('coverage-clover', 'clover.xml')
+            ->dir($dkan_dir);
+
+        $phpunitExec->run();
+
+        $this->taskExec("./cc-test-reporter after-build --coverage-input-type clover --exit-code $?")->dir($dkan_dir)->run();
+
+        $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
+            ->run();
+    }
 }

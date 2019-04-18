@@ -3,7 +3,6 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
-use Symfony\Component\Console\Input\InputOption;
 
 /**
  * This is project's console commands configuration for Robo task runner.
