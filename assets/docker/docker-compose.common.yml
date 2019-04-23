@@ -79,8 +79,6 @@ services:
       # Host SSH keys mapping. Uncomment one of the lines below based on your setup.
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws
-      # Host drush aliases mapping.
-      - ~/.drush:/root/.drush
     labels:
       - traefik.enable=false
     network_mode: bridge
