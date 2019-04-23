@@ -159,7 +159,6 @@ class BasicCommands extends \Robo\Tasks
     $skip_tables_list = implode(', ', $skip_tables);
 
     $command = "drush $alias sql-dump --structure-tables-list='" . $structure_tables_list . "' --skip-tables-list='" . $skip_tables_list . "' > excluded_tables.sql";
-    //$command = "drush $alias sql-dump --structure-tables-list='" . $structure_tables_list . "' > excluded_tables.sql";
     return $this->taskExec($command)->run();
   }
 }
