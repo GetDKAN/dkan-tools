@@ -58,7 +58,8 @@ class TestCommands extends \Robo\Tasks
             ->arg('--out=std')
             ->arg('--format=junit')
             ->arg('--out=assets/junit')
-            ->arg('--config=behat.docker.yml');
+            ->arg('--config=behat.docker.yml')
+            ->arg('--tags=~@fixme');
 
         foreach ($args as $arg) {
             $behatExec->arg($arg);
