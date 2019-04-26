@@ -147,7 +147,6 @@ class BasicCommands extends \Robo\Tasks
     );
     $structure_tables_devel = array('devel_queries', 'devel_times');
     $structure_tables_webform = array('webform_submitted_data');
-    $skip_tables = array('dkan_datastore_*');
     $structure_tables = array_merge(
       $structure_tables_common,
       $structure_tables_devel,
