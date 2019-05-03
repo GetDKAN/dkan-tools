@@ -1,6 +1,5 @@
 <?php
-namespace DkanTools\Drupal\V7;
-use DkanTools\Util\Util;
+namespace DkanTools\Util;
 
 /**
  * Test implementation helpers
@@ -35,11 +34,13 @@ trait TestingTrait
      * test dependencies.
      */
     protected function testingLinkEnv($src_dir, $dest_dir) {
-        $this->io()->section('Linking test environment ' . $dest_dir . ' to ' . $src_dir);
-        $this->_mkdir($dest_dir . '/bin');
-        $this->_symlink('../../../' . $src_dir . '/bin/behat', $dest_dir . '/bin/behat');
-        $this->_symlink('../../../' . $src_dir . '/bin/phpunit', $dest_dir . '/bin/phpunit');
-        $this->_symlink('../../' . $src_dir . '/vendor', $dest_dir . '/vendor');
+        if (!file_exists($dest_dir . '/bin')) {
+            $this->io()->section('Linking test environment ' . $dest_dir . ' to ' . $src_dir);
+            $this->_mkdir($dest_dir . '/bin');
+            $this->_symlink('../../../' . $src_dir . '/bin/behat', $dest_dir . '/bin/behat');
+            $this->_symlink('../../../' . $src_dir . '/bin/phpunit', $dest_dir . '/bin/phpunit');
+            $this->_symlink('../../' . $src_dir . '/vendor', $dest_dir . '/vendor');
+        }
     }
     
 
@@ -54,7 +55,6 @@ trait TestingTrait
     {
         $files = array($dir . '/behat.yml', $dir . '/behat.docker.yml');
         Util::ensureFilesExist($files, 'Behat config file');
-        $this->testInit();
         $behatExec = $this->taskExec('bin/behat')
             ->dir($dir)
             ->arg('--colors')
@@ -81,7 +81,6 @@ trait TestingTrait
     {
         $files = array($dir . '/phpunit/phpunit.xml');
         Util::ensureFilesExist($files, 'PhpUnit config file');
-        $this->testInit();
         $phpunitExec = $this->taskExec('bin/phpunit --verbose')
             ->dir($dir)
             ->arg('--configuration=phpunit');

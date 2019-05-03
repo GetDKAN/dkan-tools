@@ -1,6 +1,7 @@
 <?php
 
 namespace DkanTools\Drupal\V7;
+use DkanTools\Util\TestingTrait;
 
 /**
  * This is project's console commands configuration for Robo task runner.
