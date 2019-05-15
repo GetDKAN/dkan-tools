@@ -78,7 +78,8 @@ class Util
         if ($result->getExitCode() == 0 && file_exists($df)) {
             $io->success("{$df} was created.");
         } else {
-            throw new \Exception("{$df} was not created.");
+            $io->error("{$df} was not created.");
+            exit;
         }
     }
 
