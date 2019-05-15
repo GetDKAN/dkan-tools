@@ -89,4 +89,17 @@ class Util
     public static function generateHashSalt($count = 32) {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(random_bytes($count)));
     }
+
+    /**
+     * For each file in the array $paths, make sure it exists.  If not, throw an
+     * Exception.
+     */
+
+    public static function ensureFilesExist(array $paths, $message) {
+        foreach ($paths as $path) {
+            if (! file_exists($path)) {
+                throw new \Exception("{$path} is missing.");
+            }
+        }
+    }
 }
