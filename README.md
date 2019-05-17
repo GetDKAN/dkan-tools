@@ -138,6 +138,8 @@ DKTL should have already provided some things in _/src/site_: _settings.php_ con
 
 DKAN Tools supports custom PHPUnit and Behat tests found in the _src/test_ directory.
 
+If your site does not have tests set up yet, running `dktl init:custom-tests` will set up a _src/test_ directory in your project with sample phpunit and behat tests to start from.
+
 To run custom tests:
 
 ```bash
@@ -150,18 +152,19 @@ and
 dktl test:behat-custom
 ```
 
-To configure PHPUnit tests:
+To manually configure custom phpunit tests (without using `dktl init:custom-tests`):
 
 1. Create _src/test/phpunit_
-2. Place a _phpunit.xml_ configuration file in _src/test/phpunit_.  You can use the _phpunit.xml_ file in _dkan/test/phpunit_ as an example.
-3. Store your tests in _src/test/phpunit_.
+2. Place a _phpunit.xml_ configuration file in _src/test/phpunit_.  You can use the [_phpunit.xml_ file in _dkan/test/phpunit_](https://github.com/GetDKAN/dkan/blob/7.x-1.x/test/phpunit/phpunit.xml) as an example, replacing the `<testsuite>` elements to reflect your own custom tests. See the [PHPUnit documentation](https://phpunit.readthedocs.io/en/7.0/organizing-tests.html#composing-a-test-suite-using-xml-configuration) for more information.
+3. Add a copy of [_dkan/test/phpunit/boot.php_](https://github.com/GetDKAN/dkan/blob/7.x-1.x/test/phpunit/boot.php) in the same directory.
+3. Store your tests in _src/test/phpunit_. Again, use [_dkan/test/phpunit_](https://github.com/GetDKAN/dkan/tree/7.x-1.x/test/phpunit) as a guide.
 
 JUnit style test results will be written to _src/test/assets/junit_.
 
-To configure Behat tests:
+To manually configure Behat tests:
 
-1. Create _src/test/features_
-2. Place Behat configuration files _behat.yml_ and _behat.docker.yml_ in _src/test_.  You can use the corresponding files in _dkan/test_ as references.
+1. Create _src/test/features_ directory.
+2. Place Behat configuration files _behat.yml_ and _behat.docker.yml_ in _src/test_.  You can use the corresponding files in [_dkan/test_](https://github.com/GetDKAN/dkan/tree/7.x-1.x/test) as references, or even just create symbolic links to them.
 3. Store you tests in _src/test/features_.
 
 JUnit style test results will be written to _src/test/assets/junit_.
