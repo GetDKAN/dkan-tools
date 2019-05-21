@@ -15,6 +15,9 @@ class TestCommands extends \Robo\Tasks
     {
         $proj_dir = Util::getProjectDirectory();
         $this->_exec("npm install cypress");
-        $this->_exec("CYPRESS_baseUrl=http://web {$proj_dir}/node_modules/cypress/bin/cypress run");
+        $result = $this->taskExec("CYPRESS_baseUrl=http://web {$proj_dir}/node_modules/cypress/bin/cypress run")->run();
+        if ($result->getExitCode() != 0) {
+            throw new \Exception("Cypress tests failed.");
+        }
     }
 }
