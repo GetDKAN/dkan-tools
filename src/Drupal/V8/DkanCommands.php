@@ -20,9 +20,13 @@ class DkanCommands extends \Robo\Tasks
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
             ->run();
 
-        $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
+        $result = $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
             ->run();
+
+        if ($result->getExitCode() != 0) {
+            throw new \Exception("Cypress tests failed.");
+        }
     }
 
     /**
