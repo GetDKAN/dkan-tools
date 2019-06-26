@@ -80,12 +80,29 @@ class BasicCommands extends \Robo\Tasks
 
     /**
      * Get all necessary dependencies.
+     *
+     * @option prefer dist|source. Defaults to `dist`. Install packages either from source or dist when available.
+     * @option no-dev Skip installing packages listed in require-dev.
+     * @option optimize-autoloader Convert PSR-0/4 autoloading to classmap to get a faster autoloader..
      */
-    public function make($opts = ['yes|y' => false])
+    public function make($opts = [
+        'yes|y' => false,
+        'prefer'=>'dist',
+        'no-dev'=> false,
+        'optimize-autoloader'=> false,
+        ])
     {
+        // build some options.
+        $boolOptions = '';
+        foreach ($opts as $opt => $optValue) {
+            if (is_bool($optValue) && $optValue) {
+                $boolOptions .= '--'.$opt . ' ';
+            }
+        }
+
         $this->mergeComposerConfig();
         $docroot = Util::getProjectDirectory() . "/docroot";
-        $this->_exec("composer --working-dir={$docroot} update");
+        $this->_exec("composer --no-progress --working-dir={$docroot} {$boolOptions}--prefer-{$opts['prefer']} update");
         $this->linkSitesDefault();
         $this->linkModules();
         $this->linkThemes();
@@ -109,9 +126,14 @@ class BasicCommands extends \Robo\Tasks
         $custom_path = Util::getProjectDirectory() . "/src/make/composer.json";
 
         $include_array = $drupal_config->extra->{"merge-plugin"}->include;
-        $include_array[] = $custom_path;
-        $drupal_config->extra->{"merge-plugin"}->include = $include_array;
-        file_put_contents($drupal_config_path, json_encode($drupal_config, JSON_PRETTY_PRINT));
+        
+        // only add the extra composr file if needed.
+        if(!in_array($custom_path, $include_array) && is_file($custom_path))
+        {
+            $include_array[] = $custom_path;
+            $drupal_config->extra->{"merge-plugin"}->include = $include_array;
+            file_put_contents($drupal_config_path, json_encode($drupal_config, JSON_PRETTY_PRINT));
+        }
     }
 
     /**
