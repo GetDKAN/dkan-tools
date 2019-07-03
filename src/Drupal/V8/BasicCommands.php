@@ -90,26 +90,38 @@ class BasicCommands extends \Robo\Tasks
         'prefer'=>'dist',
         'no-dev'=> false,
         'optimize-autoloader'=> false,
+        'frontend' => true,
         ])
     {
+
+        $docroot = Util::getProjectDirectory() . "/docroot";
+        if (!file_exists($docroot)) {
+            throw new \Exception("Use 'dktl get <drupal version>' before trying to make the project.");
+        }
+
+        $composer_bools = ['yes', 'no-dev', 'optimize-autoloader'];
         // build some options.
         $boolOptions = '';
         foreach ($opts as $opt => $optValue) {
-            if (is_bool($optValue) && $optValue) {
-                $boolOptions .= '--'.$opt . ' ';
+            if (in_array($opt, $composer_bools)) {
+                if (is_bool($optValue) && $optValue) {
+                    $boolOptions .= '--' . $opt . ' ';
+                }
             }
         }
 
         $this->mergeComposerConfig();
-        $docroot = Util::getProjectDirectory() . "/docroot";
+
         $this->_exec("composer --no-progress --working-dir={$docroot} {$boolOptions}--prefer-{$opts['prefer']} update");
         $this->linkSitesDefault();
         $this->linkModules();
         $this->linkThemes();
         $this->linkLibraries();
-        $this->downloadInterra();
-        $this->installInterra();
-        $this->buildInterra();
+        if ($opts['frontend'] === true) {
+            $this->downloadInterra();
+            $this->installInterra();
+            $this->buildInterra();
+        }
         $this->updateDrush();
     }
 
