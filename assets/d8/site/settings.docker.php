@@ -13,4 +13,5 @@ if (getenv("DKTL_DOCKER") == "1") {
       ),
     ),
   );
+  $settings['file_public_base_url'] = "http://dkan/sites/default/files";
 }
