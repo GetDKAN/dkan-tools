@@ -79,7 +79,13 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Get all necessary dependencies.
+     * Get all necessary dependencies and "make" a working codebase.
+     * 
+     * Running `dktl make` will:
+     *   1. Modify the stock drupal composer.json file to merge in anything in src/make
+     *   2. Use composer to download and build all php dependencies.
+     *   3. Symlink a number of dirs from /src into docroot.
+     *   4. Pull the DKAN frontend application (Interra) into docroot.
      *
      * @option prefer dist|source. Defaults to `dist`. Install packages either from source or dist when available.
      * @option no-dev Skip installing packages listed in require-dev.
