@@ -144,16 +144,27 @@ class BasicCommands extends \Robo\Tasks
      */
     public function updatedrush() {
         if ($this->checkDrushCompatibility(self::DRUSH_VERSION)) {
-            $this->say('Drush is up-to-date!');
+            $this->io()->text('Drush is up-to-date!');
             return true;
         }
-        if ($this->io()->confirm("This command will attempt to make changes to the root user's composer directory and should only be run if you are using dkan-tools in Docker. Continue?")) {
-            $this->taskExec('rm -rf vendor composer.*')->dir('/root/.composer')->run();
-            $result = $this->taskComposerRequire()->dependency('drush/drush', self::DRUSH_VERSION)
-                ->dir('/root/.composer')
-                ->run();
+        $this->io()->caution("This command will attempt to make changes to the root user's composer directory and should ONLY be run if you are using dkan-tools in Docker.");
+        if (!$this->io()->confirm("Continue, removing existing global/root composer files?")) {
+            return false;
+        }
+        $result = $this->taskFilesystemStack()->stopOnFail()
+            ->remove('/root/.composer/vendor')
+            ->remove('/root/.composer/composer.json')
+            ->remove('/root/.composer/composer.lock')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not remove root composer files.');
             return $result;
         }
+        $result = $this->taskComposerRequire()
+            ->dependency('drush/drush', self::DRUSH_VERSION)
+            ->dir('/root/.composer')
+            ->run();
+        return $result;
     }
 
     private function mergeComposerConfig() {
