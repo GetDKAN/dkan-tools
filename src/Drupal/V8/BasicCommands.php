@@ -205,6 +205,8 @@ class BasicCommands extends \Robo\Tasks
     {
 
         $project_dir = Util::getProjectDirectory();
+        $target = $project_dir . "/{$target}";
+        $link = $project_dir . "/{$link}";
 
         if (!file_exists($target) || !file_exists('docroot')) {
             $this->io()->error("Could not link $target. Folders $target and 'docroot' must both be present to create link.");
