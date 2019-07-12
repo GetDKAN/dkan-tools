@@ -90,48 +90,57 @@ class BasicCommands extends \Robo\Tasks
      *   3. Symlink a number of dirs from /src into docroot.
      *   4. If requested, pull the DKAN frontend application (Interra) into docroot.
      *
-     * @option prefer dist|source. Defaults to `dist`. Install packages either from source or dist when available.
-     * @option no-dev Skip installing packages listed in require-dev.
-     * @option optimize-autoloader Convert PSR-0/4 autoloading to classmap to get a faster autoloader..
-     * @option frontend Build with the DKAN frontend application
+     * @option $yes
+     *   Skip confirmation step, overwrite existin no matter what. Use with caution!
+     * @option $prefer-dist
+     *   Prefer dist for packages. See composer docs.
+     * @option $prefer-source
+     *   Prefer dist for packages. See composer docs.
+     * @option $no-dev 
+     *   Skip installing packages listed in require-dev.
+     * @option $optimize-autoloader
+     *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
+     * @option $frontend
+     *   Build with the DKAN frontend application.
      */
     public function make($opts = [
         'yes|y' => false,
+        'prefer-source' => false,
         'prefer-dist' => false,
         'no-dev'=> false,
         'optimize-autoloader'=> false,
         'frontend' => false
         ])
     {
-
+        // Everything except frontend can be passed to composer.
         $docroot = Util::getProjectDirectory() . "/docroot";
         if (!file_exists($docroot)) {
             throw new \Exception("Use 'dktl get <drupal version>' before trying to make the project.");
         }
 
-        $composer_bools = ['yes', 'no-dev', 'optimize-autoloader'];
-        // build some options.
-        $boolOptions = '';
+        // Run main composer operations.
+        $this->mergeComposerConfig();
+        $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
+        $composerTask = $this->taskComposerUpdate()->dir($docroot)->option('no-progress');
         foreach ($opts as $opt => $optValue) {
-            if (in_array($opt, $composer_bools)) {
-                if (is_bool($optValue) && $optValue) {
-                    $boolOptions .= '--' . $opt . ' ';
-                }
+            if (in_array($opt, $composerBools) && is_bool($optValue) && $optValue) {
+                $composerTask->option($opt);
             }
         }
+        $composerTask->run();
 
-        $this->mergeComposerConfig();
-
-        $this->_exec("composer --no-progress --working-dir={$docroot} {$boolOptions} install");
+        // Symlink dirs from src into docroot.
         $this->docrootSymlink('src/site', 'docroot/sites/default');
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
-            $this->say('BUILDING FRONTEND');
-            $this->downloadInterra();
-            $this->installInterra();
-            $this->buildInterra();
-            $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
+            $this->io()->section('Building frontend application');
+            $result = $this->downloadInterra(['yes' => $opts['yes']]);
+            if ($result && $result->getExitCode() === 0) {
+                $this->installInterra();
+                $this->buildInterra();
+                $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
+            }
         }
 
         if (!$this->checkDrushCompatibility()) {
@@ -141,16 +150,22 @@ class BasicCommands extends \Robo\Tasks
 
     /**
      * Update the version of Drush used in the container.
+     * 
+     * @option $yes
+     *   Skip confirmation step, update no matter what. Use with caution!
      */
-    public function updatedrush() {
+    public function updatedrush($opts = ['yes|y' => false]) {
         if ($this->checkDrushCompatibility(self::DRUSH_VERSION)) {
             $this->io()->text('Drush is up-to-date!');
             return true;
         }
+
         $this->io()->caution("This command will attempt to make changes to the root user's composer directory and should ONLY be run if you are using dkan-tools in Docker.");
-        if (!$this->io()->confirm("Continue, removing existing global/root composer files?")) {
+        $confirmation = "Continue, removing existing global/root composer files?";
+        if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
             return false;
         }
+        
         $result = $this->taskFilesystemStack()->stopOnFail()
             ->remove('/root/.composer/vendor')
             ->remove('/root/.composer/composer.json')
@@ -197,8 +212,8 @@ class BasicCommands extends \Robo\Tasks
         }
 
         $result = $this->taskFilesystemStack()->stopOnFail()
-            ->remove('docroot/modules/custom')
-            ->symlink('src/modules', 'docroot/modules/custom')
+            ->remove($link)
+            ->symlink($target, $link)
             ->run();
 
         if ($result->getExitCode() != 0) {
@@ -213,10 +228,11 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Download Interra frontend.
      */
-    private function downloadInterra()
+    private function downloadInterra($opts = ['yes|y' => false])
     {
+        $confirmation = 'Frontend application already exists in docroot. Remove and re-install?';
         if (file_exists('docroot/data-catalog-frontend')) {
-            if (!$this->io()->confirm('Frontend application already exists in docroot. Remove and re-install?')) {
+            if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
                 return false;
             }
             $this->_deleteDir('docroot/data-catalog-frontend');
@@ -232,6 +248,7 @@ class BasicCommands extends \Robo\Tasks
             return $result;
         }
         $this->io()->success('Successfull');
+        return $result;
     }
 
     /**
