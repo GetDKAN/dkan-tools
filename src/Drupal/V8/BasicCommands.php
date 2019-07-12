@@ -11,6 +11,9 @@ use DkanTools\Util\Util;
  */
 class BasicCommands extends \Robo\Tasks
 {
+
+    const DRUSH_VERSION = '9.5.2';
+
     /**
      * Get Drupal.
      *
@@ -79,57 +82,104 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Get all necessary dependencies.
+     * Get all necessary dependencies and "make" a working codebase.
+     * 
+     * Running `dktl make` will:
+     *   1. Modify the stock drupal composer.json file to merge in anything in src/make
+     *   2. Use composer to download and build all php dependencies.
+     *   3. Symlink a number of dirs from /src into docroot.
+     *   4. If requested, pull the DKAN frontend application (Interra) into docroot.
      *
-     * @option prefer dist|source. Defaults to `dist`. Install packages either from source or dist when available.
-     * @option no-dev Skip installing packages listed in require-dev.
-     * @option optimize-autoloader Convert PSR-0/4 autoloading to classmap to get a faster autoloader..
+     * @option $yes
+     *   Skip confirmation step, overwrite existin no matter what. Use with caution!
+     * @option $prefer-dist
+     *   Prefer dist for packages. See composer docs.
+     * @option $prefer-source
+     *   Prefer dist for packages. See composer docs.
+     * @option $no-dev 
+     *   Skip installing packages listed in require-dev.
+     * @option $optimize-autoloader
+     *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
+     * @option $frontend
+     *   Build with the DKAN frontend application.
      */
     public function make($opts = [
         'yes|y' => false,
-        'prefer'=>'dist',
+        'prefer-source' => false,
+        'prefer-dist' => false,
         'no-dev'=> false,
         'optimize-autoloader'=> false,
-        'frontend' => true,
+        'frontend' => false
         ])
     {
-
+        // Everything except frontend can be passed to composer.
         $docroot = Util::getProjectDirectory() . "/docroot";
         if (!file_exists($docroot)) {
             throw new \Exception("Use 'dktl get <drupal version>' before trying to make the project.");
         }
 
-        $composer_bools = ['yes', 'no-dev', 'optimize-autoloader'];
-        // build some options.
-        $boolOptions = '';
+        // Run main composer operations.
+        $this->mergeComposerConfig();
+        $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
+        $composerTask = $this->taskComposerUpdate()->dir($docroot)->option('no-progress');
         foreach ($opts as $opt => $optValue) {
-            if (in_array($opt, $composer_bools)) {
-                if (is_bool($optValue) && $optValue) {
-                    $boolOptions .= '--' . $opt . ' ';
-                }
+            if (in_array($opt, $composerBools) && is_bool($optValue) && $optValue) {
+                $composerTask->option($opt);
+            }
+        }
+        $composerTask->run();
+
+        // Symlink dirs from src into docroot.
+        $this->docrootSymlink('src/site', 'docroot/sites/default');
+        $this->docrootSymlink('src/modules', 'docroot/modules/custom');
+        $this->docrootSymlink('src/themes', 'docroot/themes/custom');
+        if ($opts['frontend'] === true) {
+            $this->io()->section('Building frontend application');
+            $result = $this->downloadInterra(['yes' => $opts['yes']]);
+            if ($result && $result->getExitCode() === 0) {
+                $this->installInterra();
+                $this->buildInterra();
+                $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
             }
         }
 
-        $this->mergeComposerConfig();
-
-        $this->_exec("composer --no-progress --working-dir={$docroot} {$boolOptions}--prefer-{$opts['prefer']} update");
-        $this->linkSitesDefault();
-        $this->linkModules();
-        $this->linkThemes();
-        $this->linkLibraries();
-        if ($opts['frontend'] === true) {
-            $this->downloadInterra();
-            $this->installInterra();
-            $this->buildInterra();
+        if (!$this->checkDrushCompatibility()) {
+            $this->io()->warning('Your version of Drush is incompatible with DKAN2. Please upgrade to the latest Drush 9.x! If you are using the dkan-tools docker setup, try "dktl updatedrush".');
         }
-        $this->updateDrush();
     }
 
-    private function updateDrush() {
-        $this->_exec("rm -rf /root/.composer/vendor");
-        $this->_exec("rm -rf /root/.composer/composer.lock");
-        $this->_exec("rm -rf /root/.composer/composer.json");
-        $this->_exec("composer global require drush/drush:9.5.2");
+    /**
+     * Update the version of Drush used in the container.
+     * 
+     * @option $yes
+     *   Skip confirmation step, update no matter what. Use with caution!
+     */
+    public function updatedrush($opts = ['yes|y' => false]) {
+        if ($this->checkDrushCompatibility(self::DRUSH_VERSION)) {
+            $this->io()->text('Drush is up-to-date!');
+            return true;
+        }
+
+        $this->io()->caution("This command will attempt to make changes to the root user's composer directory and should ONLY be run if you are using dkan-tools in Docker.");
+        $confirmation = "Continue, removing existing global/root composer files?";
+        if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
+            return false;
+        }
+        
+        $result = $this->taskFilesystemStack()->stopOnFail()
+            ->remove('/root/.composer/vendor')
+            ->remove('/root/.composer/composer.json')
+            ->remove('/root/.composer/composer.lock')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not remove root composer files.');
+            return $result;
+        }
+        $result = $this->taskComposerRequire()
+            ->dependency('drush/drush', self::DRUSH_VERSION)
+            ->dir('/root/.composer')
+            ->run();
+        return $result;
     }
 
     private function mergeComposerConfig() {
@@ -149,93 +199,46 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Link src/site to docroot/sites/default.
+     * Link src/modules to docroot/sites/all/modules/custom.
      */
-    private function linkSitesDefault()
+    private function docrootSymlink($target, $link)
     {
-        if (!file_exists('src/site') || !file_exists('docroot')) {
-            $this->io()->error("Could not link sites/default folder. Folders 'src/site' and 'docroot' must both be present to create the link.");
+
+        $project_dir = Util::getProjectDirectory();
+        $target = $project_dir . "/{$target}";
+        $link = $project_dir . "/{$link}";
+
+        if (!file_exists($target) || !file_exists('docroot')) {
+            $this->io()->error("Could not link $target. Folders $target and 'docroot' must both be present to create link.");
             exit;
         }
 
-        $this->_exec('rm -rf docroot/sites/default');
-        $this->_exec('ln -s ../../src/site docroot/sites/default');
-
-        $this->io()->success('Successfully linked src/site folder to docroot/sites/default');
-    }
-
-    /**
-     * Link src/modules to  docroot/sites/all/modules/custom.
-     */
-    private function linkModules()
-    {
-
-        $project_dir = Util::getProjectDirectory();
-
-        if (!file_exists('src/modules') || !file_exists('docroot')) {
-            $this->io()->error("Could not link modules. Folders 'src/modules' and 'docroot' must both be present to create link.");
-            exit;
-        }
-
-        $task = $this->taskExec("ln -s ../../src/modules custom")->dir("{$project_dir}/docroot/modules");
-        $result = $task->run();
+        $result = $this->taskFilesystemStack()->stopOnFail()
+            ->remove($link)
+            ->symlink($target, $link)
+            ->run();
 
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not create link');
-            return $result;
         }
-        $this->io()->success('Successfully linked src/modules to docroot/sites/all/modules/custom');
-    }
-
-    /**
-     * Link src/themes to  docroot/sites/all/modules/themes.
-     */
-    private function linkThemes()
-    {
-        $project_dir = Util::getProjectDirectory();
-
-        if (!file_exists('src/themes') || !file_exists('docroot')) {
-            throw new \Exception("Could not link themes. Folders 'src/themes' and 'docroot' must both be present to create link.");
-            return;
+        else {            
+            $this->io()->success("Successfully linked $target to $link");
         }
-
-        $task = $this->taskExec("ln -s ../../src/themes custom")->dir("{$project_dir}/docroot/themes");
-        $result = $task->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
-            return $result;
-        }
-
-        $this->io()->success('Successfully linked src/themes to docroot/sites/all/themes/custom');
-    }
-
-    /**
-     * Link docroot/vendor/bower-asset to  docroot/libraries.
-     */
-    private function linkLibraries()
-    {
-        $project_dir = Util::getProjectDirectory();
-
-        if (!file_exists('docroot/vendor/bower-asset')) {
-            throw new \Exception("Could not link bower-asset as libraries");
-            return;
-        }
-
-        $task = $this->taskExec("ln -s vendor/bower-asset libraries")->dir("{$project_dir}/docroot");
-        $result = $task->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
-            return $result;
-        }
-
-        $this->io()->success('Successfully linked libraries');
+        return $result;
     }
 
     /**
      * Download Interra frontend.
      */
-    private function downloadInterra()
+    private function downloadInterra($opts = ['yes|y' => false])
     {
+        $confirmation = 'Frontend application already exists in docroot. Remove and re-install?';
+        if (file_exists('docroot/data-catalog-frontend')) {
+            if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
+                return false;
+            }
+            $this->_deleteDir('docroot/data-catalog-frontend');
+        }
         $result = $this->_exec('git clone --depth=1 --branch=master https://github.com/interra/data-catalog-frontend.git docroot/data-catalog-frontend');
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not download Interra front-end');
@@ -246,8 +249,8 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Could not remove Interra front-end git folder');
             return $result;
         }
-
         $this->io()->success('Successfull');
+        return $result;
     }
 
     /**
@@ -323,6 +326,25 @@ class BasicCommands extends \Robo\Tasks
         }
 
         return $phpunitExec->run();
+    }
+
+    private function checkDrushCompatibility($version = '9') {
+        if (version_compare($this->getDrushVersion(), $version) >= 0) {
+            return true;
+        }
+        return false;
+    }
+
+    private function getDrushVersion() {
+        $result = $this->taskExec('drush --version')
+            ->dir(Util::getProjectDocroot())
+            ->printOutput(FALSE)
+            ->run();
+        preg_match('/.+?(\d+\.\d+\.\d+)/', $result->getMessage(), $matches);
+        if (!isset($matches[1])) {
+            throw new \Exception("Could not determine Drush version on this system.");
+        }
+        return $matches[1];
     }
 
 }
