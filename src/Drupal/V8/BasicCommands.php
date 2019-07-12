@@ -126,12 +126,12 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/site', 'docroot/sites/default');
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
-        $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
         if ($opts['frontend'] === true) {
             $this->say('BUILDING FRONTEND');
             $this->downloadInterra();
             $this->installInterra();
             $this->buildInterra();
+            $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
         }
 
         if (!$this->checkDrushCompatibility()) {
