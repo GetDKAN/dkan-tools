@@ -39,8 +39,8 @@ class InitCommands extends \Robo\Tasks
      * phpunit and behat tests that should run and pass on any project. You can
      * run these tests with the test:phpunit-custom and test:behat-custom
      * commands.
-     * 
-     * For new sites this command will automatically be run as part of 
+     *
+     * For new sites this command will automatically be run as part of
      * dktl:init.
      */
     public function initCustomTests()
@@ -92,7 +92,7 @@ class InitCommands extends \Robo\Tasks
             }
         }
     }
-    
+
     private function createDktlYmlFile()
     {
         $dktlRoot = Util::getDktlDirectory();
@@ -125,7 +125,8 @@ class InitCommands extends \Robo\Tasks
         $this->initCustomTests();
     }
 
-    private function setupScripts() {
+    private function setupScripts()
+    {
         $dktlRoot = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
 
@@ -156,7 +157,9 @@ class InitCommands extends \Robo\Tasks
                 ->textFromFile("$dktlRoot/assets/drush/template.make.yml");
             if ($file == "drupal") {
                 $task->text("defaults:\n  projects:\n    subdir: contrib\n");
-                $task->text("projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'");
+                $task->text(
+                    "projects:\n  environment:\n    version: '1.0'\n  environment_indicator:\n    version: '2.9'"
+                );
             }
             $result = $task->run();
 
