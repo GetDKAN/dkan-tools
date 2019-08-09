@@ -14,57 +14,47 @@ class DkanCommands extends \Robo\Tasks
     /**
      * Run DKAN Cypress Tests.
      */
-    public function dkanTestCypress() {
+    public function dkanTestCypress()
+    {
         $proj_dir = Util::getProjectDirectory();
         $this->taskExec("npm install cypress")
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
             ->run();
 
-        $result = $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
+        return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
             ->run();
-
-        if ($result->getExitCode() != 0) {
-            throw new \Exception("Cypress tests failed.");
-        }
     }
 
     /**
      * Run DKAN PhpUnit Tests. Additional phpunit CLI options can be passed.
-     * 
-     * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions 
-     * @param array $args  Arguments to append to phpunit command.
+     *
+     * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
+     * @param array $args Arguments to append to phpunit command.
      */
-    public function dkanTestPhpunit(array $args) {
+    public function dkanTestPhpunit(array $args)
+    {
 
         $proj_dir = Util::getProjectDirectory();
 
         $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
 
-        $file = "{$proj_dir}/docroot/core/lib/Drupal/Component/PhpStorage/FileStorage.php";
-
-        $this->taskExec("sed -i.bak 's/trigger_error/\/\/trigger_error/' {$file}")
-            ->run();
-
         $phpunitExec = $this->taskExec($phpunit_executable)
             ->option('testsuite', 'DKAN Test Suite')
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2");
-        
+
         foreach ($args as $arg) {
             $phpunitExec->arg($arg);
         }
 
-        $phpunitExec->run();
-        
-        $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
-            ->run();
+        return $phpunitExec->run();
     }
 
     /**
      * Run DKAN PhpUnit Tests and send a coverage report to CodeClimate.
      */
-    public function dkanTestPhpunitCoverage($code_climate_reporter_id) {
-
+    public function dkanTestPhpunitCoverage($code_climate_reporter_id)
+    {
         putenv("CC_TEST_REPORTER_ID={$code_climate_reporter_id}");
 
         $proj_dir = Util::getProjectDirectory();
@@ -78,11 +68,6 @@ class DkanCommands extends \Robo\Tasks
 
         $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
 
-        $file = "{$proj_dir}/docroot/core/lib/Drupal/Component/PhpStorage/FileStorage.php";
-
-        $this->taskExec("sed -i.bak 's/trigger_error/\/\/trigger_error/' {$file}")
-            ->run();
-
         $this->taskExec("./cc-test-reporter before-build")->dir($dkan_dir)->run();
 
         $phpunitExec = $this->taskExec($phpunit_executable)
@@ -90,11 +75,9 @@ class DkanCommands extends \Robo\Tasks
             ->option('coverage-clover', 'clover.xml')
             ->dir($dkan_dir);
 
-        $phpunitExec->run();
+        $result = $phpunitExec->run();
 
         $this->taskExec("./cc-test-reporter after-build --coverage-input-type clover --exit-code $?")->dir($dkan_dir)->run();
-
-        $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
-            ->run();
+        return $result;
     }
 }
