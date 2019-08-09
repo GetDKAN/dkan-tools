@@ -81,6 +81,7 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("./cc-test-reporter before-build")->dir($dkan_dir)->run();
 
         $phpunitExec = $this->taskExec($phpunit_executable)
+            ->option('vvv')
             ->option('testsuite', 'DKAN Test Suite')
             ->option('coverage-clover', 'clover.xml')
             ->dir($dkan_dir);
