@@ -78,11 +78,6 @@ class DkanCommands extends \Robo\Tasks
 
         $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
 
-        $file = "{$proj_dir}/docroot/core/lib/Drupal/Component/PhpStorage/FileStorage.php";
-
-        $this->taskExec("sed -i.bak 's/trigger_error/\/\/trigger_error/' {$file}")
-            ->run();
-
         $this->taskExec("./cc-test-reporter before-build")->dir($dkan_dir)->run();
 
         $phpunitExec = $this->taskExec($phpunit_executable)
@@ -93,8 +88,5 @@ class DkanCommands extends \Robo\Tasks
         $phpunitExec->run();
 
         $this->taskExec("./cc-test-reporter after-build --coverage-input-type clover --exit-code $?")->dir($dkan_dir)->run();
-
-        $this->taskExec("sed -i.bak 's/\/\/trigger_error/trigger_error/' {$file}")
-            ->run();
     }
 }
