@@ -268,7 +268,7 @@ To go back to running in docker mode, set the variable to `DOCKER` (or just dele
 
 ### Using Xdebug
 
-When using the standard docker-compose environment, [Xdebug](https://xdebug.org/) can be enabled on both the web and CLI containers as needed. Running it creates a significant performance hit, so it is disabled by default. To enable, simply run `dtkl xdebug:start`. A new file will be added to _/src/docker/etc/php_, and the corresponding containers will restart. In most situations, this file should be excluded from version control with .gitignore.
+When using the standard docker-compose environment, [Xdebug](https://xdebug.org/) can be enabled on both the web and CLI containers as needed. Running it creates a significant performance hit, so it is disabled by default. To enable, simply run `dktl xdebug:start`. A new file will be added to _/src/docker/etc/php_, and the corresponding containers will restart. In most situations, this file should be excluded from version control with .gitignore.
 
 ## A note to users of DKAN Starter
 
