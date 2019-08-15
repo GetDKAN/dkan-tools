@@ -37,7 +37,10 @@ class BasicCommands extends \Robo\Tasks
         $fileName = "drupal-{$version}";
         $archive = Util::TMP_DIR . "/{$fileName}";
         if (file_exists($archive)) {
-            $this->io()->warning("Drupal archive $fileName.tar.gz already exists; skipping download, will attempt extraction.");
+            $this->io()->warning(
+                "Drupal archive $fileName.tar.gz already exists; skipping " .
+                "download, will attempt extraction."
+            );
             return $archive;
         }
 
@@ -83,7 +86,7 @@ class BasicCommands extends \Robo\Tasks
 
     /**
      * Get all necessary dependencies and "make" a working codebase.
-     * 
+     *
      * Running `dktl make` will:
      *   1. Modify the stock drupal composer.json file to merge in anything in src/make
      *   2. Use composer to download and build all php dependencies.
@@ -96,7 +99,7 @@ class BasicCommands extends \Robo\Tasks
      *   Prefer dist for packages. See composer docs.
      * @option $prefer-source
      *   Prefer dist for packages. See composer docs.
-     * @option $no-dev 
+     * @option $no-dev
      *   Skip installing packages listed in require-dev.
      * @option $optimize-autoloader
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
@@ -141,31 +144,46 @@ class BasicCommands extends \Robo\Tasks
                 $this->buildInterra();
                 $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
             }
+            $this->io()->note(
+                'You are building DKAN with the React frontend application. ' .
+                'In order for the frontend to find the correct routes to work correctly,' .
+                'you will need to enable the dkan_frontend module . ' .
+                'Do this by running "dktl install" with the "--frontend" option as well, ' .
+                'or else run "drush en dkan_frontend" after installation.'
+            );
         }
 
         if (!$this->checkDrushCompatibility()) {
-            $this->io()->warning('Your version of Drush is incompatible with DKAN2. Please upgrade to the latest Drush 9.x! If you are using the dkan-tools docker setup, try "dktl updatedrush".');
+            $this->io()->warning(
+                'Your version of Drush is incompatible with DKAN2. Please upgrade ' .
+                'to the latest Drush 9.x! If you are using the dkan-tools docker ' .
+                'setup, try "dktl updatedrush".'
+            );
         }
     }
 
     /**
      * Update the version of Drush used in the container.
-     * 
+     *
      * @option $yes
      *   Skip confirmation step, update no matter what. Use with caution!
      */
-    public function updatedrush($opts = ['yes|y' => false]) {
+    public function updatedrush($opts = ['yes|y' => false])
+    {
         if ($this->checkDrushCompatibility(self::DRUSH_VERSION)) {
             $this->io()->text('Drush is up-to-date!');
             return true;
         }
 
-        $this->io()->caution("This command will attempt to make changes to the root user's composer directory and should ONLY be run if you are using dkan-tools in Docker.");
+        $this->io()->caution(
+            "This command will attempt to make changes to the root user's " .
+            "composer directory and should ONLY be run if you are using dkan-tools in Docker."
+        );
         $confirmation = "Continue, removing existing global/root composer files?";
         if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
             return false;
         }
-        
+
         $result = $this->taskFilesystemStack()->stopOnFail()
             ->remove('/root/.composer/vendor')
             ->remove('/root/.composer/composer.json')
@@ -182,16 +200,16 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    private function mergeComposerConfig() {
+    private function mergeComposerConfig()
+    {
         $drupal_config_path = Util::getProjectDirectory() . "/docroot/composer.json";
         $drupal_config = json_decode(file_get_contents($drupal_config_path));
         $custom_path = Util::getProjectDirectory() . "/src/make/composer.json";
 
         $include_array = $drupal_config->extra->{"merge-plugin"}->include;
-        
+
         // only add the extra composr file if needed.
-        if(!in_array($custom_path, $include_array) && is_file($custom_path))
-        {
+        if (!in_array($custom_path, $include_array) && is_file($custom_path)) {
             $include_array[] = $custom_path;
             $drupal_config->extra->{"merge-plugin"}->include = $include_array;
             file_put_contents($drupal_config_path, json_encode($drupal_config, JSON_PRETTY_PRINT));
@@ -209,7 +227,10 @@ class BasicCommands extends \Robo\Tasks
         $link = $project_dir . "/{$link}";
 
         if (!file_exists($target) || !file_exists('docroot')) {
-            $this->io()->error("Could not link $target. Folders $target and 'docroot' must both be present to create link.");
+            $this->io()->error(
+                "Could not link $target. Folders $target and 'docroot' must both " .
+                "be present to create link."
+            );
             exit;
         }
 
@@ -220,8 +241,7 @@ class BasicCommands extends \Robo\Tasks
 
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not create link');
-        }
-        else {            
+        } else {
             $this->io()->success("Successfully linked $target to $link");
         }
         return $result;
@@ -239,12 +259,18 @@ class BasicCommands extends \Robo\Tasks
             }
             $this->_deleteDir('docroot/data-catalog-frontend');
         }
-        $result = $this->_exec('git clone --depth=1 --branch=master https://github.com/interra/data-catalog-frontend.git docroot/data-catalog-frontend');
+        $result = $this->taskExec('git clone')
+            ->option('depth=1')
+            ->option('branch', 'master')
+            ->arg('https://github.com/interra/data-catalog-frontend.git')
+            ->arg('data-catalog-frontend')
+            ->dir('docroot')
+            ->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not download Interra front-end');
             return $result;
         }
-        $result = $this->_exec('rm -r docroot/data-catalog-frontend/.git');
+        $result = $this->_deleteDir('docroot/data-catalog-frontend/.git');
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not remove Interra front-end git folder');
             return $result;
@@ -275,7 +301,10 @@ class BasicCommands extends \Robo\Tasks
     private function buildInterra()
     {
 
-        $result = $this->_exec('sed -i "s/https:\/\/interra.github.io\/data-catalog-frontend/\/data-catalog-frontend\/build/g" docroot/data-catalog-frontend/package.json');
+        $result = $this->taskExec('sed -i')
+            ->arg("s/https:\/\/interra.github.io\/data-catalog-frontend/\/data-catalog-frontend\/build/g")
+            ->arg('docroot/data-catalog-frontend/package.json')
+            ->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not install Interra front-end node modules');
             return $result;
@@ -304,16 +333,28 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->success('Successfull');
     }
 
-    public function install() {
-        $this->_exec("dktl drush si -y");
+    public function install($opts = ['frontend' => false])
+    {
+        $result = $this->taskExec('drush si -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+
+        if ($opts['frontend'] === true) {
+            $result = $this->taskExec('drush en -y')
+                ->arg('dkan_frontend')
+                ->dir(Util::getProjectDocroot())
+                ->run();
+        }
+        return $result;
     }
-    
+
     /**
      * Proxy to the phpunit binary.
      *
      * @param array $args  Arguments to append to full phpunit command.
      */
-    public function phpunit(array $args) {
+    public function phpunit(array $args)
+    {
 
         $proj_dir = Util::getProjectDirectory();
 
@@ -328,17 +369,19 @@ class BasicCommands extends \Robo\Tasks
         return $phpunitExec->run();
     }
 
-    private function checkDrushCompatibility($version = '9') {
+    private function checkDrushCompatibility($version = '9')
+    {
         if (version_compare($this->getDrushVersion(), $version) >= 0) {
             return true;
         }
         return false;
     }
 
-    private function getDrushVersion() {
+    private function getDrushVersion()
+    {
         $result = $this->taskExec('drush --version')
             ->dir(Util::getProjectDocroot())
-            ->printOutput(FALSE)
+            ->printOutput(false)
             ->run();
         preg_match('/.+?(\d+\.\d+\.\d+)/', $result->getMessage(), $matches);
         if (!isset($matches[1])) {
@@ -346,5 +389,4 @@ class BasicCommands extends \Robo\Tasks
         }
         return $matches[1];
     }
-
 }
