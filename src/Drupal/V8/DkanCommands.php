@@ -27,6 +27,21 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
+     * Run DKAN Dredd Tests.
+     */
+    public function dkanTestDredd()
+    {
+        $proj_dir = Util::getProjectDirectory();
+        $this->taskExec("npm install dredd")
+            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+            ->run();
+
+        return $this->taskExec("dredd --hookfiles=./dredd-hooks.js")
+            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+            ->run();
+    }
+
+    /**
      * Run DKAN PhpUnit Tests. Additional phpunit CLI options can be passed.
      *
      * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
