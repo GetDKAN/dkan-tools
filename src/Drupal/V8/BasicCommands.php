@@ -127,7 +127,10 @@ class BasicCommands extends \Robo\Tasks
                 $composerTask->option($opt);
             }
         }
-        $composerTask->run();
+        $result = $composerTask->run();
+        if ($result->getExitCode() !== 0) {
+            return $result;
+        }
 
         // Symlink dirs from src into docroot.
         $this->docrootSymlink('src/site', 'docroot/sites/default');
