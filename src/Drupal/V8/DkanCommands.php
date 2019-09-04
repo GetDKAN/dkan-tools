@@ -72,7 +72,7 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
-        this->taskExec("dktl installphpunit")->run();
+        $this->taskExec("dktl installphpunit")->run();
 
         putenv("CC_TEST_REPORTER_ID={$code_climate_reporter_id}");
 
