@@ -52,7 +52,9 @@ class DkanCommands extends \Robo\Tasks
 
         $proj_dir = Util::getProjectDirectory();
 
-        $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
+        $this->taskExec("dktl installphpunit")->run();
+
+        $phpunit_executable = "phpunit";
 
         $phpunitExec = $this->taskExec($phpunit_executable)
             ->option('testsuite', 'DKAN Test Suite')
@@ -70,6 +72,8 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
+        this->taskExec("dktl installphpunit")->run();
+
         putenv("CC_TEST_REPORTER_ID={$code_climate_reporter_id}");
 
         $proj_dir = Util::getProjectDirectory();
@@ -81,7 +85,7 @@ class DkanCommands extends \Robo\Tasks
             $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkan_dir)->run();
         }
 
-        $phpunit_executable = "{$proj_dir}/docroot/vendor/bin/phpunit";
+        $phpunit_executable = "phpunit";
 
         $this->taskExec("./cc-test-reporter before-build")->dir($dkan_dir)->run();
 
