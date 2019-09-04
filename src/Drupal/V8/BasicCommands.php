@@ -12,7 +12,7 @@ use DkanTools\Util\Util;
 class BasicCommands extends \Robo\Tasks
 {
 
-    const DRUSH_VERSION = '9.5.2';
+    const DRUSH_VERSION = '9.7.1';
 
     /**
      * Get Drupal.
@@ -110,7 +110,7 @@ class BasicCommands extends \Robo\Tasks
         'yes|y' => false,
         'prefer-source' => false,
         'prefer-dist' => false,
-        'no-dev'=> false,
+        'no-dev'=> true,
         'optimize-autoloader'=> false,
         'frontend' => false
         ])
@@ -186,7 +186,6 @@ class BasicCommands extends \Robo\Tasks
 
         $result = $this->taskFilesystemStack()->stopOnFail()
             ->remove('/root/.composer/vendor')
-            ->remove('/root/.composer/composer.json')
             ->remove('/root/.composer/composer.lock')
             ->run();
         if ($result->getExitCode() != 0) {
@@ -197,6 +196,33 @@ class BasicCommands extends \Robo\Tasks
             ->dependency('drush/drush', self::DRUSH_VERSION)
             ->dir('/root/.composer')
             ->run();
+        return $result;
+    }
+
+    public function installphpunit() {
+        $result = $this->taskExec("which phpunit")->run();
+        if ($result->getExitCode() == 0) {
+            $this->io()->text('phpunit is already installed.');
+            return true;
+        }
+
+        $this->io()->text('Installing phpunit.');
+
+        $result = $this->taskFilesystemStack()->stopOnFail()
+            ->remove('/root/.composer/vendor')
+            ->remove('/root/.composer/composer.lock')
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not remove root composer files.');
+            return $result;
+        }
+        $result = $this->taskComposerRequire()
+            ->dependency('phpunit/phpunit', "6.5.14")
+            ->dir('/root/.composer')
+            ->run();
+
+        $result = $this->taskExec("ln -s /root/.composer/vendor/bin/phpunit /usr/local/bin/phpunit")->run();
+
         return $result;
     }
 
