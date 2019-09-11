@@ -138,10 +138,10 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
             $this->io()->section('Building frontend application');
-            $result = $this->downloadInterra(['yes' => $opts['yes']]);
+            $result = $this->downloadFrontend(['yes' => $opts['yes']]);
             if ($result && $result->getExitCode() === 0) {
-                $this->installInterra();
-                $this->buildInterra();
+                $this->installFrontend();
+                $this->buildFrontend();
                 $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
             }
             $this->io()->note(
@@ -332,14 +332,14 @@ class BasicCommands extends \Robo\Tasks
             ->arg('docroot/data-catalog-frontend/package.json')
             ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install Interra front-end node modules');
+            $this->io()->error('Could not install front-end node modules');
             return $result;
         }
 
         $task = $this->taskExec("npm run build")->dir("docroot/data-catalog-frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install Interra front-end node modules');
+            $this->io()->error('Could not install front-end node modules');
             return $result;
         }
         $this->io()->success('Successfull');
