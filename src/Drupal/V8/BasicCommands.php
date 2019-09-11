@@ -91,7 +91,7 @@ class BasicCommands extends \Robo\Tasks
      *   1. Modify the stock drupal composer.json file to merge in anything in src/make
      *   2. Use composer to download and build all php dependencies.
      *   3. Symlink a number of dirs from /src into docroot.
-     *   4. If requested, pull the DKAN frontend application (Interra) into docroot.
+     *   4. If requested, pull the DKAN frontend application into docroot.
      *
      * @option $yes
      *   Skip confirmation step, overwrite existin no matter what. Use with caution!
@@ -274,9 +274,9 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Download Interra frontend.
+     * Download frontend App.
      */
-    private function downloadInterra($opts = ['yes|y' => false])
+    private function downloadFrontend($opts = ['yes|y' => false])
     {
         $confirmation = 'Frontend application already exists in docroot. Remove and re-install?';
         if (file_exists('docroot/data-catalog-frontend')) {
@@ -288,17 +288,17 @@ class BasicCommands extends \Robo\Tasks
         $result = $this->taskExec('git clone')
             ->option('depth=1')
             ->option('branch', 'master')
-            ->arg('https://github.com/interra/data-catalog-frontend.git')
+            ->arg('https://github.com/GetDKAN/data-catalog-frontend.git')
             ->arg('data-catalog-frontend')
             ->dir('docroot')
             ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not download Interra front-end');
+            $this->io()->error('Could not download front-end app');
             return $result;
         }
         $result = $this->_deleteDir('docroot/data-catalog-frontend/.git');
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not remove Interra front-end git folder');
+            $this->io()->error('Could not remove front-end git folder');
             return $result;
         }
         $this->io()->success('Successfull');
@@ -306,15 +306,15 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Install Interra frontend.
+     * Install frontend app.
      */
-    private function installInterra()
+    private function installFrontend()
     {
 
         $task = $this->taskExec("npm install")->dir("docroot/data-catalog-frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install Interra front-end node modules');
+            $this->io()->error('Could not install front-end node modules');
             return $result;
         }
 
@@ -322,9 +322,9 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Build Interra frontend.
+     * Build frontend app.
      */
-    private function buildInterra()
+    private function buildFrontend()
     {
 
         $result = $this->taskExec('sed -i')
