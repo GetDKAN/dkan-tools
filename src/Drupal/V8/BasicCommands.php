@@ -326,16 +326,6 @@ class BasicCommands extends \Robo\Tasks
      */
     private function buildFrontend()
     {
-
-        $result = $this->taskExec('sed -i')
-            ->arg("s/https:\/\/interra.github.io\/data-catalog-frontend/\/data-catalog-frontend\/build/g")
-            ->arg('docroot/data-catalog-frontend/package.json')
-            ->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install front-end node modules');
-            return $result;
-        }
-
         $task = $this->taskExec("npm run build")->dir("docroot/data-catalog-frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
