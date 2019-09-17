@@ -138,12 +138,18 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
             $this->io()->section('Building frontend application');
-            $result = $this->downloadFrontend(['yes' => $opts['yes']]);
+            if (file_exists(Util::getProjectDirectory() . "/src/frontend")) {
+                $result = $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
+            }
+            else {
+                $result = $this->downloadFrontend(['yes' => $opts['yes']]);
+            }
+
             if ($result && $result->getExitCode() === 0) {
                 $this->installFrontend();
                 $this->buildFrontend();
-                $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
             }
+
             $this->io()->note(
                 'You are building DKAN with the React frontend application. ' .
                 'In order for the frontend to find the correct routes to work correctly,' .
@@ -152,6 +158,8 @@ class BasicCommands extends \Robo\Tasks
                 'or else run "drush en dkan_frontend" after installation.'
             );
         }
+
+        $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
 
         if (!$this->checkDrushCompatibility()) {
             $this->io()->warning(
