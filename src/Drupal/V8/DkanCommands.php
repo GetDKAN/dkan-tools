@@ -8,18 +8,30 @@ use DkanTools\Util\Util;
  * This is project's console commands configuration for Robo task runner.
  *
  * @see http://robo.li/
+ * @param $arg use 'frontend' to run frontend cypress tests.
  */
 class DkanCommands extends \Robo\Tasks
 {
     /**
      * Run DKAN Cypress Tests.
      */
-    public function dkanTestCypress()
+    public function dkanTestCypress($arg = NULL)
     {
         $proj_dir = Util::getProjectDirectory();
-        $this->taskExec("npm install cypress")
-            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+
+        if ($arg === 'frontend'){
+            $this->taskExec("npm install cypress")
+            ->dir("{$proj_dir}/docroot/data-catalog-frontend")
             ->run();
+
+            return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
+            ->dir("{$proj_dir}/docroot/data-catalog-frontend")
+            ->run();            
+        }
+
+        $this->taskExec("npm install cypress")
+        ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+        ->run();
 
         return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
             ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
