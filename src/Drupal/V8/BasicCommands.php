@@ -147,7 +147,6 @@ class BasicCommands extends \Robo\Tasks
 
             if ($result && $result->getExitCode() === 0) {
                 $this->installFrontend();
-                $this->buildFrontend();
             }
 
             $this->io()->note(
@@ -332,7 +331,7 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Build frontend app.
      */
-    private function buildFrontend()
+    public function frontendBuild()
     {
         $task = $this->taskExec("npm run build")->dir("docroot/data-catalog-frontend");
         $result = $task->run();
