@@ -23,7 +23,6 @@ class TestCommands extends \Robo\Tasks
     public function testInit()
     {
         $this->testingInstallDependencies('dkan/test');
-        $this->testingLinkEnv('dkan/test', 'src/test');
         $this->testingInitDirs('dkan/test');
         if (is_dir('src/test')) {
             $this->testingInitDirs('src/test');
