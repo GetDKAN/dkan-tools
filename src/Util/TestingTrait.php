@@ -40,6 +40,7 @@ trait TestingTrait
             $this->_symlink('../../../' . $src_dir . '/bin/behat', $dest_dir . '/bin/behat');
             $this->_symlink('../../../' . $src_dir . '/bin/phpunit', $dest_dir . '/bin/phpunit');
             $this->_symlink('../../' . $src_dir . '/vendor', $dest_dir . '/vendor');
+            $this->_symlink('../../' . $src_dir . '/dkanextension', $dest_dir . '/dkanextension');
         }
     }
     
