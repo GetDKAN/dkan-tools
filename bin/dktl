@@ -142,7 +142,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 
   if [ -z $DKTL_CHOWN ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:
-    if [ ! -z `find $DKTL_PROJECT_DIRECTORY -user root -print -quit` ]; then
+    if [ ! -z "`find $DKTL_PROJECT_DIRECTORY -user root -print -quit`" ]; then
         $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chown -R `id -u`:`id -g` /var/www
     fi
   fi
