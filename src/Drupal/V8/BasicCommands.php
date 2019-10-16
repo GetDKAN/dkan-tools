@@ -147,7 +147,7 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
-            $this->io()->section('Building frontend application');
+            $this->io()->section('Adding frontend application');
             if (file_exists(Util::getProjectDirectory() . "/src/frontend")) {
                 $result = $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
             }
@@ -333,7 +333,6 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Could not install front-end node modules');
             return $result;
         }
-        
         $this->io()->success('Successfull');
     }
 
@@ -438,6 +437,6 @@ class BasicCommands extends \Robo\Tasks
         $newFile = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         file_put_contents($file, $newFile);
 
-        $this->io()->success('composer.json file updated');
+        $this->io()->success('Successfully updated the composer.json file');
     }
 }
