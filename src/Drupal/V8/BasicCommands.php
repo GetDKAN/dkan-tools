@@ -105,6 +105,10 @@ class BasicCommands extends \Robo\Tasks
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
      * @option $frontend
      *   Build with the DKAN frontend application.
+     * @option $tag
+     *   Specify DKAN tagged release to build.
+     * @option $branch
+     *   Specify DKAN branch to build.
      */
     public function make($opts = [
         'yes|y' => false,
@@ -112,9 +116,15 @@ class BasicCommands extends \Robo\Tasks
         'prefer-dist' => false,
         'no-dev'=> true,
         'optimize-autoloader'=> false,
-        'frontend' => false
+        'frontend' => false,
+        'tag' => NULL,
+        'branch' => NULL
         ])
     {
+        if ($opts['tag'] || $opts['branch']) {
+            $this->editJson($opts);
+        }
+
         // Everything except frontend can be passed to composer.
         $docroot = Util::getProjectDirectory() . "/docroot";
         if (!file_exists($docroot)) {
@@ -137,7 +147,7 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
-            $this->io()->section('Building frontend application');
+            $this->io()->section('Adding frontend application');
             if (file_exists(Util::getProjectDirectory() . "/src/frontend")) {
                 $result = $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
             }
@@ -146,8 +156,7 @@ class BasicCommands extends \Robo\Tasks
             }
 
             if ($result && $result->getExitCode() === 0) {
-                $this->installFrontend();
-                $this->buildFrontend();
+                $this->frontendInstall();
             }
 
             $this->io()->note(
@@ -316,28 +325,26 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Install frontend app.
      */
-    private function installFrontend()
+    private function frontendInstall()
     {
-
         $task = $this->taskExec("npm install")->dir("docroot/data-catalog-frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not install front-end node modules');
             return $result;
         }
-
         $this->io()->success('Successfull');
     }
 
     /**
      * Build frontend app.
      */
-    private function buildFrontend()
+    public function frontendBuild()
     {
         $task = $this->taskExec("npm run build")->dir("docroot/data-catalog-frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install front-end node modules');
+            $this->io()->error('Could not build the front-end');
             return $result;
         }
         $this->io()->success('Successfull');
@@ -412,5 +419,24 @@ class BasicCommands extends \Robo\Tasks
             throw new \Exception("Could not determine Drush version on this system.");
         }
         return $matches[1];
+    }
+
+    /**
+     * Edit the default DKAN composer.json file.
+     */
+    private function editJson($opts)
+    {
+        $file = Util::getProjectDirectory() . "/src/make/composer.json";
+        $json = file_get_contents($file);
+        $data = json_decode($json, true);
+        if ($opts['tag']) {
+            $data['require']['getdkan/dkan2'] = $opts['tag'];
+        } elseif ($opts['branch']) {
+            $data['require']['getdkan/dkan2'] = 'dev-' . $opts['branch'];
+        }
+        $newFile = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        file_put_contents($file, $newFile);
+
+        $this->io()->success('Successfully updated the composer.json file');
     }
 }
