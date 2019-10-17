@@ -28,11 +28,11 @@ class MakeCommands extends \Robo\Tasks
         $yes = (isset($opts['yes|y'])) ? $opts['yes|y'] : false;
         $make_opts = ['yes|y' => $yes];
 
-        $result = $this->makeProfile($make_opts);
-        if ($result->getExitCode() === 0) {
-            $result = $this->makeDrupal($opts);
+        $status = $this->makeProfile($make_opts);
+        if ($status) {
+            $status = $this->makeDrupal($opts);
         }
-        return $result;
+        return $status;
     }
 
     /**
@@ -67,7 +67,7 @@ class MakeCommands extends \Robo\Tasks
             ->arg('dkan')
             ->run();
 
-        return $result;
+        return $result->wasSuccessful();
     }
 
     /**
