@@ -31,7 +31,7 @@ export PATH=$PATH:/myworkspace/dkan-tools/bin
 
 Once you are working in a valid project folder (see next section) you can type `dktl` at any time to see a list of available commands.
 
-## Starting a project
+## Starting a DKAN 1.x project
 To start a project with `dktl`, create a project directory.
 
 ```bash
@@ -69,6 +69,10 @@ dktl install
 ```
 
 You can find the local site URL by typing `dktl docker:surl`.
+
+## Starting a DKAN 2.x project
+
+Instructions can be found [here](https://getdkan.github.io/dkan2/installation.html).
 
 ## Structure of a DKAN-Tools-based project
 

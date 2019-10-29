@@ -148,15 +148,12 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
             $this->io()->section('Adding frontend application');
-            if (file_exists(Util::getProjectDirectory() . "/src/frontend")) {
-                $result = $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
-            }
-            else {
-                $result = $this->downloadFrontend(['yes' => $opts['yes']]);
-            }
+            $result = $this->downloadFrontend(['yes' => $opts['yes']]);
 
             if ($result && $result->getExitCode() === 0) {
-                $this->frontendInstall();
+                $this->io()->note(
+                    'Successfully downloaded data-catalog-frontend to /src/frontend'
+                );
             }
 
             $this->io()->note(
@@ -296,38 +293,41 @@ class BasicCommands extends \Robo\Tasks
     private function downloadFrontend($opts = ['yes|y' => false])
     {
         $confirmation = 'Frontend application already exists in docroot. Remove and re-install?';
-        if (file_exists('docroot/data-catalog-frontend')) {
+        if (file_exists('src/frontend')) {
             if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
                 return false;
             }
-            $this->_deleteDir('docroot/data-catalog-frontend');
+            $this->_deleteDir('src/frontend');
         }
         $result = $this->taskExec('git clone')
             ->option('depth=1')
             ->option('branch', 'master')
             ->arg('https://github.com/GetDKAN/data-catalog-frontend.git')
-            ->arg('data-catalog-frontend')
-            ->dir('docroot')
+            ->arg('frontend')
+            ->dir('src')
             ->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not download front-end app');
             return $result;
         }
-        $result = $this->_deleteDir('docroot/data-catalog-frontend/.git');
+        $result = $this->_deleteDir('src/frontend/.git');
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not remove front-end git folder');
             return $result;
         }
-        $this->io()->success('Successfull');
+        if (file_exists('src/frontend')) {
+            $result = $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
+        }
+        $this->io()->success('Successfully added the frontend application');
         return $result;
     }
 
     /**
      * Install frontend app.
      */
-    private function frontendInstall()
+    public function frontendInstall()
     {
-        $task = $this->taskExec("npm install")->dir("docroot/data-catalog-frontend");
+        $task = $this->taskExec("npm install")->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not install front-end node modules');
@@ -341,7 +341,7 @@ class BasicCommands extends \Robo\Tasks
      */
     public function frontendBuild()
     {
-        $task = $this->taskExec("npm run build")->dir("docroot/data-catalog-frontend");
+        $task = $this->taskExec("npm run build")->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not build the front-end');
