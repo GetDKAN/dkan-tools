@@ -41,8 +41,6 @@ services:
     volumes:
        # MySQL configuration overrides
        - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
-       # Permanent DB data storage
-       - database_data:/var/lib/mysql:delegated
     labels:
       - traefik.enable=false
     network_mode: bridge
