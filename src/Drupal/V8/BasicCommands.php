@@ -148,12 +148,18 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
         if ($opts['frontend'] === true) {
             $this->io()->section('Adding frontend application');
+
+
             $result = $this->downloadFrontend(['yes' => $opts['yes']]);
 
             if ($result && $result->getExitCode() === 0) {
                 $this->io()->note(
                     'Successfully downloaded data-catalog-frontend to /src/frontend'
                 );
+            }
+
+            if (file_exists('src/frontend')) {
+                $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
             }
 
             $this->io()->note(
@@ -290,15 +296,8 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Download frontend App.
      */
-    private function downloadFrontend($opts = ['yes|y' => false])
+    private function downloadFrontend()
     {
-        $confirmation = 'Frontend application already exists in docroot. Remove and re-install?';
-        if (file_exists('src/frontend')) {
-            if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
-                return false;
-            }
-            $this->_deleteDir('src/frontend');
-        }
         $result = $this->taskExec('git clone')
             ->option('depth=1')
             ->option('branch', 'master')
@@ -315,9 +314,7 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Could not remove front-end git folder');
             return $result;
         }
-        if (file_exists('src/frontend')) {
-            $result = $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
-        }
+
         $this->io()->success('Successfully added the frontend application');
         return $result;
     }
