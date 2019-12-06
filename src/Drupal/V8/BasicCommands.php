@@ -3,6 +3,7 @@
 namespace DkanTools\Drupal\V8;
 
 use DkanTools\Util\Util;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -267,10 +268,12 @@ class BasicCommands extends \Robo\Tasks
      */
     private function docrootSymlink($target, $link)
     {
-
         $project_dir = Util::getProjectDirectory();
         $target = $project_dir . "/{$target}";
         $link = $project_dir . "/{$link}";
+        $link_parts = pathinfo($link);
+        $link_dirname = $link_parts['dirname'];
+        $target_path_relative_to_link = (new Filesystem())->makePathRelative($target, $link_dirname);
 
         if (!file_exists($target) || !file_exists('docroot')) {
             $this->io()->error(
@@ -282,7 +285,7 @@ class BasicCommands extends \Robo\Tasks
 
         $result = $this->taskFilesystemStack()->stopOnFail()
             ->remove($link)
-            ->symlink($target, $link)
+            ->symlink($target_path_relative_to_link, $link)
             ->run();
 
         if ($result->getExitCode() != 0) {
