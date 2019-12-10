@@ -128,11 +128,14 @@ services:
 
   solr:
     hostname: solr
-    image: devinci/drupal-solr:3.x
+    image: solr:8
     ports:
       - "8983"
     volumes:
-      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/8:/var/solr"
+    command:
+      - solr-precreate
+      - gettingstarted
     labels:
       - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
     network_mode: bridge
