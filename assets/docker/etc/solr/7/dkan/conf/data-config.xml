@@ -1,0 +1,26 @@
+<dataConfig>
+  <dataSource name="catalog"
+              type="URLDataSource" 
+              encoding="UTF-8"
+              connectionTimeout="5000"
+              readTimeout="10000"
+  />
+    <document>
+      <entity name="dataset"
+              processor="XPathEntityProcessor"
+              stream="true"
+              forEach="/"
+              url="http://dkan/api/1/metastore/schemas/dataset/items"
+              transformer="RegexTransformer"
+              >
+          <field column="identifier" xpath="/identifier" />
+          <field column="title" xpath="/title" />
+          <field column="description" xpath="/description" stripHTML="true" />
+          <field column="publisher" xpath="/publisher/name" />
+          <field column="format" xpath="/distribution/mediaType" />
+          <field column="keyword" xpath="/keyword" />
+          <field column="theme" xpath="/theme" />
+          <field column="modified" xpath="/modified" />
+      </entity>
+    </document>
+</dataConfig>

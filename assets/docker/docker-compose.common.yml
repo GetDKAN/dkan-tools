@@ -128,11 +128,11 @@ services:
 
   solr:
     hostname: solr
-    image: solr:8
+    image: solr:7
     ports:
       - "8983"
     volumes:
-      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/8:/var/solr"
+      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/7:/opt/solr/server/solr/"
     command:
       - solr-precreate
       - gettingstarted
