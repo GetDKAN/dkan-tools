@@ -238,7 +238,7 @@ class BasicCommands extends \Robo\Tasks
             return $result;
         }
         $result = $this->taskComposerRequire()
-            ->dependency('phpunit/phpunit', "6.5.14")
+            ->dependency('phpunit/phpunit', "7.5.18")
             ->dir('/root/.composer')
             ->run();
 
