@@ -147,6 +147,7 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/site', 'docroot/sites/default');
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
+        $this->docrootSymlink('src/schema', 'docroot/schema');
         if ($opts['frontend'] === true) {
             $this->io()->section('Adding frontend application');
 
@@ -280,7 +281,7 @@ class BasicCommands extends \Robo\Tasks
                 "Could not link $target. Folders $target and 'docroot' must both " .
                 "be present to create link."
             );
-            exit;
+            return;
         }
 
         $result = $this->taskFilesystemStack()->stopOnFail()
