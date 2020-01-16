@@ -29,7 +29,7 @@ class DrupalCommands extends \Robo\Tasks
         exec("find docroot -type f -name '.gitignore'", $gitignores);
 
         foreach ($gitignores as $gitignore) {
-            `rm {$gitignore}`;
+            `rm -f {$gitignore}`;
             $this->io()->note("Removing: {$gitignore}");
         }
 
@@ -37,7 +37,7 @@ class DrupalCommands extends \Robo\Tasks
         exec("find docroot -type d -name '.git'", $gits);
 
         foreach ($gits as $git) {
-            `rm -R {$git}`;
+            `rm -Rf {$git}`;
             $this->io()->note("Removing: {$git}");
         }
     }
