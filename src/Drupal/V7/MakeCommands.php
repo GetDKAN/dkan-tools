@@ -31,6 +31,7 @@ class MakeCommands extends \Robo\Tasks
         $status = $this->makeProfile($make_opts);
         if ($status) {
             $status = $this->makeDrupal($opts);
+            $status = $this->dkanPatch();
         }
         return $status;
     }
@@ -118,6 +119,32 @@ class MakeCommands extends \Robo\Tasks
         }
 
     }
+
+    /**
+     * Apply patches to dkan.
+     */
+    public function dkanPatch()
+    {
+        $patchDir = Util::getProjectDirectory() . '/src/patches/dkan';
+        $patchFiles = [];
+
+        if (is_dir($patchDir)) {
+            $patchFiles += scandir($patchDir);
+        }
+        foreach ($patchFiles as $fileName) {
+            $info = pathinfo($fileName);
+            if (in_array($info['extension'], ['patch', 'diff'])) {
+                $fileRelPath = '../src/patches/dkan/' . $fileName;
+                $this->say($fileRelPath);
+                $result = $this->taskExec('patch -p1 --no-backup-if-mismatch -r - <')
+                    ->arg($fileRelPath)
+                    ->dir('dkan')
+                    ->run();
+                $this->say($result->getMessage());
+            }
+        }
+    }
+
     /**
      * Link the DKAN folder to docroot/profiles.
      */
