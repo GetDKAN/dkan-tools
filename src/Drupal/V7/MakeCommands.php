@@ -1,4 +1,5 @@
 <?php
+
 namespace DkanTools\Drupal\V7;
 
 use DkanTools\Util\Util;
@@ -25,8 +26,8 @@ class MakeCommands extends \Robo\Tasks
     */
     public function make($opts = ['yes|y' => false, 'keep-git' => false])
     {
-        $yes = (isset($opts['yes|y'])) ? $opts['yes|y'] : false;
-        $make_opts = ['yes|y' => $yes];
+        $yes = (isset($opts['yes'])) ? $opts['yes'] : false;
+        $make_opts = ['yes' => $yes];
 
         $status = $this->makeProfile($make_opts);
         if ($status) {
@@ -45,7 +46,7 @@ class MakeCommands extends \Robo\Tasks
     public function makeProfile($opts = ['yes|y' => false])
     {
         if (file_exists('dkan/modules/contrib')) {
-            if (!$opts['yes|y'] && !$this->io()->confirm('DKAN dependencies have already been dowloaded. Would you like to delete and dowload them again?')) {
+            if (!$opts['yes'] && !$this->io()->confirm('DKAN dependencies have already been downloaded. Would you like to delete and download them again?')) {
                 $this->io()->warning('Make aborted');
                 return false;
             }
@@ -115,9 +116,8 @@ class MakeCommands extends \Robo\Tasks
         $this->linkModules();
         $this->linkThemes();
         if (!$opts['keep-git']) {
-           $this->makeRmGit();
+            $this->makeRmGit();
         }
-
     }
 
     /**
@@ -219,7 +219,8 @@ class MakeCommands extends \Robo\Tasks
     /**
      * Remove all .git and .gitignore files from docroot and dkan.
      */
-    public function makeRmGit() {
+    public function makeRmGit()
+    {
         foreach (['docroot', 'dkan'] as $dir) {
             $gitignores = [];
             exec("find {$dir} -type f -name '.gitignore'", $gitignores);
@@ -238,5 +239,4 @@ class MakeCommands extends \Robo\Tasks
             }
         }
     }
-
 }
