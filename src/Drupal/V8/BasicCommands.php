@@ -144,6 +144,7 @@ class BasicCommands extends \Robo\Tasks
         $composerTask->run();
 
         // Symlink dirs from src into docroot.
+        $this->docrootSymlink('src/config', 'docroot/config');
         $this->docrootSymlink('src/site', 'docroot/sites/default');
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
@@ -348,20 +349,6 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Could not build the front-end');
             return $result;
         }
-        $this->io()->success('Successfull');
-    }
-
-    /**
-     * Link src/themes to  docroot/sites/all/modules/themes.
-     */
-    private function linkJsonForm()
-    {
-        $result = $this->_exec('ln -s vendor/bower-asset docroot/libraries');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
-            return $result;
-        }
-
         $this->io()->success('Successfull');
     }
 
