@@ -174,8 +174,6 @@ class BasicCommands extends \Robo\Tasks
             );
         }
 
-        $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
-
         if (!$this->checkDrushCompatibility()) {
             $this->io()->warning(
                 'Your version of Drush is incompatible with DKAN2. Please upgrade ' .
@@ -278,7 +276,7 @@ class BasicCommands extends \Robo\Tasks
         $target_path_relative_to_link = (new Filesystem())->makePathRelative($target, $link_dirname);
 
         if (!file_exists($target) || !file_exists('docroot')) {
-            $this->io()->error(
+            $this->io()->warning(
                 "Could not link $target. Folders $target and 'docroot' must both " .
                 "be present to create link."
             );
@@ -291,7 +289,7 @@ class BasicCommands extends \Robo\Tasks
             ->run();
 
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
+            $this->io()->warning('Could not create link');
         } else {
             $this->io()->success("Successfully linked $target to $link");
         }
