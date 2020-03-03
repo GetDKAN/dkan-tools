@@ -350,7 +350,7 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->success('Successfull');
     }
 
-    public function install($opts = ['frontend' => false, 'demo' => false])
+    public function install($opts = ['frontend' => false])
     {
         $result = $this->taskExec('drush si -y')
             ->dir(Util::getProjectDocroot())
@@ -359,12 +359,6 @@ class BasicCommands extends \Robo\Tasks
         if ($opts['frontend'] === true) {
             $result = $this->taskExec('drush en -y')
                 ->arg('dkan_frontend')
-                ->dir(Util::getProjectDocroot())
-                ->run();
-        }
-        if ($opts['demo'] === true) {
-            $result = $this->taskExec('drush en -y')
-                ->arg('dkan_search_demo')
                 ->dir(Util::getProjectDocroot())
                 ->run();
         }
