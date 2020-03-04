@@ -144,7 +144,6 @@ class BasicCommands extends \Robo\Tasks
         $composerTask->run();
 
         // Symlink dirs from src into docroot.
-        $this->docrootSymlink('src/config', 'docroot/config');
         $this->docrootSymlink('src/site', 'docroot/sites/default');
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
         $this->docrootSymlink('src/themes', 'docroot/themes/custom');
