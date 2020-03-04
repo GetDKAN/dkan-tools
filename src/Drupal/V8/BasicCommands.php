@@ -173,8 +173,6 @@ class BasicCommands extends \Robo\Tasks
             );
         }
 
-        $this->docrootSymlink('docroot/vendor/bower-asset', 'docroot/libraries');
-
         if (!$this->checkDrushCompatibility()) {
             $this->io()->warning(
                 'Your version of Drush is incompatible with DKAN2. Please upgrade ' .
@@ -277,7 +275,7 @@ class BasicCommands extends \Robo\Tasks
         $target_path_relative_to_link = (new Filesystem())->makePathRelative($target, $link_dirname);
 
         if (!file_exists($target) || !file_exists('docroot')) {
-            $this->io()->error(
+            $this->io()->warning(
                 "Could not link $target. Folders $target and 'docroot' must both " .
                 "be present to create link."
             );
@@ -290,7 +288,7 @@ class BasicCommands extends \Robo\Tasks
             ->run();
 
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
+            $this->io()->warning('Could not create link');
         } else {
             $this->io()->success("Successfully linked $target to $link");
         }
@@ -348,20 +346,6 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Could not build the front-end');
             return $result;
         }
-        $this->io()->success('Successfull');
-    }
-
-    /**
-     * Link src/themes to  docroot/sites/all/modules/themes.
-     */
-    private function linkJsonForm()
-    {
-        $result = $this->_exec('ln -s vendor/bower-asset docroot/libraries');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
-            return $result;
-        }
-
         $this->io()->success('Successfull');
     }
 
