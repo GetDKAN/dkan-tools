@@ -143,6 +143,9 @@ class BasicCommands extends \Robo\Tasks
         }
         $composerTask->run();
 
+        // Build metadata form app.
+        $this->metadataFormBuild();
+
         // Symlink dirs from src into docroot.
         $this->docrootSymlink('src/site', 'docroot/sites/default');
         $this->docrootSymlink('src/modules', 'docroot/modules/custom');
@@ -344,6 +347,41 @@ class BasicCommands extends \Robo\Tasks
         $result = $task->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not build the front-end');
+            return $result;
+        }
+        $this->io()->success('Successfull');
+    }
+
+    /**
+     * Build metadata form app.
+     */
+    public function metadataFormBuild()
+    {
+        $task = $this->taskExec("npm install")->dir("docroot/profiles/contrib/dkan2/modules/custom/dkan_metadata_form/js/app/src");
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not install front-end node modules');
+            return $result;
+        }
+
+        $task = $this->taskExec("npm run build")->dir("docroot/profiles/contrib/dkan2/modules/custom/dkan_metadata_form/js/app/src");
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not build the metadata form app');
+            return $result;
+        }
+
+        $task = $this->taskExec("drush dkan-metadata-form:sync")->dir(Util::getProjectDocroot());
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not run dkan-metadata-form:sync');
+            return $result;
+        }
+
+        $task = $this->taskExec("drush cr")->dir(Util::getProjectDocroot());
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not rebuild cache');
             return $result;
         }
         $this->io()->success('Successfull');
