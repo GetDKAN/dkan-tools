@@ -62,7 +62,6 @@ class DkanCommands extends \Robo\Tasks
           "https://github.com/GetDKAN/dkan/releases/download/{$version}/{$fileName}",
           "https://github.com/GetDKAN/dkan/archive/{$fileName}",
         ];
-
         $source = null;
         foreach ($sources as $s) {
             if (Util::urlExists($s)) {
