@@ -6,4 +6,3 @@ plugins:
       standard: "PSR2"
 exclude_patterns:
  - "bin/dktl"
- - "vendor/"
