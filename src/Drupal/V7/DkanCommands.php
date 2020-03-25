@@ -52,9 +52,7 @@ class DkanCommands extends \Robo\Tasks
         $fileName = "{$version}.tar.gz";
         $archive = Util::TMP_DIR . "/dkan-{$fileName}";
         if (file_exists($archive)) {
-            $this->io()->warning(
-                "DKAN archive $fileName.tar.gz already exists; skipping download, will attempt extraction."
-            );
+            $this->io()->warning("$fileName.tar.gz already exists; will attempt extraction.");
             return $archive;
         }
 
@@ -62,6 +60,7 @@ class DkanCommands extends \Robo\Tasks
           "https://github.com/GetDKAN/dkan/releases/download/{$version}/{$fileName}",
           "https://github.com/GetDKAN/dkan/archive/{$fileName}",
         ];
+
         $source = null;
         foreach ($sources as $s) {
             if (Util::urlExists($s)) {
@@ -79,7 +78,6 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("wget -O {$archive} {$source}")->run();
         return $archive;
     }
-
 
     private function dkanTempReplace($tmp_dkan)
     {
