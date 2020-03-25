@@ -15,8 +15,8 @@ class Util
         return getenv("DKTL_DIRECTORY");
     }
 
-    public static function getProjectDirectory() 
-    {        
+    public static function getProjectDirectory()
+    {
         if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "init") {
             $directory = exec("pwd");
             return $directory;
@@ -25,7 +25,7 @@ class Util
         return getenv("DKTL_PROJECT_DIRECTORY");
     }
 
-    public static function getProjectDocroot() 
+    public static function getProjectDocroot()
     {
         return self::getProjectDirectory() . "/docroot";
     }
@@ -85,7 +85,8 @@ class Util
     /**
      * Copy of \Drupal\Component\Utility\Crypt::randomBytesBase64()
      */
-    public static function generateHashSalt($count = 32) {
+    public static function generateHashSalt($count = 32)
+    {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(random_bytes($count)));
     }
 
@@ -94,7 +95,8 @@ class Util
      * Exception.
      */
 
-    public static function ensureFilesExist(array $paths, $message) {
+    public static function ensureFilesExist(array $paths, $message)
+    {
         foreach ($paths as $path) {
             if (! file_exists($path)) {
                 throw new \Exception("{$path} is missing.");

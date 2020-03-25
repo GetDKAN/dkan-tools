@@ -24,7 +24,8 @@ class DrupalCommands extends \Robo\Tasks
     /**
      * Remove all gitignores from docroot.
      */
-    public function drupalRemoveGitIgnores() {
+    public function drupalRemoveGitIgnores()
+    {
         $gitignores = [];
         exec("find docroot -type f -name '.gitignore'", $gitignores);
 

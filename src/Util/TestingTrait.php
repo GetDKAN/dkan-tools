@@ -10,7 +10,8 @@ trait TestingTrait
     /**
      * Initialize test folders and install dependencies in directory.
      */
-    protected function testingInstallDependencies($dir) {
+    protected function testingInstallDependencies($dir)
+    {
         if (!file_exists($dir . '/vendor')) {
             $this->io()->section('Installing test dependencies in ' . $dir);
             $this->taskExec('composer install --prefer-source --no-interaction')
@@ -22,7 +23,8 @@ trait TestingTrait
     /**
      * Initialize test subdirectories
      */
-    protected function testingInitDirs($dir) {
+    protected function testingInitDirs($dir)
+    {
         if (!file_exists($dir . '/assets')) {
             $this->io()->section('Creating test subdirectories in ' . $dir);
             $this->_mkdir($dir . '/assets/junit');
@@ -33,7 +35,8 @@ trait TestingTrait
      * Establish links from a test environment to an environment with installed
      * test dependencies.
      */
-    protected function testingLinkEnv($src_dir, $dest_dir) {
+    protected function testingLinkEnv($src_dir, $dest_dir)
+    {
         if (!file_exists($dest_dir . '/bin')) {
             $this->io()->section('Linking test environment ' . $dest_dir . ' to ' . $src_dir);
             $this->_mkdir($dest_dir . '/bin');
@@ -47,7 +50,7 @@ trait TestingTrait
 
     /**
      * Helper function to run Behat tests in a particular directory.
-     * 
+     *
      * @param string $dir test directory
      * @param string $suite name of the test suite to run
      * @param array $args additional arguments to pass to behat.
@@ -74,7 +77,7 @@ trait TestingTrait
 
     /**
      * Helper function to run PHPUnit tests in a particular directory.
-     * 
+     *
      * @param string $dir test directory
      * @param array $args additional arguments to pass to PHPUnit.
      */

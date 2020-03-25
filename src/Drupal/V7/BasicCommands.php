@@ -2,7 +2,6 @@
 
 namespace DkanTools\Drupal\V7;
 
-
 class BasicCommands extends \Robo\Tasks
 {
 
@@ -59,5 +58,4 @@ class BasicCommands extends \Robo\Tasks
         
         return $phpunitExec->run();
     }
-
 }

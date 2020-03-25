@@ -15,18 +15,18 @@ class DkanCommands extends \Robo\Tasks
     /**
      * Run DKAN Cypress Tests.
      */
-    public function dkanTestCypress($arg = NULL)
+    public function dkanTestCypress($arg = null)
     {
         $proj_dir = Util::getProjectDirectory();
 
-        if ($arg === 'frontend'){
+        if ($arg === 'frontend') {
             $this->taskExec("npm install cypress")
             ->dir("{$proj_dir}/docroot/data-catalog-frontend")
             ->run();
 
             return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
             ->dir("{$proj_dir}/docroot/data-catalog-frontend")
-            ->run();            
+            ->run();
         }
 
         $this->taskExec("npm install cypress")

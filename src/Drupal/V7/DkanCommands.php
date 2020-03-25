@@ -24,13 +24,13 @@ class DkanCommands extends \Robo\Tasks
      * @option $release
      *   Redundant to the $verion argument. Provided for historical reasons.
      */
-    public function dkanGet(string $version = NULL, $opts = ['source' => false, 'release' => NULL])
+    public function dkanGet(string $version = null, $opts = ['source' => false, 'release' => null])
     {
         if (!$version && $opts['release']) {
             $version = $opts['release'];
         }
         if (!$version) {
-          throw new \Exception('You must specify a version.');
+            throw new \Exception('You must specify a version.');
         }
         Util::prepareTmp();
         if ($opts['source']) {
@@ -96,5 +96,4 @@ class DkanCommands extends \Robo\Tasks
         $verb = $replaced ? 'replaced' : 'created';
         $this->say("DKAN profile directory $verb.");
     }
-
 }

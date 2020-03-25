@@ -1,6 +1,6 @@
 <?php
 if (getenv("DKTL_DOCKER") == "1") {
-  $databases = array(
+    $databases = array(
     'default' => array(
       'default' => array(
         'database' => 'drupal',
@@ -12,6 +12,6 @@ if (getenv("DKTL_DOCKER") == "1") {
         'prefix' => '',
       ),
     ),
-  );
-  $settings['file_public_base_url'] = "http://dkan/sites/default/files";
+    );
+    $settings['file_public_base_url'] = "http://dkan/sites/default/files";
 }
