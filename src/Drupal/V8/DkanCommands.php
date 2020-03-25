@@ -92,7 +92,10 @@ class DkanCommands extends \Robo\Tasks
         $dkan_dir = "{$proj_dir}/docroot/profiles/contrib/dkan2";
 
         if (!file_exists("{$dkan_dir}/cc-test-reporter")) {
-            $this->taskExec("curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter")
+            $this->taskExec(
+                "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > "
+                . "./cc-test-reporter"
+            )
                 ->dir($dkan_dir)->run();
             $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkan_dir)->run();
         }
@@ -108,7 +111,10 @@ class DkanCommands extends \Robo\Tasks
 
         $result = $phpunitExec->run();
 
-        $this->taskExec("./cc-test-reporter after-build --coverage-input-type clover --exit-code $?")->dir($dkan_dir)->run();
+        $this->taskExec(
+            "./cc-test-reporter after-build --coverage-input-type clover --exit-code $?"
+        )
+            ->dir($dkan_dir)->run();
         return $result;
     }
 }

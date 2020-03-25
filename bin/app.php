@@ -15,7 +15,10 @@ $discovery->setSearchPattern('*Commands.php');
 $defaultCommandClasses = $discovery->discover("{$dktl_directory}/src", '\\DkanTools');
 
 $discovery->setSearchPattern('*Commands.php');
-$drupalVersionSpecificCommandsClasses = $discovery->discover("{$dktl_directory}/src/Drupal/{$drupalVersion}", '\\DkanTools\\Drupal\\' . $drupalVersion);
+$drupalVersionSpecificCommandsClasses = $discovery->discover(
+    "{$dktl_directory}/src/Drupal/{$drupalVersion}",
+    '\\DkanTools\\Drupal\\' . $drupalVersion
+);
 
 $customCommandClasses = [];
 if (file_exists("{$dktl_project_directory}/src/command")) {

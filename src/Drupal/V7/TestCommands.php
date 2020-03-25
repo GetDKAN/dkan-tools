@@ -130,7 +130,9 @@ class TestCommands extends \Robo\Tasks
 
         $phpcs_command = $this->getVendorCommand("phpcs");
 
-        $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
+        $task = $this->taskExec(
+            "{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer"
+        );
         $task->run();
 
         $task = $this->taskExec($phpcs_command);
@@ -164,10 +166,14 @@ class TestCommands extends \Robo\Tasks
 
         $phpcs_command = $this->getVendorCommand("phpcs");
 
-        $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
-        $task->run();
+        $this->taskExec($phpcs_command)
+            ->option('config-set', 'installed_paths')
+            ->arg("{$dktl_dir}/vendor/drupal/coder/coder_sniffer")
+            ->run();
 
-        $task = $this->taskExec("{$phpcs_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+        $task = $this->taskExec($phpcs_command)
+            ->option('standard', 'Drupal,DrupalPractice')
+            ->option('extensions', 'php,module,inc,install,test,profile,theme,info');
 
         foreach ($paths as $path) {
             $task->arg("{$project_dir}/{$path}");
@@ -185,7 +191,9 @@ class TestCommands extends \Robo\Tasks
 
         $phpcbf_command = $this->getVendorCommand("phpcbf");
 
-        $task = $this->taskExec("{$phpcbf_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+        $task = $this->taskExec($phpcbf_command)
+            ->option('standard', 'Drupal,DrupalPractice')
+            ->option('extensions', 'php,module,inc,install,test,profile,theme,info');
 
         foreach ($paths as $path) {
             $task->arg("{$project_dir}/{$path}");

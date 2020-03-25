@@ -157,7 +157,10 @@ class BasicCommands extends \Robo\Tasks
         $skip_tables = array('dkan_datastore_*');
         $skip_tables_list = implode(', ', $skip_tables);
 
-        $command = "drush $alias sql-dump --structure-tables-list='" . $structure_tables_list . "' --skip-tables-list='" . $skip_tables_list . "' > excluded_tables.sql";
-        return $this->taskExec($command)->run();
+        return $this->taskExec("drush $alias sql-dump")
+            ->option('structure-tables-list', $structure_tables_list)
+            ->option('skip-tables-list', $skip_tables_list)
+            ->rawArg('> excluded_tables.sql')
+            ->run();
     }
 }

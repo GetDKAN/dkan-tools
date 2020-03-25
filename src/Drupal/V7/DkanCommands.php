@@ -52,7 +52,9 @@ class DkanCommands extends \Robo\Tasks
         $fileName = "{$version}.tar.gz";
         $archive = Util::TMP_DIR . "/dkan-{$fileName}";
         if (file_exists($archive)) {
-            $this->io()->warning("DKAN archive $fileName.tar.gz already exists; skipping download, will attempt extraction.");
+            $this->io()->warning(
+                "DKAN archive $fileName.tar.gz already exists; skipping download, will attempt extraction."
+            );
             return $archive;
         }
 
