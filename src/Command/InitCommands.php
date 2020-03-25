@@ -4,7 +4,7 @@ namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 
-class initCommands extends \Robo\Tasks
+class InitCommands extends \Robo\Tasks
 {
 
     /**

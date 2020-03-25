@@ -59,14 +59,12 @@ class RestoreCommands extends \Robo\Tasks
         // If no file argument provided, check out the backups dir.
         if (!$file) {
             $filepath = $this->getDbBackupPath();
-        }
-        // If provided a URL, get it with getFile()
-        elseif (filter_var($file, FILTER_VALIDATE_URL)) {
+        } elseif (filter_var($file, FILTER_VALIDATE_URL)) {
+            // If provided a URL, get it with getFile().
             $filepath = $this->getFile($file);
             $tempNeedsCleanup = true;
-        }
-        // If not a URL check for existence of file in /backups.
-        elseif (!file_exists('backups') || !file_exists("backups/{$file}")) {
+        } elseif (!file_exists('backups') || !file_exists("backups/{$file}")) {
+            // If not a URL check for existence of file in /backups.
             throw new \Exception("{$file} backup could not be found.");
         } else {
             $filepath = realpath("backups/$file");

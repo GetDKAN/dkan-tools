@@ -1,5 +1,7 @@
 <?php
 
+namespace DkanTools\Test;
+
 class DktlV8Test extends \PHPUnit\Framework\TestCase
 {
 
