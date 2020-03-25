@@ -1,0 +1,9 @@
+version: 2
+plugins:
+  phpcodesniffer:
+    enabled: true
+    config:
+      standard: "PSR12"
+exclude_patterns:
+ - "bin/dktl"
+ - "vendor/"
