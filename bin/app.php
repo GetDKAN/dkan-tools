@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $drupalVersion = isset($_SERVER['DRUPAL_VERSION']) ? $_SERVER['DRUPAL_VERSION'] : "V7";
 

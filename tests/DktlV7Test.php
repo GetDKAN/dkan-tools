@@ -1,7 +1,5 @@
 <?php
 
-
-
 class DktlV7Test extends \PHPUnit\Framework\TestCase
 {
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace DkanTools\Util;
 
 /**

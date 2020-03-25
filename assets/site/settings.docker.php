@@ -1,4 +1,5 @@
 <?php
+
 if (getenv("DKTL_DOCKER") == "1") {
     $databases = array(
     'default' => array(
