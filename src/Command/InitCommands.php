@@ -4,13 +4,14 @@ namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 
-class initCommands extends \Robo\Tasks
+class InitCommands extends \Robo\Tasks
 {
 
     /**
      * Generates basic configuration for a DKAN project to work with CircleCI.
      */
-    public function initCircleCI() {
+    public function initCircleCI()
+    {
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
         return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
@@ -19,7 +20,8 @@ class initCommands extends \Robo\Tasks
     /**
      * Generates basic configuration for a DKAN project to work with ProboCI.
      */
-    public function initProboCI() {
+    public function initProboCI()
+    {
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
         $collection = $this->collectionBuilder();

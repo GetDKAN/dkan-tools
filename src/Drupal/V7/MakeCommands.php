@@ -46,7 +46,9 @@ class MakeCommands extends \Robo\Tasks
     public function makeProfile($opts = ['yes|y' => false])
     {
         if (file_exists('dkan/modules/contrib')) {
-            if (!$opts['yes'] && !$this->io()->confirm('DKAN dependencies have already been downloaded. Would you like to delete and download them again?')) {
+            $confirmMessage = 'DKAN dependencies have already been downloaded. ' .
+                'Would you like to delete and download them again?';
+            if (!$opts['yes'] && !$this->io()->confirm($confirmMessage)) {
                 $this->io()->warning('Make aborted');
                 return false;
             }
@@ -90,7 +92,8 @@ class MakeCommands extends \Robo\Tasks
             return false;
         }
         if (file_exists('docroot')) {
-            if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. Delete it and reinstall drupal?')) {
+            if (!$opts['yes'] && !$this->io()->confirm('docroot folder alredy exists. ' .
+                'Delete it and reinstall drupal?')) {
                 $this->io()->warning('Make aborted');
                 return false;
             }
@@ -113,8 +116,8 @@ class MakeCommands extends \Robo\Tasks
 
         $this->linkDkan();
         $this->linkSitesDefault();
-        $this->linkModules();
-        $this->linkThemes();
+        $this->linkSrcSitesAll('modules', 'modules/custom');
+        $this->linkSrcSitesAll('themes', 'themes/custom');
         if (!$opts['keep-git']) {
             $this->makeRmGit();
         }
@@ -151,7 +154,8 @@ class MakeCommands extends \Robo\Tasks
     private function linkDkan()
     {
         if (!file_exists('dkan') || !file_exists('docroot')) {
-            $this->io()->error("Could not link profile folder. Folders 'dkan' and 'docroot' must both be present to create link.");
+            $this->io()->error("Could not link profile folder. " .
+                "Folders 'dkan' and 'docroot' must both be present to create link.");
             exit;
         }
 
@@ -170,7 +174,9 @@ class MakeCommands extends \Robo\Tasks
     private function linkSitesDefault()
     {
         if (!file_exists('src/site') || !file_exists('docroot')) {
-            $this->io()->error("Could not link sites/default folder. Folders 'src/site' and 'docroot' must both be present to create the link.");
+            $sitesError = "Could not link sites/default folder. " .
+                "Folders 'src/site' and 'docroot' must both be present to create the link.";
+            $this->io()->error($sitesError);
             exit;
         }
 
@@ -183,39 +189,22 @@ class MakeCommands extends \Robo\Tasks
     /**
      * Link src/modules to  docroot/sites/all/modules/custom.
      */
-    private function linkModules()
+    private function linkSrcSitesAll($original, $test)
     {
-        if (!file_exists('src/modules') || !file_exists('docroot')) {
-            $this->io()->error("Could not link modules. Folders 'src/modules' and 'docroot' must both be present to create link.");
+        if (!file_exists($original) || !file_exists('docroot')) {
+            $this->io()->error("Could not link {$original}. " .
+                "Folders 'src/{$original}' and 'docroot' must both be present to create link.");
             exit;
         }
 
-        $result = $this->_exec('ln -s ../../../../src/modules docroot/sites/all/modules/custom');
+        $result = $this->_exec("ln -s ../../../../src/{$original} docroot/sites/all/{$dest}");
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not create link');
             return $result;
         }
-        $this->io()->success('Successfully linked src/modules to docroot/sites/all/modules/custom');
+        $this->io()->success("Successfully linked src/{$original} to docroot/sites/all/{$dest}");
     }
-
-    /**
-     * Link src/themes to  docroot/sites/all/modules/themes.
-     */
-    private function linkThemes()
-    {
-        if (!file_exists('src/themes') || !file_exists('docroot')) {
-            throw new \Exception("Could not link themes. Folders 'src/themes' and 'docroot' must both be present to create link.");
-            return;
-        }
-        $result = $this->_exec('ln -s ../../../../src/themes docroot/sites/all/themes/custom');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not create link');
-            return $result;
-        }
-
-        $this->io()->success('Successfully linked src/themes to docroot/sites/all/themes/custom');
-    }
-
+    
     /**
      * Remove all .git and .gitignore files from docroot and dkan.
      */

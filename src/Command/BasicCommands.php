@@ -68,7 +68,8 @@ class BasicCommands extends \Robo\Tasks
     /**
      * Check for existence of XDEBUG_DKTL environment variable.
      */
-    private function xdebugCheck() {
+    private function xdebugCheck()
+    {
         $xdebugDktl = getenv("XDEBUG_DKTL");
         if (!$xdebugDktl) {
             throw new \Exception("XDEBUG_DKTL environment variable must be "
@@ -76,18 +77,18 @@ class BasicCommands extends \Robo\Tasks
         }
     }
 
-    /** 
+    /**
      * Start xdebug on CLI and web containers.
-     * 
+     *
      * This command adds a .ini file to your src/docker/etc/php directory and
      * restarts the CLI and web containers. It checks for compatibility by
      * looking for a DKTL_XDEBUG environment variable. This is set by default in
      * DKAN Tools' containers, but you may need to set it again if using your
      * own.
-     * 
+     *
      * Adding /src/docker/etc to your project .gitignore is reccomended.
      */
-    public function xdebugStart() 
+    public function xdebugStart()
     {
         $this->xdebugCheck();
         
@@ -99,7 +100,7 @@ class BasicCommands extends \Robo\Tasks
         $f = 'src/docker/etc/php/xdebug.ini';
         if (file_exists($f)) {
             throw new \Exception("File {$f} already exists.");
-        } 
+        }
 
         $result = $this->taskWriteToFile($f)
             ->textFromFile("$dktlRoot/assets/docker/etc/php/$sourceFile")
@@ -108,10 +109,10 @@ class BasicCommands extends \Robo\Tasks
         Util::directoryAndFileCreationCheck($result, $f, $this->io());
     }
 
-    /** 
+    /**
      * Stop xdebug on CLI and web containers.
-     * 
-     * Removes the xdebug.ini file and restarts CLI and web containers. See 
+     *
+     * Removes the xdebug.ini file and restarts CLI and web containers. See
      * xdebug:start for more information.
      */
     public function xdebugStop()
@@ -123,8 +124,7 @@ class BasicCommands extends \Robo\Tasks
         if ($result) {
             $this->io()->success("Removed xdebug.ini; restarting.");
             return $result;
-        }
-        else {
+        } else {
             throw new \Exception("Failed, xdebug.ini not found.");
         }
     }
@@ -137,27 +137,30 @@ class BasicCommands extends \Robo\Tasks
    *
    * @param String $alias Drush alias of the site we want the db from.
    */
-  public function siteGrabDatabase($alias)
-  {
-    // Tables for which we want the structure and not the data.
-    $structure_tables_common = array(
-      'accesslog', 'batch', 'cache', 'cache_*', '*_cache', 'ctools_views_cache',
-      'ctools_object_cache', 'flood', 'history', 'queue', 'search_*',
-      'semaphore', 'sessions', 'watchdog'
-    );
-    $structure_tables_devel = array('devel_queries', 'devel_times');
-    $structure_tables_webform = array('webform_submitted_data');
-    $structure_tables = array_merge(
-      $structure_tables_common,
-      $structure_tables_devel,
-      $structure_tables_webform
-    );
-    $structure_tables_list = implode(', ', $structure_tables);
-    // Tables to be completely skipped.
-    $skip_tables = array('dkan_datastore_*');
-    $skip_tables_list = implode(', ', $skip_tables);
+    public function siteGrabDatabase($alias)
+    {
+      // Tables for which we want the structure and not the data.
+        $structure_tables_common = array(
+        'accesslog', 'batch', 'cache', 'cache_*', '*_cache', 'ctools_views_cache',
+        'ctools_object_cache', 'flood', 'history', 'queue', 'search_*',
+        'semaphore', 'sessions', 'watchdog'
+        );
+        $structure_tables_devel = array('devel_queries', 'devel_times');
+        $structure_tables_webform = array('webform_submitted_data');
+        $structure_tables = array_merge(
+            $structure_tables_common,
+            $structure_tables_devel,
+            $structure_tables_webform
+        );
+        $structure_tables_list = implode(', ', $structure_tables);
+      // Tables to be completely skipped.
+        $skip_tables = array('dkan_datastore_*');
+        $skip_tables_list = implode(', ', $skip_tables);
 
-    $command = "drush $alias sql-dump --structure-tables-list='" . $structure_tables_list . "' --skip-tables-list='" . $skip_tables_list . "' > excluded_tables.sql";
-    return $this->taskExec($command)->run();
-  }
+        return $this->taskExec("drush $alias sql-dump")
+            ->option('structure-tables-list', $structure_tables_list)
+            ->option('skip-tables-list', $skip_tables_list)
+            ->rawArg('> excluded_tables.sql')
+            ->run();
+    }
 }

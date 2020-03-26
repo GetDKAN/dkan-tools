@@ -1,4 +1,5 @@
 <?php
+
 namespace DkanTools\Drupal\V8;
 
 use DkanTools\Util\Util;
@@ -24,7 +25,8 @@ class DrupalCommands extends \Robo\Tasks
     /**
      * Remove all gitignores from docroot.
      */
-    public function drupalRemoveGitIgnores() {
+    public function drupalRemoveGitIgnores()
+    {
         $gitignores = [];
         exec("find docroot -type f -name '.gitignore'", $gitignores);
 

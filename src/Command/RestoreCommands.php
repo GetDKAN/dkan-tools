@@ -1,4 +1,5 @@
 <?php
+
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
@@ -28,7 +29,7 @@ class RestoreCommands extends \Robo\Tasks
      *
      * It is reccomended that you set the options for this in command in
      * dktl.yml (see README for more information).
-     * 
+     *
      * @todo Give feedback when no options provided.
      *
      * @param array $opts
@@ -37,13 +38,13 @@ class RestoreCommands extends \Robo\Tasks
      * @option $files_url
      *   A url to the site files archive. zip, gz, and tar.gz files are supported.
      */
-    public function restore($opts = ['db_url' => NULL, 'files_url' => NULL])
+    public function restore($opts = ['db_url' => null, 'files_url' => null])
     {
         if ($opts['db_url']) {
-          $this->restoreDb($opts['db_url']);
+            $this->restoreDb($opts['db_url']);
         }
         if ($opts['files_url']) {
-          $this->restoreFiles($opts['files_url']);
+            $this->restoreFiles($opts['files_url']);
         }
     }
 
@@ -53,23 +54,20 @@ class RestoreCommands extends \Robo\Tasks
      * @param string $file
      *   URL to remote backup or a filename that lives in the /backups directory.
      */
-    public function restoreDb($file = NULL)
+    public function restoreDb($file = null)
     {
         // If no file argument provided, check out the backups dir.
         if (!$file) {
             $filepath = $this->getDbBackupPath();
-        }
-        // If provided a URL, get it with getFile()
-        elseif (filter_var($file, FILTER_VALIDATE_URL)) {
+        } elseif (filter_var($file, FILTER_VALIDATE_URL)) {
+            // If provided a URL, get it with getFile().
             $filepath = $this->getFile($file);
-            $tempNeedsCleanup = TRUE;
-        }
-        // If not a URL check for existence of file in /backups.
-        elseif (!file_exists('backups') || !file_exists("backups/{$file}")) {
+            $tempNeedsCleanup = true;
+        } elseif (!file_exists('backups') || !file_exists("backups/{$file}")) {
+            // If not a URL check for existence of file in /backups.
             throw new \Exception("{$file} backup could not be found.");
-        }
-        else {
-          $filepath = realpath("backups/$file");
+        } else {
+            $filepath = realpath("backups/$file");
         }
         $info = pathinfo($filepath);
 
@@ -77,16 +75,14 @@ class RestoreCommands extends \Robo\Tasks
         $s->exec('drush -y sql-drop');
         if ($info['extension'] == "gz") {
             $s->exec("zcat $filepath | drush sqlc");
-        }
-        else {
+        } else {
             $s->exec("drush sqlc < $filepath");
         }
         $result = $s->run();
 
         if ($result->getExitCode() == 0) {
             $this->io()->success('Database restored.');
-        }
-        else {
+        } else {
             $this->io()->error('Issues restoring the database.');
         }
         Util::cleanupTmp();
@@ -97,22 +93,21 @@ class RestoreCommands extends \Robo\Tasks
     /**
      * Ask for which backup to use from the project /backups dir
      */
-    private function getDbBackupPath() {
+    private function getDbBackupPath()
+    {
         if (file_exists('backups')) {
             $backups = array_values(array_diff(scandir('backups'), ['.', '..']));
             if (empty($backups)) {
-              throw new \Exception('No backup files available.');
-            }
-            elseif (count($backups) === 1) {
-              $filename = current($backups);
-              $this->io()->note("No filename provided; using $filename.");
+                throw new \Exception('No backup files available.');
+            } elseif (count($backups) === 1) {
+                $filename = current($backups);
+                $this->io()->note("No filename provided; using $filename.");
             }
             if (!empty($backups)) {
-              $filename = $this->io()->choice('Choose backup file', $backups);
+                $filename = $this->io()->choice('Choose backup file', $backups);
             }
             return realpath("backups/$filename");
-        }
-        else {
+        } else {
             throw new \Exception("No backup files available.");
         }
     }
@@ -139,8 +134,8 @@ class RestoreCommands extends \Robo\Tasks
             $this->restoreFilesCopy("{$parentDir}/private", "{$projectDirectory}/private");
         }
         if (!is_dir("{$parentDir}/files") && !is_dir("{$parentDir}/private")) {
-          $this->io->warning('No files found');
-          return FALSE;
+            $this->io->warning('No files found');
+            return false;
         }
 
         Util::cleanupTmp();
@@ -159,29 +154,26 @@ class RestoreCommands extends \Robo\Tasks
         $info = pathinfo($filePath);
         $extension = $info['extension'];
 
-        if($extension == "zip") {
+        if ($extension == "zip") {
             $taskUnzip = $this->taskExec("unzip $filePath -d {$tmpPath}");
             $parentDir = substr($filePath, 0, -4);
-        }
-        else if($extension == "gz") {
+        } elseif ($extension == "gz") {
             if (substr_count($filePath, ".tar") > 0) {
                 $taskUnzip = $this->taskExec("tar -xvzf {$filePath}")->dir($tmpPath);
                 $parentDir = substr($filePath, 0, -7);
-            }
-            else {
+            } else {
                 $taskUnzip = $this->taskExec("gunzip {$filePath}");
                 $parentDir = substr($filePath, 0, -3);
             }
-        }
-        else {
-          throw new \Exception('Could not extract file.');
+        } else {
+            throw new \Exception('Could not extract file.');
         }
         $result = $taskUnzip->run();
         if (!is_dir($parentDir)) {
-          $parentDir = dirname($parentDir);
+            $parentDir = dirname($parentDir);
         }
         if (is_dir($parentDir) && $result->getExitCode() == 0) {
-          return $parentDir;
+            return $parentDir;
         }
         throw new \Exception('Extraction failed.');
     }
@@ -193,8 +185,7 @@ class RestoreCommands extends \Robo\Tasks
             $result = $this->taskCopyDir([$source => $destination])->run();
             if ($result->getExitCode() == 0) {
                 $this->io()->success("Files restored to $destination.");
-            }
-            else {
+            } else {
                 throw new \Exception("Failed restoring files to $destination.");
             }
             return $result;
@@ -202,21 +193,20 @@ class RestoreCommands extends \Robo\Tasks
         throw new \Exception("Source dir $source not found.");
     }
 
-    private function getFile($url) {
+    private function getFile($url)
+    {
         $tmp_dir_path = Util::TMP_DIR;
 
         if (substr_count($url, "http://") > 0 || substr_count($url, "https://")) {
             $info = pathinfo($url);
             $filename = $info['basename'];
             $approach = "wget -O {$tmp_dir_path}/{$filename} {$url}";
-        }
-        elseif (substr_count($url, "s3://")) {
+        } elseif (substr_count($url, "s3://")) {
             $parser = new \Aws\S3\S3UriParser();
             $info = $parser->parse($url);
             $filename = $info['key'];
             $approach = "aws s3 cp {$url} {$tmp_dir_path}/";
-        }
-        else {
+        } else {
             $this->io()->error("Unsupported file protocol.");
             return;
         }
@@ -226,11 +216,9 @@ class RestoreCommands extends \Robo\Tasks
         if ($result->getExitCode() == 0) {
             $this->io()->success("Got the file from {$url}.");
             return "$tmp_dir_path/$filename";
-        }
-        else {
+        } else {
             $this->io()->error("Issues getting the file from {$url}.");
             throw new \Exception("Error retrieving file.");
         }
     }
-
 }

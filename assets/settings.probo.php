@@ -1,7 +1,7 @@
 <?php
 
 if (!empty(getenv("PROBO_ENVIRONMENT"))) {
-  $databases = array(
+    $databases = array(
     'default' => array(
       'default' => array(
         'database' => 'dkan',
@@ -11,5 +11,5 @@ if (!empty(getenv("PROBO_ENVIRONMENT"))) {
         'driver' => 'mysql',
       ),
     ),
-  );
+    );
 }

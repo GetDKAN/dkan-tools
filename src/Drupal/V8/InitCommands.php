@@ -67,7 +67,8 @@ class InitCommands extends \Robo\Tasks
         $this->createMakeFiles();
     }
 
-    private function setupScripts() {
+    private function setupScripts()
+    {
         $dktlRoot = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
 
@@ -121,13 +122,12 @@ class InitCommands extends \Robo\Tasks
         foreach ($settings as $setting) {
             $f = "src/site/{$setting}";
             if ($setting == 'settings.php') {
-              $result = $this->taskWriteToFile($f)
+                $result = $this->taskWriteToFile($f)
                 ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
                 ->place('HASH_SALT', $hash_salt)
                 ->run();
-            }
-            else {
-              $result = $this->taskWriteToFile($f)
+            } else {
+                $result = $this->taskWriteToFile($f)
                 ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
                 ->run();
             }
@@ -180,5 +180,4 @@ class InitCommands extends \Robo\Tasks
             exit;
         }
     }
-
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $drupalVersion = isset($_SERVER['DRUPAL_VERSION']) ? $_SERVER['DRUPAL_VERSION'] : "V7";
 
@@ -15,7 +15,10 @@ $discovery->setSearchPattern('*Commands.php');
 $defaultCommandClasses = $discovery->discover("{$dktl_directory}/src", '\\DkanTools');
 
 $discovery->setSearchPattern('*Commands.php');
-$drupalVersionSpecificCommandsClasses = $discovery->discover("{$dktl_directory}/src/Drupal/{$drupalVersion}", '\\DkanTools\\Drupal\\' . $drupalVersion);
+$drupalVersionSpecificCommandsClasses = $discovery->discover(
+    "{$dktl_directory}/src/Drupal/{$drupalVersion}",
+    '\\DkanTools\\Drupal\\' . $drupalVersion
+);
 
 $customCommandClasses = [];
 if (file_exists("{$dktl_project_directory}/src/command")) {

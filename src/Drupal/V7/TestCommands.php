@@ -1,6 +1,7 @@
 <?php
 
 namespace DkanTools\Drupal\V7;
+
 use DkanTools\Util\TestingTrait;
 
 /**
@@ -114,7 +115,8 @@ class TestCommands extends \Robo\Tasks
         $this->_exec("CYPRESS_baseUrl=http://web {$proj_dir}/node_modules/cypress/bin/cypress run");
     }
 
-    private function getVendorCommand($binary_name) {
+    private function getVendorCommand($binary_name)
+    {
         $dktl_dir = Util::getDktlDirectory();
         return "{$dktl_dir}/vendor/bin/{$binary_name}";
     }
@@ -122,12 +124,15 @@ class TestCommands extends \Robo\Tasks
     /**
      * Proxy to phpcs.
      */
-    public function phpcs(array $args) {
+    public function phpcs(array $args)
+    {
         $dktl_dir = Util::getDktlDirectory();
 
         $phpcs_command = $this->getVendorCommand("phpcs");
 
-        $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
+        $task = $this->taskExec(
+            "{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer"
+        );
         $task->run();
 
         $task = $this->taskExec($phpcs_command);
@@ -140,7 +145,8 @@ class TestCommands extends \Robo\Tasks
     /**
      * Proxy to phpcbf.
      */
-    public function phpcbf(array $args) {
+    public function phpcbf(array $args)
+    {
         $phpcbf_command = $this->getVendorCommand("phpcbf");
 
         $task = $this->taskExec($phpcbf_command);
@@ -153,16 +159,21 @@ class TestCommands extends \Robo\Tasks
     /**
      * Preconfigured linting for paths inside of the repo.
      */
-    public function testLint(array $paths) {
+    public function testLint(array $paths)
+    {
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
 
         $phpcs_command = $this->getVendorCommand("phpcs");
 
-        $task = $this->taskExec("{$phpcs_command} --config-set installed_paths {$dktl_dir}/vendor/drupal/coder/coder_sniffer");
-        $task->run();
+        $this->taskExec($phpcs_command)
+            ->option('config-set', 'installed_paths')
+            ->arg("{$dktl_dir}/vendor/drupal/coder/coder_sniffer")
+            ->run();
 
-        $task = $this->taskExec("{$phpcs_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+        $task = $this->taskExec($phpcs_command)
+            ->option('standard', 'Drupal,DrupalPractice')
+            ->option('extensions', 'php,module,inc,install,test,profile,theme,info');
 
         foreach ($paths as $path) {
             $task->arg("{$project_dir}/{$path}");
@@ -174,12 +185,15 @@ class TestCommands extends \Robo\Tasks
     /**
      * Preconfigured lint fixing for paths inside of the repo.
      */
-    public function testLintFix(array $paths) {
+    public function testLintFix(array $paths)
+    {
         $project_dir = Util::getProjectDirectory();
 
         $phpcbf_command = $this->getVendorCommand("phpcbf");
 
-        $task = $this->taskExec("{$phpcbf_command} --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,info");
+        $task = $this->taskExec($phpcbf_command)
+            ->option('standard', 'Drupal,DrupalPractice')
+            ->option('extensions', 'php,module,inc,install,test,profile,theme,info');
 
         foreach ($paths as $path) {
             $task->arg("{$project_dir}/{$path}");
@@ -198,7 +212,8 @@ class TestCommands extends \Robo\Tasks
      * @option $workflow Create workflow users as well.
      * @option $yes Use workflow option w/o checking for module.
      */
-    public function testQaUsers($opts = ['yes|y' => false, 'workflow|w' => false]) {
+    public function testQaUsers($opts = ['yes|y' => false, 'workflow|w' => false])
+    {
         $users = [
             'sitemanager' => ['site manager'],
             'editor' => ['editor'],
@@ -211,16 +226,15 @@ class TestCommands extends \Robo\Tasks
                     'moderator' => ['editor' , 'Workflow Moderator'],
                     'supervisor' => ['site manager', 'Workflow Supervisor']
                 ];
-            }
-            else {
+            } else {
                 throw new \Exception('Workflow QA users requested, but dkan_workflow_permissions not enbled.');
             }
         }
         $stack = $this->taskExecStack()->stopOnFail()->dir('docroot');
-        foreach($users as $user => $roles) {
+        foreach ($users as $user => $roles) {
             // Add stack of drush commands to create users and assign roles.
             $stack->exec("drush ucrt $user --mail={$user}@example.com --password={$user}");
-            foreach($roles as $role) {
+            foreach ($roles as $role) {
                 $stack->exec("drush urol '{$role}' --name={$user}");
             }
         }
@@ -230,16 +244,17 @@ class TestCommands extends \Robo\Tasks
     /**
      * Use Drush to check if dkan_workflow_permissions module is enabled.
      */
-    private function hasWorkflow() {
+    private function hasWorkflow()
+    {
         $result = $this->taskExec('drush php-eval')
             ->arg('echo module_exists("dkan_workflow_permissions");')
             ->dir('docroot')
-            ->printOutput(FALSE)
+            ->printOutput(false)
             ->run();
         if ($result->getExitCode() == 0) {
             return $result->getMessage();
+        } else {
+            throw new \Exception('Drush command failed; aborting');
         }
-        else {
-          throw new \Exception('Drush command failed; aborting');
-        }
-    }}
+    }
+}

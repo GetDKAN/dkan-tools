@@ -115,11 +115,11 @@ class BasicCommands extends \Robo\Tasks
         'yes|y' => false,
         'prefer-source' => false,
         'prefer-dist' => false,
-        'no-dev'=> true,
-        'optimize-autoloader'=> false,
+        'no-dev' => true,
+        'optimize-autoloader' => false,
         'frontend' => false,
-        'tag' => NULL,
-        'branch' => NULL
+        'tag' => null,
+        'branch' => null
         ])
     {
         if ($opts['tag'] || $opts['branch']) {
@@ -219,7 +219,8 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    public function installphpunit() {
+    public function installphpunit()
+    {
         $result = $this->taskExec("which phpunit")->run();
         if ($result->getExitCode() == 0) {
             $this->io()->text('phpunit is already installed.');
