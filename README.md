@@ -274,6 +274,15 @@ To go back to running in docker mode, set the variable to `DOCKER` (or just dele
 
 When using the standard docker-compose environment, [Xdebug](https://xdebug.org/) can be enabled on both the web and CLI containers as needed. Running it creates a significant performance hit, so it is disabled by default. To enable, simply run `dktl xdebug:start`. A new file will be added to _/src/docker/etc/php_, and the corresponding containers will restart. In most situations, this file should be excluded from version control with .gitignore.
 
+### Configuration Brought into the Containers from the Host Machine.
+
+Unless you are running in "HOST" mode, DKTL runs inside of docker containers. Some configuration from your host machine can be useful inside of the containers: ssh configuration, external services authentication tokens, etc.
+
+DKTL recognized this and by default makes some configurations available to the containers by default. If any of these directories exist in your current user's profile, they will be available in the container:
+* .ssh
+* .aws
+* .composer
+
 ## A note to users of DKAN Starter
 
 Users of [DKAN Starter](https://github.com/GetDKAN/dkan_starter) will recognize some concepts here. The release of DKAN Tools eliminates the need for a separate DKAN Starter project, as it provides a workflow to build sites directly from DKAN releases. Support for DKAN Starter and its accompanying [Ahoy](http://www.ahoycli.com/en/latest/) commands is ending, and detailed instructions for migrating DKAN Starter projects to the DKAN Tools workflow is coming soon.
