@@ -12,8 +12,6 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class BasicCommands extends \Robo\Tasks
 {
-    const DRUSH_VERSION = '9.7.1';
-
     private $drupalVersion;
     private $drupalFolder;
 
@@ -93,7 +91,7 @@ class BasicCommands extends \Robo\Tasks
         // $this->addDependency("GetDKAN/dkan2", "", $opts)
         // @Todo: see if latest Drush ^10.2 could be used without breaking BC.
         // Composer install
-        $drush = "drush/drush:" . BasicCommands::DRUSH_VERSION;
+        $drush = "drush/drush";
         $dkan2 = "getdkan/dkan2:dev-beyond-drupal-8.7";
         $this->_exec("composer require --no-progress {$drush} {$dkan2}");
 
