@@ -1,6 +1,6 @@
 <?php
 
-namespace DkanTools\Drupal\V8;
+namespace DkanTools\Drupal;
 
 use DkanTools\Util\Util;
 use Symfony\Component\Filesystem\Filesystem;
@@ -33,6 +33,7 @@ class BasicCommands extends \Robo\Tasks
 
         // Composer's create-project requires an empty destination folder,
         // so briefly move dktl items out, then move them back in.
+        // @Todo: consider running composer in another folder and moving its 2 composer.*
         $this->_exec("mv * " . Util::TMP_DIR);
         $this->_exec("composer create-project --no-install drupal/recommended-project .");
         $this->_exec("mv " . Util::TMP_DIR . "/* .");
@@ -99,6 +100,8 @@ class BasicCommands extends \Robo\Tasks
         $this->docrootSymlink('src/site', "{$this->drupalFolder}/sites/default");
         $this->docrootSymlink('src/modules', "{$this->drupalFolder}/modules/custom");
         $this->docrootSymlink('src/themes', "{$this->drupalFolder}/themes/custom");
+
+        // @Todo: Check if it exists first, probably inside docrootSymlink
         $this->docrootSymlink('src/schema', "{$this->drupalFolder}/schema");
 
         // @Todo: frontend
