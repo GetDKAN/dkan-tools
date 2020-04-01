@@ -12,77 +12,28 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class BasicCommands extends \Robo\Tasks
 {
-
     const DRUSH_VERSION = '9.7.1';
 
     /**
-     * Get Drupal.
+     * Get drupal/recommended-project's composer files.
      *
-     * We get DKAN on the make step.
+     * We get both Drupal and DKAN on the make step, using composer.
+     *
+     * @param string $version
+     *   Drupal X.Y.Z version or "latest"
      */
-    public function get($version)
+    public function get(string $version = "latest")
     {
+        Util::cleanupTmp();
         Util::prepareTmp();
 
-        $archive = $this->getDrupalArchive($version);
-        $task = $this->taskExec("tar -xvzf {$archive}")->dir(Util::TMP_DIR);
-        $task->run();
+        // Composer's create-project requires an empty destination folder,
+        // so briefly move dktl items out, then move them back in.
+        $this->_exec("mv * " . Util::TMP_DIR);
+        $this->_exec("composer create-project --no-install drupal/recommended-project .");
+        $this->_exec("mv " . Util::TMP_DIR . "/* .");
 
-        // At this point we should have the unbuilt Drupal folder in tmp.
-        $this->drupalTempReplace(str_replace(".tar.gz", "", $archive));
         Util::cleanupTmp();
-    }
-
-    private function getDrupalArchive($version)
-    {
-        $fileName = "drupal-{$version}";
-        $archive = Util::TMP_DIR . "/{$fileName}";
-        if (file_exists($archive)) {
-            $this->io()->warning(
-                "Drupal archive $fileName.tar.gz already exists; skipping " .
-                "download, will attempt extraction."
-            );
-            return $archive;
-        }
-
-        $sources = [
-            "https://ftp.drupal.org/files/projects/{$fileName}.tar.gz",
-        ];
-
-        $source = null;
-        foreach ($sources as $s) {
-            if (Util::urlExists($s)) {
-                $source = $s;
-                break;
-            }
-        }
-
-        if (!isset($source)) {
-            $this->io()->error("No archive available for Drupal $version.");
-            return;
-        }
-
-        $this->io()->section("Getting Drupal from {$source}");
-        $this->taskExec("wget -O {$archive} {$source}")->run();
-        return $archive;
-    }
-
-    private function drupalTempReplace($tmp_drupal)
-    {
-        $drupal_permanent = Util::getProjectDirectory() . '/docroot';
-        $replaced = false;
-        if (file_exists($drupal_permanent)) {
-            if ($this->io()->confirm("Are you sure you want to replace your current DKAN profile directory?")) {
-                $this->_deleteDir($drupal_permanent);
-                $replaced = true;
-            } else {
-                $this->say('Canceled.');
-                return;
-            }
-        }
-        $this->_exec('mv ' . $tmp_drupal . ' ' . $drupal_permanent);
-        $verb = $replaced ? 'replaced' : 'created';
-        $this->say("Drupal directory $verb.");
     }
 
     /**
