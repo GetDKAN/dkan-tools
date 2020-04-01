@@ -15,6 +15,7 @@ class BasicCommands extends \Robo\Tasks
     const DRUSH_VERSION = '9.7.1';
 
     private $drupalVersion;
+    private $drupalFolder;
 
     /**
      * Get drupal/recommended-project's composer files.
@@ -52,20 +53,22 @@ class BasicCommands extends \Robo\Tasks
      *
      * @option $yes
      *   Skip confirmation step, overwrite existin no matter what. Use with caution!
-     * @option $prefer-dist
+     * @option prefer-dist
      *   Prefer dist for packages. See composer docs.
-     * @option $prefer-source
+     * @option prefer-source
      *   Prefer dist for packages. See composer docs.
-     * @option $no-dev
+     * @option no-dev
      *   Skip installing packages listed in require-dev.
-     * @option $optimize-autoloader
+     * @option optimize-autoloader
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
-     * @option $frontend
+     * @option frontend
      *   Build with the DKAN frontend application.
-     * @option $tag
+     * @option tag
      *   Specify DKAN tagged release to build.
-     * @option $branch
+     * @option branch
      *   Specify DKAN branch to build.
+     * @option drupal-folder
+     *   Specify Drupal root folder.
      */
     public function make($opts = [
         'yes|y' => false,
@@ -75,67 +78,32 @@ class BasicCommands extends \Robo\Tasks
         'optimize-autoloader' => false,
         'frontend' => false,
         'tag' => null,
-        'branch' => null
+        'branch' => null,
+        'drupal-folder' => null,
         ])
     {
-        if ($opts['tag'] || $opts['branch']) {
-            $this->editJson($opts);
-        }
+        $this->drupalFolder = $opts['drupal-folder'] ?? "docroot";
 
-        // Everything except frontend can be passed to composer.
-        $docroot = Util::getProjectDirectory() . "/docroot";
-        if (!file_exists($docroot)) {
-            throw new \Exception("Use 'dktl get <drupal version>' before trying to make the project.");
-        }
+        // @Todo: make a function to pass Drupal's folder name as an option.
+        // @Todo: make sure target directory does not exist.
+        $this->_exec("sed -i -E 's#web/#{$this->drupalFolder}/#g' composer.json");
 
-        // Run main composer operations.
-        $this->mergeComposerConfig();
-        $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
-        $composerTask = $this->taskComposerUpdate()->dir($docroot)->option('no-progress');
-        foreach ($opts as $opt => $optValue) {
-            if (in_array($opt, $composerBools) && is_bool($optValue) && $optValue) {
-                $composerTask->option($opt);
-            }
-        }
-        $composerTask->run();
+        // @Todo: make a single function to add a dependency in composer.json?
+        // $this->addDependency("drush/drush", BasicCommands::DRUSH_VERSION);
+        // $this->addDependency("GetDKAN/dkan2", "", $opts)
+        // @Todo: see if latest Drush ^10.2 could be used without breaking BC.
+        // Composer install
+        $drush = "drush/drush:" . BasicCommands::DRUSH_VERSION;
+        $dkan2 = "getdkan/dkan2:dev-beyond-drupal-8.7";
+        $this->_exec("composer require --no-progress {$drush} {$dkan2}");
 
         // Symlink dirs from src into docroot.
-        $this->docrootSymlink('src/site', 'docroot/sites/default');
-        $this->docrootSymlink('src/modules', 'docroot/modules/custom');
-        $this->docrootSymlink('src/themes', 'docroot/themes/custom');
-        $this->docrootSymlink('src/schema', 'docroot/schema');
-        if ($opts['frontend'] === true) {
-            $this->io()->section('Adding frontend application');
+        $this->docrootSymlink('src/site', "{$this->drupalFolder}/sites/default");
+        $this->docrootSymlink('src/modules', "{$this->drupalFolder}/modules/custom");
+        $this->docrootSymlink('src/themes', "{$this->drupalFolder}/themes/custom");
+        $this->docrootSymlink('src/schema', "{$this->drupalFolder}/schema");
 
-
-            $result = $this->downloadFrontend(['yes' => $opts['yes']]);
-
-            if ($result && $result->getExitCode() === 0) {
-                $this->io()->note(
-                    'Successfully downloaded data-catalog-frontend to /src/frontend'
-                );
-            }
-
-            if (file_exists('src/frontend')) {
-                $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
-            }
-
-            $this->io()->note(
-                'You are building DKAN with the React frontend application. ' .
-                'In order for the frontend to find the correct routes to work correctly,' .
-                'you will need to enable the dkan_frontend module . ' .
-                'Do this by running "dktl install" with the "--frontend" option as well, ' .
-                'or else run "drush en dkan_frontend" after installation.'
-            );
-        }
-
-        if (!$this->checkDrushCompatibility()) {
-            $this->io()->warning(
-                'Your version of Drush is incompatible with DKAN2. Please upgrade ' .
-                'to the latest Drush 9.x! If you are using the dkan-tools docker ' .
-                'setup, try "dktl updatedrush".'
-            );
-        }
+        // @Todo: frontend
     }
 
     /**
@@ -375,6 +343,28 @@ class BasicCommands extends \Robo\Tasks
             $data['require']['getdkan/dkan2'] = $opts['tag'];
         } elseif ($opts['branch']) {
             $data['require']['getdkan/dkan2'] = 'dev-' . $opts['branch'];
+        }
+        $newFile = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        file_put_contents($file, $newFile);
+
+        $this->io()->success('Successfully updated the composer.json file');
+    }
+
+    /**
+     * Add Drush and Dkan2 to the project's composer.json file.
+     */
+    private function DrushAndDkan2($opts)
+    {
+        $file = Util::getProjectDirectory() . "/composer.json";
+        $json = file_get_contents($file);
+        $data = json_decode($json, true);
+        $data['require']['drush/drush'] = BasicCommands::DRUSH_VERSION;
+        if ($opts['tag']) {
+            $data['require']['getdkan/dkan2'] = $opts['tag'];
+        } elseif ($opts['branch']) {
+            $data['require']['getdkan/dkan2'] = 'dev-' . $opts['branch'];
+        } else {
+            $data['require']['getdkan/dkan2'] = 'dev-master';
         }
         $newFile = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         file_put_contents($file, $newFile);
