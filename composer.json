@@ -1,5 +1,5 @@
 {
-    "name": "dafeder/dkan-tools",
+    "name": "getdkan/dkan-tools",
     "require": {
         "consolidation/robo": "^1.3",
         "pear/archive_tar": "^1.4",
