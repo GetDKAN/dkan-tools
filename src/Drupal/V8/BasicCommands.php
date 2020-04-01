@@ -14,6 +14,8 @@ class BasicCommands extends \Robo\Tasks
 {
     const DRUSH_VERSION = '9.7.1';
 
+    private $drupalVersion;
+
     /**
      * Get drupal/recommended-project's composer files.
      *
@@ -24,6 +26,9 @@ class BasicCommands extends \Robo\Tasks
      */
     public function get(string $version = "latest")
     {
+        // Set the Drupal version for later.
+        $this->drupalVersion = $version;
+
         Util::cleanupTmp();
         Util::prepareTmp();
 
