@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set Drupal version if it isn't set.
-DRUPAL_VERSION=${DRUPAL_VERSION:-"V7"}
+DRUPAL_VERSION=${DRUPAL_VERSION:-"V8"}
 
 # Which platform we're running on (linux and mac supported)
 if [ -z $PLATFORM ]; then

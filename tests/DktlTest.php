@@ -2,12 +2,13 @@
 
 namespace DkanTools\Test;
 
-class DktlV8Test extends \PHPUnit\Framework\TestCase
+class DktlTest extends \PHPUnit\Framework\TestCase
 {
 
     protected function setUp()
     {
         parent::setUp();
+        // @Todo: Try to remove.
         putenv("DRUPAL_VERSION=V8");
         `mkdir sandbox`;
     }
