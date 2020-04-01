@@ -349,26 +349,4 @@ class BasicCommands extends \Robo\Tasks
 
         $this->io()->success('Successfully updated the composer.json file');
     }
-
-    /**
-     * Add Drush and Dkan2 to the project's composer.json file.
-     */
-    private function DrushAndDkan2($opts)
-    {
-        $file = Util::getProjectDirectory() . "/composer.json";
-        $json = file_get_contents($file);
-        $data = json_decode($json, true);
-        $data['require']['drush/drush'] = BasicCommands::DRUSH_VERSION;
-        if ($opts['tag']) {
-            $data['require']['getdkan/dkan2'] = $opts['tag'];
-        } elseif ($opts['branch']) {
-            $data['require']['getdkan/dkan2'] = 'dev-' . $opts['branch'];
-        } else {
-            $data['require']['getdkan/dkan2'] = 'dev-master';
-        }
-        $newFile = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        file_put_contents($file, $newFile);
-
-        $this->io()->success('Successfully updated the composer.json file');
-    }
 }
