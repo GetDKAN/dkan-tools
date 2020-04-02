@@ -36,9 +36,10 @@ class BasicCommands extends \Robo\Tasks
         $this->composerDrupalOutsideProjectRoot($drupalVersion);
         $this->moveComposerFilesToProjectRoot();
 
-        // Modify project's scaffold and installation paths to `docroot` from
-        // the default `web` for drupal/recommended-project.
+        // Modify project's scaffold and installation paths to `docroot`, then
+        // install Drupal in it.
         $this->modifyComposerPaths();
+        $this->taskComposerInstall()->run();
 
         Util::cleanupTmp();
         $this->io()->success("dktl get completed.");
@@ -152,7 +153,18 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->section("Running dktl make");
 
         // Add Drush and Dkan2 dependencies.
-        $this->addDependencies($opts);
+        $this->addDrush();
+        $this->addDkan2($opts);
+
+        // Run composer install while passing the options.
+        $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
+        $install = $this->taskComposerInstall();
+        foreach ($composerBools as $composerBool) {
+            if ($opts[$composerBool] === true) {
+                $install->option($composerBool);
+            }
+        }
+        $install->run();
 
         // Symlink dirs from src into docroot.
         $this->addSymlinksToDrupalRoot();
@@ -162,10 +174,20 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->success("dktl make completed.");
     }
 
-    private function addDependencies(array $opts)
+    private function addDrush()
     {
-        $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
+        $addDrush = $this->taskComposerRequire()
+          ->dependency("drush/drush")
+          ->run();
+        if ($addDrush->getExitCode() != 0) {
+          $this->io()->error('Unable to add Drush as a project dependencies.');
+          exit;
+        }
+        $this->io()->success("drush/drush added as a project dependency.");
+    }
 
+    private function addDkan2(array $opts)
+    {
         // Find Dkan2 version from options' tag or branch values.
         if ($opts['tag']) {
             $dkanVersion = $opts['tag'];
@@ -173,20 +195,14 @@ class BasicCommands extends \Robo\Tasks
             $dkanVersion = "dev-{$opts['branch']}";
         }
 
-        $addDeps = $this->taskComposerRequire();
-        // Pass the options, then add Drush and Dkan2 as project dependencies.
-        foreach ($composerBools as $composerBool) {
-            if ($opts[$composerBool] === true) {
-                $addDeps->option($composerBool);
-            }
-        }
-        $addDeps->dependency("drush/drush")
+        $addDkan2 = $this->taskComposerRequire()
             ->dependency("getdkan/dkan2", $dkanVersion)
             ->run();
-        if ($addDeps->getExitCode() != 0) {
+        if ($addDkan2->getExitCode() != 0) {
             $this->io()->error('Unable to add Drush and Dkan2 dependencies.');
             exit;
         }
+        $this->io()->success("getdkan/dkan2 added as a project dependency.");
     }
 
     private function addSymlinksToDrupalRoot()
