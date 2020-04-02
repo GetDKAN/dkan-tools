@@ -225,7 +225,27 @@ class BasicCommands extends \Robo\Tasks
 
     private function installFrontend()
     {
+        $this->io()->section('Adding frontend application');
 
+        $result = $this->downloadFrontend(['yes' => $opts['yes']]);
+
+        if ($result && $result->getExitCode() === 0) {
+            $this->io()->note(
+                'Successfully downloaded data-catalog-frontend to /src/frontend'
+            );
+        }
+
+        if (file_exists('src/frontend')) {
+            $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
+        }
+
+        $this->io()->note(
+            'You are building DKAN with the React frontend application. ' .
+            'In order for the frontend to find the correct routes to work correctly,' .
+            'you will need to enable the dkan_frontend module . ' .
+            'Do this by running "dktl install" with the "--frontend" option as well, ' .
+            'or else run "drush en dkan_frontend" after installation.'
+        );
     }
 
     /**
@@ -342,29 +362,26 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    /**
-     * Download frontend App.
-     */
     private function downloadFrontend()
     {
         $result = $this->taskExec('git clone')
-            ->option('depth=1')
+            ->option('depth', '1')
             ->option('branch', 'master')
             ->arg('https://github.com/GetDKAN/data-catalog-frontend.git')
             ->arg('frontend')
             ->dir('src')
             ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not download front-end app');
+            $this->io()->error('Could not download front-end app.');
             return $result;
         }
         $result = $this->_deleteDir('src/frontend/.git');
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not remove front-end git folder');
+            $this->io()->error('Could not remove front-end git folder.');
             return $result;
         }
 
-        $this->io()->success('Successfully added the frontend application');
+        $this->io()->success('frontend application added.');
         return $result;
     }
 
