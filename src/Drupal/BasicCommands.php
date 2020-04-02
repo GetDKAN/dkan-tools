@@ -248,43 +248,6 @@ class BasicCommands extends \Robo\Tasks
         );
     }
 
-    /**
-     * Update the version of Drush used in the container.
-     *
-     * @option $yes
-     *   Skip confirmation step, update no matter what. Use with caution!
-     */
-    public function updatedrush($opts = ['yes|y' => false])
-    {
-        if ($this->checkDrushCompatibility(self::DRUSH_VERSION)) {
-            $this->io()->text('Drush is up-to-date!');
-            return true;
-        }
-
-        $this->io()->caution(
-            "This command will attempt to make changes to the root user's " .
-            "composer directory and should ONLY be run if you are using dkan-tools in Docker."
-        );
-        $confirmation = "Continue, removing existing global/root composer files?";
-        if (!$opts['yes'] && !$this->io()->confirm($confirmation)) {
-            return false;
-        }
-
-        $result = $this->taskFilesystemStack()->stopOnFail()
-            ->remove('/root/.composer/vendor')
-            ->remove('/root/.composer/composer.lock')
-            ->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('could not remove root composer files.');
-            return $result;
-        }
-        $result = $this->taskComposerRequire()
-            ->dependency('drush/drush', self::DRUSH_VERSION)
-            ->dir('/root/.composer')
-            ->run();
-        return $result;
-    }
-
     public function installphpunit()
     {
         $result = $this->taskExec("which phpunit")->run();
@@ -357,7 +320,7 @@ class BasicCommands extends \Robo\Tasks
         if ($result->getExitCode() != 0) {
             $this->io()->warning('Could not create link');
         } else {
-            $this->io()->success("Successfully linked $target to $link");
+            $this->io()->success("Symlinked $target to $link");
         }
         return $result;
     }
@@ -470,22 +433,4 @@ class BasicCommands extends \Robo\Tasks
         return $matches[1];
     }
 
-    /**
-     * Edit the default DKAN composer.json file.
-     */
-    private function editJson($opts)
-    {
-        $file = Util::getProjectDirectory() . "/src/make/composer.json";
-        $json = file_get_contents($file);
-        $data = json_decode($json, true);
-        if ($opts['tag']) {
-            $data['require']['getdkan/dkan2'] = $opts['tag'];
-        } elseif ($opts['branch']) {
-            $data['require']['getdkan/dkan2'] = 'dev-' . $opts['branch'];
-        }
-        $newFile = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        file_put_contents($file, $newFile);
-
-        $this->io()->success('Successfully updated the composer.json file');
-    }
 }
