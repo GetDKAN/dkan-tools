@@ -1,11 +1,7 @@
 {
-    "description": "Project",
+    "description": "Data Catalog Project",
     "minimum-stability": "dev",
     "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/fmizzell/json_form"
-        },
         {
             "type": "composer",
             "url": "https://asset-packagist.org"
