@@ -12,7 +12,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class BasicCommands extends \Robo\Tasks
 {
-    const MIN_DRUPAL_VERSION = "8.8";
+    const DRUPAL_MIN_VERSION = "8.8";
+    const DRUPAL_FOLDER_NAME = "docroot";
 
     /**
      * Get drupal/recommended-project's composer files.
@@ -70,7 +71,7 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error("Parameter invalid: requires semantic version.");
             return false;
         }
-        if (version_compare($version, self::MIN_DRUPAL_VERSION, "<")) {
+        if (version_compare($version, self::DRUPAL_MIN_VERSION, "<")) {
             $this->io()->error("Drupal version below minimal required.");
             return false;
         }
@@ -86,7 +87,7 @@ class BasicCommands extends \Robo\Tasks
      *   3. Symlink a number of dirs from /src into docroot.
      *   4. If requested, pull the DKAN frontend application into docroot.
      *
-     * @option $yes
+     * @option yes
      *   Skip confirmation step, overwrite existin no matter what. Use with caution!
      * @option prefer-dist
      *   Prefer dist for packages. See composer docs.
@@ -117,7 +118,7 @@ class BasicCommands extends \Robo\Tasks
         'drupal-folder' => null,
         ])
     {
-        $this->drupalFolder = $opts['drupal-folder'] ?? "docroot";
+        $this->drupalFolder = $opts['drupal-folder'] ?? self::DRUPAL_FOLDER_NAME;
 
         // @Todo: make a function to pass Drupal's folder name as an option.
         // @Todo: make sure target directory does not exist.
