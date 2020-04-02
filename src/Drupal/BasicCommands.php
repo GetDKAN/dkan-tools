@@ -64,7 +64,7 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error("Drupal version below minimal required.");
             exit;
         }
-        $this->io()->success('Validated semantic version.');
+        $this->io()->success('Validated semantic version and at least ' . self::DRUPAL_MIN_VERSION);
     }
 
     private function composerDrupalOutsideProjectRoot(string $version)
@@ -85,14 +85,14 @@ class BasicCommands extends \Robo\Tasks
     {
         $moveFiles = $this->taskFilesystemStack()
             ->rename(
-              Util::TMP_DIR . "/composer.json",
-              Util::getProjectDirectory() . "/composer.json",
-              TRUE
+                Util::TMP_DIR . "/composer.json",
+                Util::getProjectDirectory() . "/composer.json",
+                true
             )
             ->rename(
-              Util::TMP_DIR . "/composer.lock",
-              Util::getProjectDirectory() . "/composer.lock",
-              TRUE
+                Util::TMP_DIR . "/composer.lock",
+                Util::getProjectDirectory() . "/composer.lock",
+                true
             )
             ->run();
         if ($moveFiles->getExitCode() != 0) {
@@ -154,11 +154,22 @@ class BasicCommands extends \Robo\Tasks
     {
         $this->io()->section("Running dktl make");
 
+        $this->addDependencies($opts);
+
+        // Symlink dirs from src into docroot.
+        $this->addSymlinksToDrupalRoot();
+
+        // @Todo: frontend
+    }
+
+    private function addDependencies(array $opts)
+    {
         // Find Dkan2 version from options' tag or branch values.
+        $dkanVersion = null;
         if ($opts['tag']) {
-          $dkanVersion = $opts['tag'];
+            $dkanVersion = $opts['tag'];
         } elseif ($opts['branch']) {
-          $dkanVersion = "dev-{$opts['branch']}";
+            $dkanVersion = "dev-{$opts['branch']}";
         }
 
         // Add Drush and Dkan2 as project dependencies.
@@ -170,21 +181,22 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Unable to add Drush and Dkan2 dependencies.');
             exit;
         }
-
-        // Symlink dirs from src into docroot.
-        $this->docrootSymlink('src/site', "{$drupalFolder}/sites/default");
-        $this->docrootSymlink('src/modules', "{$drupalFolder}/modules/custom");
-        $this->docrootSymlink('src/themes', "{$drupalFolder}/themes/custom");
-
-        // @Todo: Check if it exists first, probably inside docrootSymlink
-        $this->docrootSymlink('src/schema', "{$drupalFolder}/schema");
-
-        // @Todo: frontend
     }
 
-    private function modifyScaffoldAndInstallerPaths(string $folder)
+    private function addSymlinksToDrupalRoot()
     {
-
+        $targetsAndLinks = [
+            ['target' => 'src/site',    'link' => '/sites/default'],
+            ['target' => 'src/modules', 'link' => '/modules/custom'],
+            ['target' => 'src/themes',  'link' => '/themes/custom'],
+            ['target' => 'src/schema',  'link' => '/schema'],
+        ];
+        foreach ($targetsAndLinks as $targetAndLink) {
+            $this->docrootSymlink(
+                $targetAndLink['target'],
+                self::DRUPAL_FOLDER_NAME . $targetAndLink['link']
+            );
+        }
     }
 
     /**
