@@ -227,7 +227,7 @@ class BasicCommands extends \Robo\Tasks
     {
         $this->io()->section('Adding frontend application');
 
-        $result = $this->downloadFrontend(['yes' => $opts['yes']]);
+        $result = $this->downloadFrontend();
 
         if ($result && $result->getExitCode() === 0) {
             $this->io()->note(
@@ -396,7 +396,7 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error('Could not install front-end node modules');
             return $result;
         }
-        $this->io()->success('Successfull');
+        $this->io()->success('front-end installed.');
     }
 
     /**
@@ -407,10 +407,10 @@ class BasicCommands extends \Robo\Tasks
         $task = $this->taskExec("npm run build")->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not build the front-end');
+            $this->io()->error('could not build the front-end.');
             return $result;
         }
-        $this->io()->success('Successfull');
+        $this->io()->success('front-end build.');
     }
 
     public function install($opts = ['frontend' => false])
