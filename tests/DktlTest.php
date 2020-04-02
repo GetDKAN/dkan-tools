@@ -29,7 +29,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         `cd sandbox && dktl init`;
         exec("cd sandbox && dktl get foobar", $output);
         $this->assertContains(
-            " [ERROR] Parameter invalid: requires semantic version.",
+            " [ERROR] version format not semantic.",
             $output
         );
     }
@@ -40,7 +40,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         `cd sandbox && dktl init`;
         exec("cd sandbox && dktl get 8.7.11", $output);
         $this->assertContains(
-            " [ERROR] Drupal version below minimal required.",
+            " [ERROR] drupal version below minimal required.",
             $output
         );
     }
@@ -55,7 +55,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
             $output
         );
         $this->assertContains(
-            ' [ERROR] Error running composer create-project.',
+            ' [ERROR] could not run composer create-project.',
             $output
         );
     }
@@ -66,7 +66,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
       `cd sandbox && dktl init`;
       exec("cd sandbox && dktl get 9.0.0-beta2", $output);
       $this->assertContains(
-        ' [OK] Created composer project.',
+        ' [OK] composer project created.',
         $output
       );
     }
