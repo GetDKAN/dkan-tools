@@ -158,25 +158,32 @@ class BasicCommands extends \Robo\Tasks
         $this->addSymlinksToDrupalRoot();
 
         // @Todo: frontend
+
         $this->io()->success("dktl make completed.");
     }
 
     private function addDependencies(array $opts)
     {
+        $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
+
         // Find Dkan2 version from options' tag or branch values.
-        $dkanVersion = null;
         if ($opts['tag']) {
             $dkanVersion = $opts['tag'];
         } elseif ($opts['branch']) {
             $dkanVersion = "dev-{$opts['branch']}";
         }
 
-        // Add Drush and Dkan2 as project dependencies.
-        $dependencies = $this->taskComposerRequire()
-            ->dependency("drush/drush")
+        $addDeps = $this->taskComposerRequire();
+        // Pass the options, then add Drush and Dkan2 as project dependencies.
+        foreach ($composerBools as $composerBool) {
+            if ($opts[$composerBool] === true) {
+                $addDeps->option($composerBool);
+            }
+        }
+        $addDeps->dependency("drush/drush")
             ->dependency("getdkan/dkan2", $dkanVersion)
             ->run();
-        if ($dependencies->getExitCode() != 0) {
+        if ($addDeps->getExitCode() != 0) {
             $this->io()->error('Unable to add Drush and Dkan2 dependencies.');
             exit;
         }
