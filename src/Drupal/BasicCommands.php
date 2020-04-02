@@ -152,7 +152,7 @@ class BasicCommands extends \Robo\Tasks
     {
         $this->io()->section("Running dktl make");
 
-        // Add Drush and Dkan2 dependencies.
+        // Add project dependencies.
         $this->addDrush();
         $this->addDkan2($opts);
 
@@ -169,7 +169,9 @@ class BasicCommands extends \Robo\Tasks
         // Symlink dirs from src into docroot.
         $this->addSymlinksToDrupalRoot();
 
-        // @Todo: frontend
+        if ($opts['frontend'] === true) {
+            $this->installFrontend();
+        }
 
         $this->io()->success("dktl make completed.");
     }
@@ -219,6 +221,11 @@ class BasicCommands extends \Robo\Tasks
                 self::DRUPAL_FOLDER_NAME . $targetAndLink['link']
             );
         }
+    }
+
+    private function installFrontend()
+    {
+
     }
 
     /**
