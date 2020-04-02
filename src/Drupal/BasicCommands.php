@@ -28,13 +28,11 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->section("Running dktl get");
 
         $this->validateVersion($drupalVersion);
-
-        Util::cleanupTmp();
         Util::prepareTmp();
 
         // Composer's create-project requires an empty folder, so run it in
         // Util::Tmp, then move the 2 composer files back into project root.
-        $this->drupalRecommendedOutsideProjectRoot($drupalVersion);
+        $this->composerDrupalOutsideProjectRoot($drupalVersion);
         $this->moveComposerFilesToProjectRoot();
 
         // Modify project's scaffold and installation paths from web to docroot.
@@ -44,14 +42,14 @@ class BasicCommands extends \Robo\Tasks
     }
 
     /**
-     * Validate the parameter is a valid semantic version and at least 8.8.
+     * Validate version is semantic, and at least DRUPAL_MIN_VERSION.
      *
      * @param string $version
      *   Drupal version.
      */
     private function validateVersion(string $version)
     {
-        // Verify if valid semantic version against semver.org's regex here:
+        // Verify against semver.org's regex here:
         // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
         $semVerRegex = "^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P" .
           "<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-]" .
@@ -69,7 +67,7 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->success('Validated semantic version.');
     }
 
-    private function drupalRecommendedOutsideProjectRoot(string $version)
+    private function composerDrupalOutsideProjectRoot(string $version)
     {
         $createFiles = $this->taskComposerCreateProject()
             ->source("drupal/recommended-project:{$version}")
