@@ -23,25 +23,13 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testDktlGetWithoutParameter()
-    {
-        $output = [];
-        `cd sandbox && dktl init`;
-        exec("cd sandbox && dktl get", $output);
-        print_r($output);
-        $this->assertContains(
-            " Not enough arguments (missing: \"drupalVersion\").",
-            $output
-        );
-    }
-
-    public function testDktlGetWithoutBadParameter()
+    public function testDktlGetWithBadParameter()
     {
         $output = [];
         `cd sandbox && dktl init`;
         exec("cd sandbox && dktl get foobar", $output);
         $this->assertContains(
-            " [WARNING] Missing parameter: Drupal semantic version.",
+            " [ERROR] Parameter invalid: requires semantic version.",
             $output
         );
     }
@@ -67,7 +55,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
             $output
         );
         $this->assertContains(
-            ' [WARNING] Error running composer create-project.',
+            ' [ERROR] Error running composer create-project.',
             $output
         );
     }
@@ -77,7 +65,6 @@ class DktlTest extends \PHPUnit\Framework\TestCase
       $output = [];
       `cd sandbox && dktl init`;
       exec("cd sandbox && dktl get 9.0.0-beta2", $output);
-      print_r($output);
       $this->assertContains(
         ' [OK] Created composer project.',
         $output
