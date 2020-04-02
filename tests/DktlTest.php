@@ -5,7 +5,7 @@ namespace DkanTools\Test;
 class DktlTest extends \PHPUnit\Framework\TestCase
 {
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         // @Todo: Try to remove.
@@ -21,6 +21,67 @@ class DktlTest extends \PHPUnit\Framework\TestCase
             "DKTL is running outside of a DKTL project. Run dktl init in the project directory first.",
             $output[0]
         );
+    }
+
+    public function testDktlGetWithoutParameter()
+    {
+        $output = [];
+        `cd sandbox && dktl init`;
+        exec("cd sandbox && dktl get", $output);
+        print_r($output);
+        $this->assertContains(
+            " Not enough arguments (missing: \"drupalVersion\").",
+            $output
+        );
+    }
+
+    public function testDktlGetWithoutBadParameter()
+    {
+        $output = [];
+        `cd sandbox && dktl init`;
+        exec("cd sandbox && dktl get foobar", $output);
+        $this->assertContains(
+            " [WARNING] Missing parameter: Drupal semantic version.",
+            $output
+        );
+    }
+
+    public function testDktlGetDrupalVersionLessThanMinimum()
+    {
+        $output = [];
+        `cd sandbox && dktl init`;
+        exec("cd sandbox && dktl get 8.7.11", $output);
+        $this->assertContains(
+            " [ERROR] Drupal version below minimal required.",
+            $output
+        );
+    }
+
+    public function testDktlGetNonExistentDrupalVersion()
+    {
+        $output = [];
+        `cd sandbox && dktl init`;
+        exec("cd sandbox && dktl get 77.7.7", $output);
+        $this->assertContains(
+            '  Could not find package drupal/recommended-project with version 77.7.7.',
+            $output
+        );
+        $this->assertContains(
+            ' [WARNING] Error running composer create-project.',
+            $output
+        );
+    }
+
+    public function testDktlGetSuccess()
+    {
+      $output = [];
+      `cd sandbox && dktl init`;
+      exec("cd sandbox && dktl get 9.0.0-beta2", $output);
+      print_r($output);
+      $this->assertContains(
+        ' [OK] Created composer project.',
+        $output
+      );
     }
 
     public function testFromInitToSite()
@@ -52,7 +113,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("No database updates required", $output[0]);
     }
 
-    protected function tearDown()
+    protected function tearDown() : void
     {
         parent::tearDown();
         `cd sandbox && dktl dc kill`;
