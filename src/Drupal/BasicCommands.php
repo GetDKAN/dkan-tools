@@ -25,31 +25,20 @@ class BasicCommands extends \Robo\Tasks
      */
     public function get(string $drupalVersion)
     {
-        if (!$this->validateVersion($drupalVersion)) {
-          exit;
-        }
+        $this->io()->section("Running dktl get");
+
+        $this->validateVersion($drupalVersion);
+
+        Util::cleanupTmp();
         Util::prepareTmp();
 
-        // Composer's create-project requires an empty folder, so run it in /tmp
-        // then move the 2 composer files back into project root.
-        $createFiles = $this->taskComposerCreateProject()
-          ->source("drupal/recommended-project:{$drupalVersion}")
-          ->target(Util::TMP_DIR)
-          ->noInstall()
-          ->run();
-        if ($createFiles->getExitCode() != 0) {
-            $this->io()->error('Error running composer create-project.');
-            exit;
-        }
-        $moveFiles = $this->taskFilesystemStack()
-          ->rename(Util::TMP_DIR . "/composer.json", Util::getProjectDirectory() . "/composer.json", TRUE)
-          ->rename(Util::TMP_DIR . "/composer.lock", Util::getProjectDirectory() . "/composer.lock", TRUE)
-          ->run();
-        if ($moveFiles->getExitCode() != 0) {
-            $this->io()->error('Error moving composer files.');
-            exit;
-        }
-        $this->io()->success('Created composer project.');
+        // Composer's create-project requires an empty folder, so run it in
+        // Util::Tmp, then move the 2 composer files back into project root.
+        $this->drupalRecommendedOutsideProjectRoot($drupalVersion);
+        $this->moveComposerFilesToProjectRoot();
+
+        // Modify project's scaffold and installation paths from web to docroot.
+        $this->modifyComposerPaths();
 
         Util::cleanupTmp();
     }
@@ -59,23 +48,73 @@ class BasicCommands extends \Robo\Tasks
      *
      * @param string $version
      *   Drupal version.
-     *
-     * @return bool
      */
-    private function validateVersion(string $version): bool
+    private function validateVersion(string $version)
     {
-        // Verify it's a valid semantic version by using regex provided by
+        // Verify if valid semantic version against semver.org's regex here:
         // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-        $semVerRegex = "^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
+        $semVerRegex = "^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P" .
+          "<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-]" .
+          "[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))" .
+          "?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
+
         if (!preg_match("#{$semVerRegex}#", $version, $matches)) {
             $this->io()->error("Parameter invalid: requires semantic version.");
-            return false;
+            exit;
         }
         if (version_compare($version, self::DRUPAL_MIN_VERSION, "<")) {
             $this->io()->error("Drupal version below minimal required.");
-            return false;
+            exit;
         }
-        return true;
+        $this->io()->success('Validated semantic version.');
+    }
+
+    private function drupalRecommendedOutsideProjectRoot(string $version)
+    {
+        $createFiles = $this->taskComposerCreateProject()
+            ->source("drupal/recommended-project:{$version}")
+            ->target(Util::TMP_DIR)
+            ->noInstall()
+            ->run();
+        if ($createFiles->getExitCode() != 0) {
+            $this->io()->error('Error running composer create-project.');
+            exit;
+        }
+        $this->io()->success('Created composer project.');
+    }
+
+    private function moveComposerFilesToProjectRoot()
+    {
+        $moveFiles = $this->taskFilesystemStack()
+            ->rename(
+              Util::TMP_DIR . "/composer.json",
+              Util::getProjectDirectory() . "/composer.json",
+              TRUE
+            )
+            ->rename(
+              Util::TMP_DIR . "/composer.lock",
+              Util::getProjectDirectory() . "/composer.lock",
+              TRUE
+            )
+            ->run();
+        if ($moveFiles->getExitCode() != 0) {
+            $this->io()->error('Error moving composer files.');
+            exit;
+        }
+        $this->io()->success('Moved composer.json and composer.lock to project root.');
+    }
+
+    private function modifyComposerPaths()
+    {
+        $regexps = "s#web/#" . self::DRUPAL_FOLDER_NAME . "/#g";
+        $installationPaths = $this
+            ->taskExec("sed -i -E '{$regexps}' composer.json")
+            ->run();
+        if ($installationPaths->getExitCode() != 0) {
+            $this->io()->error('Unable to modifying composer.json paths.');
+            exit;
+        }
+        $this->io()->success('Modified composer installation paths.');
     }
 
     /**
@@ -88,7 +127,7 @@ class BasicCommands extends \Robo\Tasks
      *   4. If requested, pull the DKAN frontend application into docroot.
      *
      * @option yes
-     *   Skip confirmation step, overwrite existin no matter what. Use with caution!
+     *   Skip confirmation step, overwrite existing no matter what. Use with caution!
      * @option prefer-dist
      *   Prefer dist for packages. See composer docs.
      * @option prefer-source
@@ -103,8 +142,6 @@ class BasicCommands extends \Robo\Tasks
      *   Specify DKAN tagged release to build.
      * @option branch
      *   Specify DKAN branch to build.
-     * @option drupal-folder
-     *   Specify Drupal root folder.
      */
     public function make($opts = [
         'yes|y' => false,
@@ -115,33 +152,41 @@ class BasicCommands extends \Robo\Tasks
         'frontend' => false,
         'tag' => null,
         'branch' => null,
-        'drupal-folder' => null,
         ])
     {
-        $this->drupalFolder = $opts['drupal-folder'] ?? self::DRUPAL_FOLDER_NAME;
+        $this->io()->section("Running dktl make");
 
-        // @Todo: make a function to pass Drupal's folder name as an option.
-        // @Todo: make sure target directory does not exist.
-        $this->_exec("sed -i -E 's#web/#{$this->drupalFolder}/#g' composer.json");
+        // Find Dkan2 version from options' tag or branch values.
+        if ($opts['tag']) {
+          $dkanVersion = $opts['tag'];
+        } elseif ($opts['branch']) {
+          $dkanVersion = "dev-{$opts['branch']}";
+        }
 
-        // @Todo: make a single function to add a dependency in composer.json?
-        // $this->addDependency("drush/drush", BasicCommands::DRUSH_VERSION);
-        // $this->addDependency("GetDKAN/dkan2", "", $opts)
-        // @Todo: see if latest Drush ^10.2 could be used without breaking BC.
-        // Composer install
-        $drush = "drush/drush";
-        $dkan2 = "getdkan/dkan2:dev-beyond-drupal-8.7";
-        $this->_exec("composer require --no-progress {$drush} {$dkan2}");
+        // Add Drush and Dkan2 as project dependencies.
+        $dependencies = $this->taskComposerRequire()
+            ->dependency("drush/drush")
+            ->dependency("getdkan/dkan2", $dkanVersion)
+            ->run();
+        if ($dependencies->getExitCode() != 0) {
+            $this->io()->error('Unable to add Drush and Dkan2 dependencies.');
+            exit;
+        }
 
         // Symlink dirs from src into docroot.
-        $this->docrootSymlink('src/site', "{$this->drupalFolder}/sites/default");
-        $this->docrootSymlink('src/modules', "{$this->drupalFolder}/modules/custom");
-        $this->docrootSymlink('src/themes', "{$this->drupalFolder}/themes/custom");
+        $this->docrootSymlink('src/site', "{$drupalFolder}/sites/default");
+        $this->docrootSymlink('src/modules', "{$drupalFolder}/modules/custom");
+        $this->docrootSymlink('src/themes', "{$drupalFolder}/themes/custom");
 
         // @Todo: Check if it exists first, probably inside docrootSymlink
-        $this->docrootSymlink('src/schema', "{$this->drupalFolder}/schema");
+        $this->docrootSymlink('src/schema', "{$drupalFolder}/schema");
 
         // @Todo: frontend
+    }
+
+    private function modifyScaffoldAndInstallerPaths(string $folder)
+    {
+
     }
 
     /**
@@ -237,10 +282,10 @@ class BasicCommands extends \Robo\Tasks
         $link_dirname = $link_parts['dirname'];
         $target_path_relative_to_link = (new Filesystem())->makePathRelative($target, $link_dirname);
 
-        if (!file_exists($target) || !file_exists('docroot')) {
+        if (!file_exists($target) || !file_exists(self::DRUPAL_FOLDER_NAME)) {
             $this->io()->warning(
-                "Could not link $target. Folders $target and 'docroot' must both " .
-                "be present to create link."
+                "Skipping linking $target. Folders $target and '" .
+                self::DRUPAL_FOLDER_NAME."' must both be present to create link."
             );
             return;
         }
