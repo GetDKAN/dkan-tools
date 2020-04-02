@@ -21,12 +21,13 @@ class BasicCommands extends \Robo\Tasks
      * We get both Drupal and DKAN on the make step, using composer.
      *
      * @param string $drupalVersion
-     *   Drupal pure semantic version, i.e. 8.8.4 or 9.0.0-beta1
+     *   Drupal semantic version, i.e. 8.8.4 or 9.0.0-beta1
      */
     public function get(string $drupalVersion)
     {
         $this->io()->section("Running dktl get");
 
+        // Validate version is semantic and at least DRUPAL_MIN_VERSION.
         $this->validateVersion($drupalVersion);
         Util::prepareTmp();
 
@@ -35,18 +36,14 @@ class BasicCommands extends \Robo\Tasks
         $this->composerDrupalOutsideProjectRoot($drupalVersion);
         $this->moveComposerFilesToProjectRoot();
 
-        // Modify project's scaffold and installation paths from web to docroot.
+        // Modify project's scaffold and installation paths to `docroot` from
+        // the default `web` for drupal/recommended-project.
         $this->modifyComposerPaths();
 
         Util::cleanupTmp();
+        $this->io()->success("dktl get completed.");
     }
 
-    /**
-     * Validate version is semantic, and at least DRUPAL_MIN_VERSION.
-     *
-     * @param string $version
-     *   Drupal version.
-     */
     private function validateVersion(string $version)
     {
         // Verify against semver.org's regex here:
@@ -57,14 +54,14 @@ class BasicCommands extends \Robo\Tasks
           "?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
 
         if (!preg_match("#{$semVerRegex}#", $version, $matches)) {
-            $this->io()->error("Parameter invalid: requires semantic version.");
+            $this->io()->error("version format not semantic.");
             exit;
         }
         if (version_compare($version, self::DRUPAL_MIN_VERSION, "<")) {
-            $this->io()->error("Drupal version below minimal required.");
+            $this->io()->error("drupal version below minimal required.");
             exit;
         }
-        $this->io()->success('Validated semantic version and at least ' . self::DRUPAL_MIN_VERSION);
+        $this->io()->success('semantic version validated and >= ' . self::DRUPAL_MIN_VERSION);
     }
 
     private function composerDrupalOutsideProjectRoot(string $version)
@@ -75,10 +72,10 @@ class BasicCommands extends \Robo\Tasks
             ->noInstall()
             ->run();
         if ($createFiles->getExitCode() != 0) {
-            $this->io()->error('Error running composer create-project.');
+            $this->io()->error('could not run composer create-project.');
             exit;
         }
-        $this->io()->success('Created composer project.');
+        $this->io()->success('composer project created.');
     }
 
     private function moveComposerFilesToProjectRoot()
@@ -96,10 +93,10 @@ class BasicCommands extends \Robo\Tasks
             )
             ->run();
         if ($moveFiles->getExitCode() != 0) {
-            $this->io()->error('Error moving composer files.');
+            $this->io()->error('could not move composer files.');
             exit;
         }
-        $this->io()->success('Moved composer.json and composer.lock to project root.');
+        $this->io()->success('composer.json and composer.lock moved to project root.');
     }
 
     private function modifyComposerPaths()
@@ -109,10 +106,10 @@ class BasicCommands extends \Robo\Tasks
             ->taskExec("sed -i -E '{$regexps}' composer.json")
             ->run();
         if ($installationPaths->getExitCode() != 0) {
-            $this->io()->error('Unable to modifying composer.json paths.');
+            $this->io()->error('could not Unable to modifying composer.json paths.');
             exit;
         }
-        $this->io()->success('Modified composer installation paths.');
+        $this->io()->success('composer installation paths modified.');
     }
 
     /**
@@ -154,12 +151,14 @@ class BasicCommands extends \Robo\Tasks
     {
         $this->io()->section("Running dktl make");
 
+        // Add Drush and Dkan2 dependencies.
         $this->addDependencies($opts);
 
         // Symlink dirs from src into docroot.
         $this->addSymlinksToDrupalRoot();
 
         // @Todo: frontend
+        $this->io()->success("dktl make completed.");
     }
 
     private function addDependencies(array $opts)
@@ -226,7 +225,7 @@ class BasicCommands extends \Robo\Tasks
             ->remove('/root/.composer/composer.lock')
             ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not remove root composer files.');
+            $this->io()->error('could not remove root composer files.');
             return $result;
         }
         $result = $this->taskComposerRequire()
@@ -251,7 +250,7 @@ class BasicCommands extends \Robo\Tasks
             ->remove('/root/.composer/composer.lock')
             ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not remove root composer files.');
+            $this->io()->error('could not remove root composer files.');
             return $result;
         }
         $result = $this->taskComposerRequire()
