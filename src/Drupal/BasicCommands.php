@@ -182,8 +182,8 @@ class BasicCommands extends \Robo\Tasks
           ->dependency("drush/drush")
           ->run();
         if ($addDrush->getExitCode() != 0) {
-          $this->io()->error('Unable to add Drush as a project dependencies.');
-          exit;
+            $this->io()->error('Unable to add Drush as a project dependencies.');
+            exit;
         }
         $this->io()->success("drush/drush added as a project dependency.");
     }
@@ -432,5 +432,4 @@ class BasicCommands extends \Robo\Tasks
         }
         return $matches[1];
     }
-
 }
