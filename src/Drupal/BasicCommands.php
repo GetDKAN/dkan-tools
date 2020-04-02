@@ -12,33 +12,69 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class BasicCommands extends \Robo\Tasks
 {
-    private $drupalVersion;
-    private $drupalFolder;
+    const MIN_DRUPAL_VERSION = "8.8";
 
     /**
      * Get drupal/recommended-project's composer files.
      *
      * We get both Drupal and DKAN on the make step, using composer.
      *
-     * @param string $version
-     *   Drupal X.Y.Z version or "latest"
+     * @param string $drupalVersion
+     *   Drupal pure semantic version, i.e. 8.8.4 or 9.0.0-beta1
      */
-    public function get(string $version = "latest")
+    public function get(string $drupalVersion)
     {
-        // Set the Drupal version for later.
-        $this->drupalVersion = $version;
-
-        Util::cleanupTmp();
+        if (!$this->validateVersion($drupalVersion)) {
+          exit;
+        }
         Util::prepareTmp();
 
-        // Composer's create-project requires an empty destination folder,
-        // so briefly move dktl items out, then move them back in.
-        // @Todo: consider running composer in another folder and moving its 2 composer.*
-        $this->_exec("mv * " . Util::TMP_DIR);
-        $this->_exec("composer create-project --no-install drupal/recommended-project .");
-        $this->_exec("mv " . Util::TMP_DIR . "/* .");
+        // Composer's create-project requires an empty folder, so run it in /tmp
+        // then move the 2 composer files back into project root.
+        $createFiles = $this->taskComposerCreateProject()
+          ->source("drupal/recommended-project:{$drupalVersion}")
+          ->target(Util::TMP_DIR)
+          ->noInstall()
+          ->run();
+        if ($createFiles->getExitCode() != 0) {
+            $this->io()->error('Error running composer create-project.');
+            exit;
+        }
+        $moveFiles = $this->taskFilesystemStack()
+          ->rename(Util::TMP_DIR . "/composer.json", Util::getProjectDirectory() . "/composer.json", TRUE)
+          ->rename(Util::TMP_DIR . "/composer.lock", Util::getProjectDirectory() . "/composer.lock", TRUE)
+          ->run();
+        if ($moveFiles->getExitCode() != 0) {
+            $this->io()->error('Error moving composer files.');
+            exit;
+        }
+        $this->io()->success('Created composer project.');
 
         Util::cleanupTmp();
+    }
+
+    /**
+     * Validate the parameter is a valid semantic version and at least 8.8.
+     *
+     * @param string $version
+     *   Drupal version.
+     *
+     * @return bool
+     */
+    private function validateVersion(string $version): bool
+    {
+        // Verify it's a valid semantic version by using regex provided by
+        // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+        $semVerRegex = "^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
+        if (!preg_match("#{$semVerRegex}#", $version, $matches)) {
+            $this->io()->error("Parameter invalid: requires semantic version.");
+            return false;
+        }
+        if (version_compare($version, self::MIN_DRUPAL_VERSION, "<")) {
+            $this->io()->error("Drupal version below minimal required.");
+            return false;
+        }
+        return true;
     }
 
     /**
