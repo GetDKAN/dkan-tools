@@ -334,34 +334,6 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    /**
-     * Install frontend app.
-     */
-    public function frontendInstall()
-    {
-        $task = $this->taskExec("npm install")->dir("src/frontend");
-        $result = $task->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install front-end node modules');
-            return $result;
-        }
-        $this->io()->success('front-end installed.');
-    }
-
-    /**
-     * Build frontend app.
-     */
-    public function frontendBuild()
-    {
-        $task = $this->taskExec("npm run build")->dir("src/frontend");
-        $result = $task->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('could not build the front-end.');
-            return $result;
-        }
-        $this->io()->success('front-end build.');
-    }
-
     public function install($opts = ['frontend' => false])
     {
         $result = $this->taskExec('drush si -y')
