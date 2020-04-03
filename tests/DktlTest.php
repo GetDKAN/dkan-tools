@@ -13,11 +13,12 @@ class DktlTest extends \PHPUnit\Framework\TestCase
 
     public function testUninitialized()
     {
+        `mkdir /tmp/sandbox`;
         $output = [];
-        exec("cd sandbox && dktl", $output);
-        $this->assertEquals(
+        exec("cd /tmp/sandbox && dktl", $output);
+        $this->assertContains(
             "DKTL is running outside of a DKTL project. Run dktl init in the project directory first.",
-            $output[0]
+            $output
         );
     }
 

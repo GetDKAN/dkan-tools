@@ -11,14 +11,9 @@ $dktl_project_directory = DkanTools\Util\Util::getProjectDirectory();
 
 $output = new ConsoleOutput();
 
-
-$commands = [];
-
 $discovery = new CommandFileDiscovery();
 $discovery->setSearchPattern('*Commands.php');
 $defaultCommandClasses = $discovery->discover("{$dktl_directory}/src", '\\DkanTools');
-
-print_r($defaultCommandClasses);
 
 $customCommandClasses = [];
 if (file_exists("{$dktl_project_directory}/src/command")) {

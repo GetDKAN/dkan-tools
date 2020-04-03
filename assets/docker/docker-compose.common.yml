@@ -49,7 +49,7 @@ services:
   # Used for all console commands and tools.
   cli:
     hostname: cli
-    image: getdkan/dkan-docker:php72-cli
+    image: getdkan/dkan-cli:latest
     environment:
       - DKTL_MODE=HOST
       - DKTL_DOCKER=1

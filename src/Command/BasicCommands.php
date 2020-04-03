@@ -54,7 +54,7 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->section("Running dktl make");
 
         // Add project dependencies.
-        $this->addDrush();
+        // $this->addDrush();
         $this->addDkan2($opts);
 
         // Run composer install while passing the options.
@@ -91,6 +91,7 @@ class BasicCommands extends \Robo\Tasks
 
     private function addDkan2(array $opts)
     {
+        $dkanVersion = 'dev-master';
         // Find Dkan2 version from options' tag or branch values.
         if ($opts['tag']) {
             $dkanVersion = $opts['tag'];
