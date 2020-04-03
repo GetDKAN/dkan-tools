@@ -11,6 +11,12 @@ class InitCommands extends \Robo\Tasks
      */
     public function init($opts = ['host' => ''])
     {
+        $this->initConfig();
+        $this->initSrc($opts);
+    }
+
+    private function initConfig()
+    {
         $this->io()->section('Initializing dktl configuration');
         if (file_exists('dktl.yml') && file_exists('src')) {
             $this->io()->note("This project has already been initialized.");
@@ -22,7 +28,10 @@ class InitCommands extends \Robo\Tasks
         } else {
             $this->createDktlYmlFile();
         }
+    }
 
+    private function initSrc($opts)
+    {
         $this->io()->section('Initializing src directory');
         if (file_exists('src')) {
             $this->io()->warning('The src directory already exists in this directory; skipping.');
@@ -30,7 +39,6 @@ class InitCommands extends \Robo\Tasks
             $this->createSrcDirectory($opts['host']);
         }
     }
-
 
     private function createDktlYmlFile()
     {
