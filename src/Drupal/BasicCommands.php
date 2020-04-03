@@ -143,7 +143,7 @@ class BasicCommands extends \Robo\Tasks
         'yes|y' => false,
         'prefer-source' => false,
         'prefer-dist' => false,
-        'no-dev' => true,
+        'no-dev' => false,
         'optimize-autoloader' => false,
         'frontend' => false,
         'tag' => null,
