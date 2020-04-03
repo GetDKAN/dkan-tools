@@ -8,8 +8,6 @@ class DktlTest extends \PHPUnit\Framework\TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        // @Todo: Try to remove.
-        putenv("DRUPAL_VERSION=V8");
         `mkdir sandbox`;
     }
 
@@ -25,79 +23,87 @@ class DktlTest extends \PHPUnit\Framework\TestCase
 
     public function testDktlGetWithBadParameter()
     {
-        $output = [];
         `cd sandbox && dktl init`;
+        $output = [];
         exec("cd sandbox && dktl get foobar", $output);
-        $this->assertContains(
-            " [ERROR] version format not semantic.",
-            $output
-        );
+        $this->assertContains(" [ERROR] version format not semantic.", $output);
     }
 
     public function testDktlGetDrupalVersionLessThanMinimum()
     {
-        $output = [];
         `cd sandbox && dktl init`;
+        $output = [];
         exec("cd sandbox && dktl get 8.7.11", $output);
-        $this->assertContains(
-            " [ERROR] drupal version below minimal required.",
-            $output
-        );
+        $this->assertContains(" [ERROR] drupal version below minimal required.", $output);
     }
 
     public function testDktlGetNonExistentDrupalVersion()
     {
-        $output = [];
         `cd sandbox && dktl init`;
+        $output = [];
         exec("cd sandbox && dktl get 77.7.7", $output);
-        $this->assertContains(
-            '  Could not find package drupal/recommended-project with version 77.7.7.',
-            $output
-        );
-        $this->assertContains(
-            ' [ERROR] could not run composer create-project.',
-            $output
-        );
+        $this->assertContains('  Could not find package drupal/recommended-project with version 77.7.7.', $output);
+        $this->assertContains(' [ERROR] could not run composer create-project.', $output);
     }
 
     public function testDktlGetSuccess()
     {
-      $output = [];
-      `cd sandbox && dktl init`;
-      exec("cd sandbox && dktl get 9.0.0-beta2", $output);
-      $this->assertContains(
-        ' [OK] composer project created.',
-        $output
-      );
+        `cd sandbox && dktl init`;
+        $output = [];
+        exec("cd sandbox && dktl get 9.0.0-beta2", $output);
+        $this->assertContains(' [OK] composer project created.', $output);
     }
 
     public function testFromInitToSite()
     {
-        // Initialize project
+        // Dktl init.
+        `cd sandbox && dktl init`;
         $output = [];
-        exec("cd sandbox && dktl init");
         exec("ls sandbox", $output);
-        $this->assertEquals("dktl.yml", $output[0]);
-        $this->assertEquals("src", $output[1]);
-
-        // Get DKAN.
+        $this->assertContains("dktl.yml", $output);
+        $this->assertContains("src", $output);
+        $this->assertNotContains("composer.json", $output);
+        $this->assertNotContains("composer.lock", $output);
+        $this->assertNotContains("docroot", $output);
+        $this->assertNotContains("vendor", $output);
         $output = [];
-        exec("cd sandbox && dktl get 8.6.13");
-        exec("ls sandbox", $output);
-        $this->assertEquals("docroot", $output[1]);
+        exec("ls sandbox/src", $output);
+        $this->assertContains("command", $output);
+        $this->assertContains("docker", $output);
+        $this->assertContains("make", $output);
+        $this->assertContains("modules", $output);
+        $this->assertContains("script", $output);
+        $this->assertContains("site", $output);
+        $this->assertContains("tests", $output);
+        $this->assertContains("themes", $output);
 
-        // Make the project.
-        exec("cd sandbox && dktl make");
+        // Dktl get.
+        `cd sandbox && dktl get 8.8.4`;
+        $output = [];
+        exec("ls sandbox", $output);
+        $this->assertContains("composer.json", $output);
+        $this->assertContains("composer.lock", $output);
+        $this->assertContains("docroot", $output);
+        $this->assertContains("vendor", $output);
+        $output = [];
+        exec("ls sandbox/docroot", $output);
+        $this->assertContains("core", $output);
+        $this->assertContains("modules", $output);
+        $this->assertContains("profiles", $output);
+        $this->assertContains("sites", $output);
+        $this->assertContains("themes", $output);
+
+        // Dktl make.
+        `cd sandbox && dktl make --branch beyond-drupal-8.7`;
         $output = [];
         exec("ls sandbox/docroot/profiles/contrib", $output);
-        $this->assertEquals("dkan2", $output[0]);
+        $this->assertContains("dkan2", $output);
 
-        // Install Drupal.
-        exec("cd sandbox && dktl install");
+        // Dktl install.
+        `cd sandbox && dktl install`;
         $output = [];
         exec("cd sandbox && dktl drush updb", $output);
-
-        $this->assertContains("No database updates required", $output[0]);
+        $this->assertContains(" [success] No pending updates.", $output);
     }
 
     protected function tearDown() : void
