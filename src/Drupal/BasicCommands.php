@@ -63,7 +63,7 @@ class BasicCommands extends \Robo\Tasks
             exit;
         }
         $this->io()->success(
-          "semantic version validated and >= " . self::DRUPAL_MIN_VERSION . "."
+            "semantic version validated and >= " . self::DRUPAL_MIN_VERSION . "."
         );
     }
 
