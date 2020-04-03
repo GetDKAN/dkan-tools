@@ -94,7 +94,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("themes", $output);
 
         // Dktl make.
-        `cd sandbox && dktl make --branch beyond-drupal-8.7`;
+        `cd sandbox && dktl make`;
         $output = [];
         exec("ls sandbox/docroot/profiles/contrib", $output);
         $this->assertContains("dkan2", $output);
