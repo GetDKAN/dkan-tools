@@ -62,7 +62,9 @@ class BasicCommands extends \Robo\Tasks
             $this->io()->error("drupal version below minimal required.");
             exit;
         }
-        $this->io()->success('semantic version validated and >= ' . self::DRUPAL_MIN_VERSION);
+        $this->io()->success(
+          "semantic version validated and >= " . self::DRUPAL_MIN_VERSION . "."
+        );
     }
 
     private function composerDrupalOutsideProjectRoot(string $version)
