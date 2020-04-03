@@ -1,6 +1,6 @@
 <?php
 
-namespace DkanTools\Drupal;
+namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 
