@@ -124,6 +124,6 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         parent::tearDown();
         `cd sandbox && dktl dc kill`;
         `cd sandbox && dktl dc rm --force`;
-        `sudo rm -rf sandbox`;
+        `rm -rf sandbox`;
     }
 }
