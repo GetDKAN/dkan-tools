@@ -236,7 +236,7 @@ class BasicCommands extends \Robo\Tasks
         }
 
         if (file_exists('src/frontend')) {
-            $this->docrootSymlink('src/frontend', 'docroot/data-catalog-frontend');
+            $this->docrootSymlink('src/frontend', self::DRUPAL_FOLDER_NAME . '/data-catalog-frontend');
         }
 
         $this->io()->note(
@@ -274,22 +274,6 @@ class BasicCommands extends \Robo\Tasks
         $result = $this->taskExec("ln -s /root/.composer/vendor/bin/phpunit /usr/local/bin/phpunit")->run();
 
         return $result;
-    }
-
-    private function mergeComposerConfig()
-    {
-        $drupal_config_path = Util::getProjectDirectory() . "/docroot/composer.json";
-        $drupal_config = json_decode(file_get_contents($drupal_config_path));
-        $custom_path = Util::getProjectDirectory() . "/src/make/composer.json";
-
-        $include_array = $drupal_config->extra->{"merge-plugin"}->include;
-
-        // only add the extra composr file if needed.
-        if (!in_array($custom_path, $include_array) && is_file($custom_path)) {
-            $include_array[] = $custom_path;
-            $drupal_config->extra->{"merge-plugin"}->include = $include_array;
-            file_put_contents($drupal_config_path, json_encode($drupal_config, JSON_PRETTY_PRINT));
-        }
     }
 
     /**
