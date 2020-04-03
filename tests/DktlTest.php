@@ -56,7 +56,14 @@ class DktlTest extends \PHPUnit\Framework\TestCase
 
     public function testFromInitToSite()
     {
-        // Dktl init.
+        $this->init();
+        $this->get();
+        $this->make();
+        $this->install();
+    }
+
+    private function init()
+    {
         `cd sandbox && dktl init`;
         $output = [];
         exec("ls sandbox", $output);
@@ -76,8 +83,10 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("site", $output);
         $this->assertContains("tests", $output);
         $this->assertContains("themes", $output);
+    }
 
-        // Dktl get.
+    private function get()
+    {
         `cd sandbox && dktl get 8.8.4`;
         $output = [];
         exec("ls sandbox", $output);
@@ -92,14 +101,18 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("profiles", $output);
         $this->assertContains("sites", $output);
         $this->assertContains("themes", $output);
+    }
 
-        // Dktl make.
+    private function make()
+    {
         `cd sandbox && dktl make`;
         $output = [];
         exec("ls sandbox/docroot/profiles/contrib", $output);
         $this->assertContains("dkan2", $output);
+    }
 
-        // Dktl install.
+    private function install()
+    {
         `cd sandbox && dktl install`;
         $output = [];
         exec("cd sandbox && dktl drush updb", $output);
