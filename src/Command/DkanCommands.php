@@ -30,11 +30,11 @@ class DkanCommands extends \Robo\Tasks
         }
 
         $this->taskExec("npm install cypress")
-        ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+        ->dir("{$proj_dir}/docroot/modules/contrib/dkan2")
         ->run();
 
         return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
-            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+            ->dir("{$proj_dir}/docroot/modules/contrib/dkan2")
             ->run();
     }
 
@@ -45,11 +45,11 @@ class DkanCommands extends \Robo\Tasks
     {
         $proj_dir = Util::getProjectDirectory();
         $this->taskExec("npm install dredd")
-            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2")
+            ->dir("{$proj_dir}/docroot/modules/contrib/dkan2")
             ->run();
 
         return $this->taskExec("npx dredd --hookfiles=./dredd-hooks.js")
-            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2/dredd")
+            ->dir("{$proj_dir}/docroot/modules/contrib/dkan2/dredd")
             ->run();
     }
 
@@ -70,7 +70,7 @@ class DkanCommands extends \Robo\Tasks
 
         $phpunitExec = $this->taskExec($phpunit_executable)
             ->option('testsuite', 'DKAN Test Suite')
-            ->dir("{$proj_dir}/docroot/profiles/contrib/dkan2");
+            ->dir("{$proj_dir}/docroot/modules/contrib/dkan2");
 
         foreach ($args as $arg) {
             $phpunitExec->arg($arg);
@@ -89,7 +89,7 @@ class DkanCommands extends \Robo\Tasks
         putenv("CC_TEST_REPORTER_ID={$code_climate_reporter_id}");
 
         $proj_dir = Util::getProjectDirectory();
-        $dkan_dir = "{$proj_dir}/docroot/profiles/contrib/dkan2";
+        $dkan_dir = "{$proj_dir}/docroot/modules/contrib/dkan2";
 
         if (!file_exists("{$dkan_dir}/cc-test-reporter")) {
             $this->taskExec(
