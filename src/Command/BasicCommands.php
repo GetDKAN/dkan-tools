@@ -68,7 +68,7 @@ class BasicCommands extends \Robo\Tasks
         $install->run();
 
         // Symlink dirs from src into docroot.
-        $this->addSymlinksToDrupalRoot();
+        $this->makeAddSymlinksToDrupalRoot();
 
         if ($opts['frontend'] === true) {
             $this->installFrontend();
@@ -109,7 +109,7 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->success("getdkan/dkan2 added as a project dependency.");
     }
 
-    private function addSymlinksToDrupalRoot()
+    public function makeAddSymlinksToDrupalRoot()
     {
         $targetsAndLinks = [
             ['target' => 'src/site',    'link' => '/sites/default'],
