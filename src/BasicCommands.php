@@ -41,7 +41,9 @@ class BasicCommands extends \Robo\Tasks
         // Modify project's scaffold and installation paths to `docroot`, then
         // install Drupal in it.
         $this->modifyComposerPaths();
-        $this->taskComposerInstall()->run();
+        $this->taskComposerInstall()
+            ->env("COMPOSER_MEMORY_LIMIT", -1)
+            ->run();
 
         Util::cleanupTmp();
         $this->io()->success("dktl get completed.");
@@ -71,7 +73,8 @@ class BasicCommands extends \Robo\Tasks
 
     private function composerDrupalOutsideProjectRoot(string $version)
     {
-        $createFiles = $this->taskComposerCreateProject()
+      $createFiles = $this->taskComposerCreateProject()
+        ->env("COMPOSER_MEMORY_LIMIT", -1)
         ->source("drupal/recommended-project:{$version}")
         ->target(Util::TMP_DIR)
         ->noInstall()

@@ -59,7 +59,8 @@ class BasicCommands extends \Robo\Tasks
 
         // Run composer install while passing the options.
         $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
-        $install = $this->taskComposerInstall();
+        $install = $this->taskComposerInstall()
+            ->env("COMPOSER_MEMORY_LIMIT", -1);
         foreach ($composerBools as $composerBool) {
             if ($opts[$composerBool] === true) {
                 $install->option($composerBool);
@@ -80,6 +81,7 @@ class BasicCommands extends \Robo\Tasks
     private function addDrush()
     {
         $addDrush = $this->taskComposerRequire()
+          ->env("COMPOSER_MEMORY_LIMIT", -1)
           ->dependency("drush/drush")
           ->run();
         if ($addDrush->getExitCode() != 0) {
@@ -100,6 +102,7 @@ class BasicCommands extends \Robo\Tasks
         }
 
         $addDkan2 = $this->taskComposerRequire()
+            ->env("COMPOSER_MEMORY_LIMIT", -1)
             ->dependency("getdkan/dkan2", $dkanVersion)
             ->run();
         if ($addDkan2->getExitCode() != 0) {
@@ -169,6 +172,7 @@ class BasicCommands extends \Robo\Tasks
             return $result;
         }
         $result = $this->taskComposerRequire()
+            ->env("COMPOSER_MEMORY_LIMIT", -1)
             ->dependency('phpunit/phpunit', "7.5.18")
             ->dir('/root/.composer')
             ->run();
