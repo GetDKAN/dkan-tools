@@ -6,6 +6,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+putenv("COMPOSER_MEMORY_LIMIT=-1");
+
 $dktl_directory = DkanTools\Util\Util::getDktlDirectory();
 $dktl_project_directory = DkanTools\Util\Util::getProjectDirectory();
 
