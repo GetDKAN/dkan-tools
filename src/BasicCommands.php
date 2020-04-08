@@ -73,12 +73,12 @@ class BasicCommands extends \Robo\Tasks
 
     private function composerDrupalOutsideProjectRoot(string $version)
     {
-      $createFiles = $this->taskComposerCreateProject()
-        ->env("COMPOSER_MEMORY_LIMIT", -1)
-        ->source("drupal/recommended-project:{$version}")
-        ->target(Util::TMP_DIR)
-        ->noInstall()
-        ->run();
+        $createFiles = $this->taskComposerCreateProject()
+            ->env("COMPOSER_MEMORY_LIMIT", -1)
+            ->source("drupal/recommended-project:{$version}")
+            ->target(Util::TMP_DIR)
+            ->noInstall()
+            ->run();
         if ($createFiles->getExitCode() != 0) {
             $this->io()->error('could not run composer create-project.');
             exit;
