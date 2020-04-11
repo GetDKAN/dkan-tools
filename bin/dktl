@@ -170,7 +170,7 @@ elif [ "$DKTL_MODE" = "HOST" ]; then
   # For several commands, we want to insert a "--" to pass all arguments as an array.
 
   case $1 in
-      drush | phpunit | test:phpunit* | dkan:test-phpunit | test:behat* | test:lint | test:lint-fix)
+      drush | phpunit | *test* )
           php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"          
           ;;
       *)
