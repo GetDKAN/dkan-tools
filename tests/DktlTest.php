@@ -99,7 +99,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         exec("ls sandbox/docroot", $output);
         $this->assertContains("core", $output);
         $this->assertContains("modules", $output);
-        $this->assertContains("profiles", $output);
+        $this->assertContains("modules", $output);
         $this->assertContains("sites", $output);
         $this->assertContains("themes", $output);
     }
@@ -108,7 +108,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
     {
         `cd sandbox && dktl make`;
         $output = [];
-        exec("ls sandbox/docroot/profiles/contrib", $output);
+        exec("ls sandbox/docroot/modules/contrib", $output);
         $this->assertContains("dkan2", $output);
     }
 

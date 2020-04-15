@@ -236,7 +236,19 @@ class BasicCommands extends \Robo\Tasks
 
     public function install($opts = ['frontend' => false])
     {
-        $result = $this->taskExec('drush si -y')
+        $result = $this->taskExec('drush si standard -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush en dkan2 dkan_admin dkan_harvest dkan_dummy_content dblog config_update_ui -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush config-set system.performance css.preprocess 0 -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush config-set system.performance js.preprocess 0 -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush config-set system.site page.front "//dkan/home" -y')
             ->dir(Util::getProjectDocroot())
             ->run();
 
