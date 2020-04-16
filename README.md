@@ -143,31 +143,13 @@ DKTL should have already provided some things in _/src/site_: _settings.php_ con
 
 ### The src/test folder (custom tests)
 
-DKAN Tools supports custom PHPUnit and Cypress tests found in the _src/test_ directory.
-
-If your site does not have tests set up yet, running `dktl init:custom-tests` will set up a _src/test_ directory in your project with sample phpunit and cypress tests to start from.
+DKAN Tools supports custom Cypress tests found in the _src/test/cypress_ directory.
 
 To run custom tests:
 
 ```bash
-dktl dkan:test-phpunit-coverage-custom
+dktl test:cypress
 ```
-
-and
-
-```bash
-dktl dkan:test-cypress-custom
-```
-
-To manually configure custom phpunit tests (without using `dktl init:custom-tests`):
-
-1. Create _src/test/phpunit_
-2. Place a _phpunit.xml_ configuration file in _src/test/phpunit_.  You can use the [_phpunit.xml_ file in _dkan/test/phpunit_](https://github.com/GetDKAN/dkan/blob/7.x-1.x/test/phpunit/phpunit.xml) as an example, replacing the `<testsuite>` elements to reflect your own custom tests. See the [PHPUnit documentation](https://phpunit.readthedocs.io/en/7.0/organizing-tests.html#composing-a-test-suite-using-xml-configuration) for more information.
-3. Add a copy of [_dkan/test/phpunit/boot.php_](https://github.com/GetDKAN/dkan/blob/7.x-1.x/test/phpunit/boot.php) in the same directory.
-4. Store your tests in _src/test/phpunit_. Again, use [_dkan/test/phpunit_](https://github.com/GetDKAN/dkan/tree/7.x-1.x/test/phpunit) as a guide.
-
-JUnit style test results will be written to _src/test/assets/junit_.
-
 
 ## Restoring a database dump or site files
 
@@ -278,10 +260,6 @@ DKTL recognized this and by default makes some configurations available to the c
 * .ssh
 * .aws
 * .composer
-
-## A note to users of DKAN Starter
-
-Users of [DKAN Starter](https://github.com/GetDKAN/dkan_starter) will recognize some concepts here. The release of DKAN Tools eliminates the need for a separate DKAN Starter project, as it provides a workflow to build sites directly from DKAN releases. Support for DKAN Starter and its accompanying [Ahoy](http://www.ahoycli.com/en/latest/) commands is ending, and detailed instructions for migrating DKAN Starter projects to the DKAN Tools workflow is coming soon.
 
 ## Troubleshooting
 
