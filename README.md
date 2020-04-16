@@ -143,7 +143,7 @@ DKTL should have already provided some things in _/src/site_: _settings.php_ con
 
 ### The src/test folder (custom tests)
 
-DKAN Tools supports custom Cypress tests found in the _src/test/cypress_ directory.
+DKAN Tools supports custom [Cypress](https://www.cypress.io/) tests found in the _src/test/cypress_ directory.
 
 To run custom tests:
 
