@@ -60,17 +60,20 @@ This will automatically start up the Docker containers, which can also be starte
 dktl get <drupal-version>
 ```
 
-4. Get Drupal dependencies and DKAN modules. This will create the symlinks necesarry to create a working Drupal site under _/docroot_.
+4. Get Drupal dependencies and DKAN modules. This will create the symlinks necessary to create a working Drupal site under _/docroot_.
 
 ```bash
 dktl make
 ```
 
-  - Flag options:
-      * If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests, use the `--prefer-source` option with `dktl make`. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
-      * To install the React frontend application add the `--frontend` option with `dktl make`. This will download the app to `src/frontend` and symlink the files to `docroot/data-catalog-frontend`.
+  - Make options:
+      * `--prefer-source` If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
+      * `--frontend` To **download** the React frontend application to _src/frontend_ and symlink the files to _docroot/data-catalog-frontend_.
+      * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
+      * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
 
-5. Install DKAN. Add the `--frontend` option again to enable the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end.
+5. Install DKAN.
+      * Add the `--frontend` option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions to build the frontend application.
 
 ```bash
 dktl install
