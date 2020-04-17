@@ -1,6 +1,6 @@
 # DKAN Tools
 
-This CLI application provides tools for implementing and developing [DKAN](https://getdkan.org/), the Drupal-based open data portal.
+This CLI application provides tools for implementing and developing [DKAN](https://github.com/GetDKAN/dkan), the Drupal-based open data portal.
 
 ## Requirements
 
@@ -31,7 +31,7 @@ export PATH=$PATH:/myworkspace/dkan-tools/bin
 
 Once you are working in a valid project folder (see next section) you can type `dktl` at any time to see a list of available commands.
 
-## Starting a DKAN 1.x project
+## Starting a new project
 To start a project with `dktl`, create a project directory.
 
 ```bash
@@ -70,9 +70,6 @@ dktl install
 
 You can find the local site URL by typing `dktl docker:surl`.
 
-## Starting a DKAN 2.x project
-
-Instructions can be found [here](https://getdkan.github.io/dkan2/installation.html).
 
 ## Structure of a DKAN-Tools-based project
 
@@ -171,8 +168,6 @@ To manually configure Behat tests:
 2. Place Behat configuration files _behat.yml_ and _behat.docker.yml_ in _src/test_.  You can use the corresponding files in [_dkan/test_](https://github.com/GetDKAN/dkan/tree/7.x-1.x/test) as references, or even just create symbolic links to them.
 3. Store you tests in _src/test/features_.
 
-JUnit style test results will be written to _src/test/assets/junit_.
-
 ## Restoring a database dump or site files
 
 DKAN Tools' `restore` commands can restore from a local or remote dump of the database, as well as restore a files archive. This simplest way to do this is:
@@ -209,7 +204,7 @@ If you include this in your dktl.yml file, typing `dktl restore` without any arg
 
 ## Custom Commands
 
-Projects to can define their own commands. To create a custom command, create a new class inside of this project with a similar structure to the this one:
+Projects to can define their own commands. To create a custom command, add a file named `CustomCommands.php` and add it to `src/command/`, create a new class in the file with a similar structure to the this one:
 
 ```php
 <?php
