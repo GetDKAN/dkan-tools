@@ -1,6 +1,6 @@
 # DKAN Tools
 
-This CLI application provides tools for implementing and developing [DKAN](https://getdkan.org/), the Drupal-based open data portal.
+This CLI application provides tools for implementing and developing [DKAN](https://github.com/GetDKAN/dkan), the Drupal-based open data portal.
 
 ## Requirements
 
@@ -31,14 +31,22 @@ export PATH=$PATH:/myworkspace/dkan-tools/bin
 
 Once you are working in a valid project folder (see next section) you can type `dktl` at any time to see a list of available commands.
 
-## Starting a DKAN 1.x project
-To start a project with `dktl`, create a project directory.
+## Local development
+The React front end uses the DKAN API to build pages, so we will want to mimic a production environment. The environment variables are [defined in `.env` files](https://github.com/GetDKAN/data-catalog-frontend/blob/master/.env.production#L1), the default value is _"dkan"_, you can adjust these files as necessary.
+
+Setup and start the proxy:
+
+- Add `dkan` to `/etc/hosts`
+- Start the proxy: `docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy`
+
+## Starting a new project
+1. To start a project with `dktl`, create a project directory.
 
 ```bash
 mkdir my_project && cd my_project
 ```
 
-Inside the project directory, initialize your project.
+2. Inside the project directory, initialize your project.
 
 ```bash
 dktl init
@@ -46,88 +54,86 @@ dktl init
 
 This will automatically start up the Docker containers, which can also be started manually with `dktl docker:compose up -d`. Any other docker-compose commands can be run via `dktl docker:compose <args>` or simply `dktl dc <args>`.
 
-After initialization, we want to get DKAN ready. We can use `git clone` (recommended if you are working directly on DKAN core and will want to commit and push changes to the DKAN project) or download a tarball of the DKAN source from [GitHub](https://github.com/GetDKAN/dkan), but the easiest method is using this command:
+3. Get Drupal, only versions 8.8 or above are supported:
 
 ```bash
-dktl dkan:get <version_number>
+dktl get <drupal-version>
 ```
 
-Versions of DKAN look like this: ``7.x-1.15.3``. We can see all of [DKAN's releases](https://github.com/getDkan/dkan/releases) in Github.
-
-Now run the "make" command:
+4. Get Drupal dependencies and DKAN modules. This will create the symlinks necessary to create a working Drupal site under _/docroot_.
 
 ```bash
 dktl make
 ```
 
-The `make` command will get all of DKAN's dependencies _including_ Drupal core. It will also create all the symlinks necesarry to create a working Drupal site under _/docroot_.
+  - Make options:
+      * `--prefer-source` If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
+      * `--frontend` To **download** the React frontend application to _src/frontend_ and symlink the files to _docroot/data-catalog-frontend_.
+      * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
+      * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
 
-Finally, let's install DKAN.
+5. Install DKAN.
+      * Add the `--frontend` option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions to build the frontend application.
 
 ```bash
 dktl install
 ```
 
-You can find the local site URL by typing `dktl docker:surl`.
+---
 
-## Starting a DKAN 2.x project
+**NOTE: The install command currently runs extra drush commands to set up basic configuration and enables non-essential dkan and drupal modules that are nice to have on a fresh install but may not be needed if you are adding DKAN to an existing site.**
 
-Instructions can be found [here](https://getdkan.github.io/dkan2/installation.html).
+---
+
+6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.
+
 
 ## Structure of a DKAN-Tools-based project
 
-One of the many reasons for using DKTL is to create a clear separation between the code specific to a particular DKAN site (i.e. "custom code") and the dependencies we pull in from other sources (primarily, DKAN core and Drupal core).
+One of the many reasons for using DKTL is to create a clear separation between the code specific to a particular DKAN site (i.e. "custom code") and the dependencies we pull in from other sources (primarily, DKAN core and Drupal core). Keep all of your custom code in the _src_ directory.
 
 To accomplish this, DKAN Tools projects will have the following basic directory structure, created when we run `dktl init`.
 
-    ├── dkan              # The upstream DKAN core codebase
-    ├── docroot           # Drupal core, and contrib modules not from DKAN
-    ├── src               # Site-specific configuration, code and files
+    ├── backups           # Optional for local development, see the backups section below
+    ├── docroot           # Drupal core
+    |   └── modules
+    |       └── contrib
+    |           └── dkan2 # The upstream DKAN core codebase
+    |
+    ├── src               # Site-specific configuration, code and files.
     │   ├── make          # Overrides for DKAN and Drupal makefiles
-    │   ├── modules       # Symlinked to docroot/sites/all/modules/custom
+    │   ├── modules       # Symlinked to docroot/modules/custom
     │   ├── script        # Deployment script and other misc utilities
     |   └── site          # Symlinked to docroot/sites/default
     │   │   └── files     # The main site files
     │   └── test          # Custom tests
     └── dktl.yml          # DKAN Tools configuration
 
-We may wish to create two additional folders in the root of your project later on: _/src/patches_, where we can store local patches to be applied via the make files in _/src/make_; and _/backups_, where database dumps can be stored. The first time we run `dktl install` the _/backups_ folder will be created if it does not already exist.
+We may wish to create two additional folders in the root of your project later on: _/src/patches_, where we can store local patches to be applied via the make files in _/src/make_; and _/backups_, where database dumps can be stored.
 
 ### The /src/make folder
 
 DKAN uses [Drush Make](https://docs.drush.org/en/8.x/make/) to define its dependencies. DKAN Tools also uses Drush Make to apply overrides patches to DKAN in a managed way, without having to hack either the Drupal or DKAN core.
 
-DKAN defines its Drupal Core dependency in _/dkan/drupal-org-core.make_. Additional DKAN dependencies and patches are defined in _/dkan/drupal-org.make_. These two files should not be changed directly within the _dkan_ folder, but they can be _overridden_ via two files in your project: _/src/make/drupal.make_ and _/src/make/dkan.make_.
+In _/src/make/composer.json_ we can define the contributed modules, themes, and libraries that our site uses. For example if our site uses the [Deploy](https://www.drupal.org/project/deploy) module we can add this to _/src/make/drupal.make_ under the `require` section:
 
-If we want to override the version of Drupal being used (for instance, if we need a security update just released in Drupal core but aren't ready to move to the newest DKAN version), we add the right version to _/src/make/drupal.make_:
-
-```yaml
-api: 2
-core: 7.x
-projects:
-  drupal:
-    type: core
-    version: '7.50'
+```json
+  "require": {
+    "getdkan/dkan2": "dev-master",
+    "drupal/deploy": "3.1"
+  }
 ```
-
-In _/src/make/drupal.make_ we can also define the contributed modules, themes, and libraries that our site uses. For example if our site uses the [Deploy](https://www.drupal.org/project/deploy) module we can add this to _/src/make/drupal.make_ under the `projects` section:
-
-```yaml
-projects:
-  deploy:
-    version: '3.1'
-```
-
 
 If our site requires a custom patch to the deploy module, we add it to _/src/patches_. For remote patches (usually from [Drupal.org](https://www.drupal.org)) we just need the url to the patch:
 
-```yaml
-projects:
-  deploy:
-    version: '3.1'
-    patch:
-      1: '../patches/custom_patch.patch'
-      3005415: 'https://www.drupal.org/files/issues/2018-10-09/use_plain_text_format-3005415.patch'
+```json
+  "extra": {
+    "patches": {
+      "drupal/deploy": {
+        "3005415": "https://www.drupal.org/files/issues/2018-10-09/use_plain_text_format-3005415.patch"
+      }
+    }
+  }
 ```
 
 ### The src/site folder
@@ -140,38 +146,13 @@ DKTL should have already provided some things in _/src/site_: _settings.php_ con
 
 ### The src/test folder (custom tests)
 
-DKAN Tools supports custom PHPUnit and Behat tests found in the _src/test_ directory.
-
-If your site does not have tests set up yet, running `dktl init:custom-tests` will set up a _src/test_ directory in your project with sample phpunit and behat tests to start from.
+DKAN Tools supports custom [Cypress](https://www.cypress.io/) tests found in the _src/test/cypress_ directory.
 
 To run custom tests:
 
 ```bash
-dktl test:phpunit-custom
+dktl test:cypress
 ```
-
-and
-
-```bash
-dktl test:behat-custom
-```
-
-To manually configure custom phpunit tests (without using `dktl init:custom-tests`):
-
-1. Create _src/test/phpunit_
-2. Place a _phpunit.xml_ configuration file in _src/test/phpunit_.  You can use the [_phpunit.xml_ file in _dkan/test/phpunit_](https://github.com/GetDKAN/dkan/blob/7.x-1.x/test/phpunit/phpunit.xml) as an example, replacing the `<testsuite>` elements to reflect your own custom tests. See the [PHPUnit documentation](https://phpunit.readthedocs.io/en/7.0/organizing-tests.html#composing-a-test-suite-using-xml-configuration) for more information.
-3. Add a copy of [_dkan/test/phpunit/boot.php_](https://github.com/GetDKAN/dkan/blob/7.x-1.x/test/phpunit/boot.php) in the same directory.
-3. Store your tests in _src/test/phpunit_. Again, use [_dkan/test/phpunit_](https://github.com/GetDKAN/dkan/tree/7.x-1.x/test/phpunit) as a guide.
-
-JUnit style test results will be written to _src/test/assets/junit_.
-
-To manually configure Behat tests:
-
-1. Create _src/test/features_ directory.
-2. Place Behat configuration files _behat.yml_ and _behat.docker.yml_ in _src/test_.  You can use the corresponding files in [_dkan/test_](https://github.com/GetDKAN/dkan/tree/7.x-1.x/test) as references, or even just create symbolic links to them.
-3. Store you tests in _src/test/features_.
-
-JUnit style test results will be written to _src/test/assets/junit_.
 
 ## Restoring a database dump or site files
 
@@ -209,7 +190,7 @@ If you include this in your dktl.yml file, typing `dktl restore` without any arg
 
 ## Custom Commands
 
-Projects to can define their own commands. To create a custom command, create a new class inside of this project with a similar structure to the this one:
+Projects to can define their own commands. To create a custom command, add a file named `CustomCommands.php` and add it to `src/command/`, create a new class in the file with a similar structure to this one:
 
 ```php
 <?php
@@ -282,10 +263,6 @@ DKTL recognized this and by default makes some configurations available to the c
 * .ssh
 * .aws
 * .composer
-
-## A note to users of DKAN Starter
-
-Users of [DKAN Starter](https://github.com/GetDKAN/dkan_starter) will recognize some concepts here. The release of DKAN Tools eliminates the need for a separate DKAN Starter project, as it provides a workflow to build sites directly from DKAN releases. Support for DKAN Starter and its accompanying [Ahoy](http://www.ahoycli.com/en/latest/) commands is ending, and detailed instructions for migrating DKAN Starter projects to the DKAN Tools workflow is coming soon.
 
 ## Troubleshooting
 
