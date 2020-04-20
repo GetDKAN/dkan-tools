@@ -190,7 +190,7 @@ If you include this in your dktl.yml file, typing `dktl restore` without any arg
 
 ## Custom Commands
 
-Projects to can define their own commands. To create a custom command, add a file named `CustomCommands.php` and add it to `src/command/`, create a new class in the file with a similar structure to the this one:
+Projects to can define their own commands. To create a custom command, add a file named `CustomCommands.php` and add it to `src/command/`, create a new class in the file with a similar structure to this one:
 
 ```php
 <?php
