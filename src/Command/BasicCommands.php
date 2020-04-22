@@ -100,6 +100,7 @@ class BasicCommands extends \Robo\Tasks
         }
 
         $addDkan2 = $this->taskComposerRequire()
+            ->env("COMPOSER_MEMORY_LIMIT=-1")
             ->dependency("getdkan/dkan2", $dkanVersion)
             ->run();
         if ($addDkan2->getExitCode() != 0) {
