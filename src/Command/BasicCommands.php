@@ -234,7 +234,7 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    public function install($opts = ['frontend' => false])
+    private function standardInstallation()
     {
         $result = $this->taskExec('drush si standard -y')
             ->dir(Util::getProjectDocroot())
@@ -251,8 +251,19 @@ class BasicCommands extends \Robo\Tasks
         $result = $this->taskExec('drush config-set system.site page.front "//dkan/home" -y')
             ->dir(Util::getProjectDocroot())
             ->run();
+    }
 
-        if ($opts['frontend'] === true) {
+    public function install($opts = ['frontend' => false, 'existing-config' => false])
+    {
+        if ($opts['existing-config']) {
+            $result = $this->taskExec('drush si -y --existing-config')
+                ->dir(Util::getProjectDocroot())
+                ->run();
+        } else {
+            $this->standardInstallation();
+        }
+
+        if ($opts['frontend']) {
             $result = $this->taskExec('drush en -y')
                 ->arg('dkan_frontend')
                 ->dir(Util::getProjectDocroot())
@@ -260,6 +271,8 @@ class BasicCommands extends \Robo\Tasks
         }
         return $result;
     }
+
+
 
     /**
      * Proxy to the phpunit binary.
