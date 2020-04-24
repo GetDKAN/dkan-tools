@@ -234,7 +234,7 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    public function installStandard()
+    private function standardInstallation()
     {
         $result = $this->taskExec('drush si standard -y')
             ->dir(Util::getProjectDocroot())
@@ -260,7 +260,7 @@ class BasicCommands extends \Robo\Tasks
                 ->dir(Util::getProjectDocroot())
                 ->run();
         } else {
-            $this->installStandard();
+            $this->standardInstallation();
         }
 
         if ($opts['frontend']) {
