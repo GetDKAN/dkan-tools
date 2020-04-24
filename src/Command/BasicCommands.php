@@ -234,31 +234,36 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
+    public function installStandard()
+    {
+        $result = $this->taskExec('drush si standard -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush en dkan2 dkan_admin dkan_harvest dkan_dummy_content dblog config_update_ui -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush config-set system.performance css.preprocess 0 -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush config-set system.performance js.preprocess 0 -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+        $result = $this->taskExec('drush config-set system.site page.front "//dkan/home" -y')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+    }
+
     public function install($opts = ['frontend' => false, 'existing-config' => false])
     {
-        if (!$opts['existing-config']) {
-            $result = $this->taskExec('drush si standard -y')
-                ->dir(Util::getProjectDocroot())
-                ->run();
-            $result = $this->taskExec('drush en dkan2 dkan_admin dkan_harvest dkan_dummy_content dblog config_update_ui -y')
-                ->dir(Util::getProjectDocroot())
-                ->run();
-            $result = $this->taskExec('drush config-set system.performance css.preprocess 0 -y')
-                ->dir(Util::getProjectDocroot())
-                ->run();
-            $result = $this->taskExec('drush config-set system.performance js.preprocess 0 -y')
-                ->dir(Util::getProjectDocroot())
-                ->run();
-            $result = $this->taskExec('drush config-set system.site page.front "//dkan/home" -y')
-                ->dir(Util::getProjectDocroot())
-                ->run();
-        } else {
+        if ($opts['existing-config']) {
             $result = $this->taskExec('drush si -y --existing-config')
                 ->dir(Util::getProjectDocroot())
                 ->run();
+        } else {
+            $this->installStandard();
         }
 
-        if ($opts['frontend'] === true) {
+        if ($opts['frontend']) {
             $result = $this->taskExec('drush en -y')
                 ->arg('dkan_frontend')
                 ->dir(Util::getProjectDocroot())
@@ -266,6 +271,8 @@ class BasicCommands extends \Robo\Tasks
         }
         return $result;
     }
+
+
 
     /**
      * Proxy to the phpunit binary.
