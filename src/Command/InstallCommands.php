@@ -14,7 +14,7 @@ class InstallCommands extends Tasks
                 ->dir(Util::getProjectDocroot())
                 ->run();
         } else {
-            $this->standardInstallation();
+            $result = $this->standardInstallation();
         }
 
         if ($opts['demo'] === true) {
@@ -47,6 +47,7 @@ class InstallCommands extends Tasks
         $result = $this->taskExec('drush config-set system.site page.front "/home" -y')
             ->dir(Util::getProjectDocroot())
             ->run();
+        return $result;
     }
 
     private function setupDemo()
@@ -72,5 +73,6 @@ class InstallCommands extends Tasks
         $result = $this->taskExec('drush cr')
             ->dir(Util::getProjectDocroot())
             ->run();
+        return $result;
     }
 }
