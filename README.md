@@ -1,6 +1,6 @@
 # DKAN Tools
 
-This CLI application provides tools for implementing and developing [DKAN](https://github.com/GetDKAN/dkan), the Drupal-based open data portal.
+This CLI application provides tools for implementing and developing [DKAN](https://github.com/GetDKAN/dkan), the Drupal-based open data portal. For Drupal 7.x projects use the 1.x branch.
 
 ## Requirements
 
@@ -72,18 +72,16 @@ dktl make
       * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
       * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
 
-5. Install DKAN.
-      * Add the `--frontend` option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions to build the frontend application.
+5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
 ```bash
 dktl install
 ```
+  - Install options:
+      * `--frontend` Add this option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content.
+      * `--existing-config` Add this option to preserve existing configuration.
+      * `--demo` Use this option to have the frontend enabled, example content created, and the React pages built.
 
----
-
-**NOTE: The install command currently runs extra drush commands to set up basic configuration and enables non-essential dkan and drupal modules that are nice to have on a fresh install but may not be needed if you are adding DKAN to an existing site.**
-
----
 
 6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.
 
