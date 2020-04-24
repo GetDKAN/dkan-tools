@@ -79,6 +79,7 @@ dktl install
 ```
   - Install options:
       * `--frontend` Add this option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content.
+      * `--existing-config` Add this option to preserve existing configuration.
       * `--demo` Use this option to have the frontend enabled, example content created, and the React pages built.
 
 
