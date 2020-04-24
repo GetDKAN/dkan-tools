@@ -74,6 +74,7 @@ dktl make
 
 5. Install DKAN.
       * Add the `--frontend` option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions to build the frontend application.
+      * Add the `--existing-config` option to install directly from a configuration directory. This assumes your site's settings (typically `sites/default/settings.php`) contains an entry `$settings['config_sync_directory']` pointing to it.
 
 ```bash
 dktl install
