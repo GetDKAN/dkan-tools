@@ -138,13 +138,14 @@ class BasicCommands extends \Robo\Tasks
         }
 
         if (file_exists('src/frontend')) {
+            `dktl frontend:install`;
             $this->docrootSymlink('src/frontend', self::DRUPAL_FOLDER_NAME . '/data-catalog-frontend');
         }
 
         $this->io()->note(
             'You are building DKAN with the React frontend application. ' .
             'In order for the frontend to find the correct routes to work correctly,' .
-            'you will need to enable the dkan_frontend module . ' .
+            'you will need to enable the dkan_frontend module. ' .
             'Do this by running "dktl install" with the "--frontend" option as well, ' .
             'or else run "drush en dkan_frontend" after installation.'
         );

@@ -32,47 +32,26 @@ class InstallCommands extends Tasks
 
     private function standardInstallation()
     {
-        $result = $this->taskExec('drush si standard -y')
+        `dktl drush si standard -y`;
+        `dktl drush en dkan2 dkan_admin dkan_harvest dblog config_update_ui -y`;
+        `dktl drush config-set system.performance css.preprocess 0 -y`;
+        `dktl drush config-set system.performance js.preprocess 0 -y`;
+        return $this->taskExec('drush config-set system.site page.front "/home" -y')
             ->dir(Util::getProjectDocroot())
             ->run();
-        $result = $this->taskExec('drush en dkan2 dkan_admin dkan_harvest dblog config_update_ui -y')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('drush config-set system.performance css.preprocess 0 -y')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('drush config-set system.performance js.preprocess 0 -y')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('drush config-set system.site page.front "/home" -y')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        return $result;
     }
 
     private function setupDemo()
     {
-        $result = $this->taskExec('drush en dkan_dummy_content dkan_frontend -y')
+        `dktl drush en dkan_dummy_content dkan_frontend -y`;
+        `dktl drush dkan-dummy-content:create`;
+        `dktl drush queue:run dkan_datastore_import`;
+        `dktl drush dkan-search:rebuild-tracker`;
+        `dktl drush sapi-i`;
+        `dktl frontend:install`;
+        `dktl frontend:build`;
+        return  $this->taskExec('drush cr')
             ->dir(Util::getProjectDocroot())
             ->run();
-        $result = $this->taskExec('drush dkan-dummy-content:create')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('drush dkan-search:rebuild-tracker')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('drush sapi-i')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('frontend:install')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('frontend:build')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        $result = $this->taskExec('drush cr')
-            ->dir(Util::getProjectDocroot())
-            ->run();
-        return $result;
     }
 }
