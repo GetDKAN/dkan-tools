@@ -9,6 +9,8 @@ class FrontendCommands extends Tasks
 {
   /**
    * Install frontend app.
+   *
+   * @todo Should this be called 'make' instead of 'install'. Generally we are using make to mean 'get dependencies'.
    */
     public function frontendInstall()
     {
