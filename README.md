@@ -1,6 +1,6 @@
 # DKAN Tools
 
-This CLI application provides tools for implementing and developing [DKAN](https://github.com/GetDKAN/dkan), the Drupal-based open data portal. For Drupal 7.x projects use the 1.x branch.
+This CLI application provides tools for implementing, developing, and maintaining [DKAN](https://github.com/GetDKAN/dkan), the Drupal-based open data portal. For Drupal 7.x projects use the 1.x branch.
 
 ## Requirements
 
@@ -86,11 +86,17 @@ dktl install
 6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.
 
 
-## Structure of a DKAN-Tools-based project
+## File structure of a DKAN-Tools-based project
 
-One of the many reasons for using DKTL is to create a clear separation between the code specific to a particular DKAN site (i.e. "custom code") and the dependencies we pull in from other sources (primarily, DKAN core and Drupal core). Keep all of your custom code in the _src_ directory.
+One of the many reasons for using DKTL is to create a clear separation between the
+code specific to a particular DKAN site (i.e. "custom code") and the dependencies
+we pull in from other sources (primarily, DKAN core and Drupal core). Keep all of
+your custom code in the _src_ directory and symlink the overrides to the appropriate
+directory inside docroot. This will make maintaining your DKAN site much easier.
+DKAN Tools will set up the symlinks for you.
 
-To accomplish this, DKAN Tools projects will have the following basic directory structure, created when we run `dktl init`.
+To accomplish this separation, DKAN Tools projects will have the following basic
+directory structure, created when we run `dktl init`.
 
     ├── backups           # Optional for local development, see the backups section below
     ├── docroot           # Drupal core
@@ -104,10 +110,14 @@ To accomplish this, DKAN Tools projects will have the following basic directory 
     │   ├── script        # Deployment script and other misc utilities
     |   └── site          # Symlinked to docroot/sites/default
     │   │   └── files     # The main site files
-    │   └── test          # Custom tests
+    │   ├── test          # Custom tests
+    |   └── themes        # Symlinked to docroot/themes/custom
     └── dktl.yml          # DKAN Tools configuration
 
-We may wish to create two additional folders in the root of your project later on: _/src/patches_, where we can store local patches to be applied via the make files in _/src/make_; and _/backups_, where database dumps can be stored.
+
+If it is necessary or expedient to overwrite files in DKAN or Drupal core, it is recommended that you create a _/src/patches_ directory where you can store local [patch](https://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git/)
+files with the changes. A patch will make it possible to re-apply these changes once a
+newer version of DKAN or Drupal is applied to your project.
 
 ### The /src/make folder
 
@@ -171,6 +181,48 @@ You can create a database dump excluding tables related to cache, devel, webform
 This command needs to be run with DKTL_MODE set to "HOST". So you'll need to run `export DKTL_MODE="HOST"` and after the command finishes, you should set it back to its old value or just unset the variable by running `unset DKTL_MODE`.
 
 If you want to import this dump into your local development site, then you can move the file _excluded\_tables.sql_ into the directory _backups_ in the root of your project, then you'll be able to import it by running `dktl restore:db excluded_tables.sql`.
+
+## Primary Maintenance Tasks
+
+A DKAN site does not differ substantially from [maintaining other Drupal
+sites](https://www.drupal.org/docs/8/configuration-management).
+
+By "maintenance" we mean three specific tasks
+
+-  **Upgrading** DKAN to receive new features and bug-fixes
+-  **Adding** additional modules or features
+-  **Overriding** current modules or functionally
+
+## Getting DKAN Updates
+
+DKAN uses a slightly modified [semantic](https://www.drupal.org/docs/8/understanding-drupal-version-numbers) versioning system.
+
+**Major.Minor.Patch**
+
+- *Major* indicates compatibility
+- *Minor* indicates backwards compatilble new features or upgrades
+- *Patch* indicates a release for security updates and bug fixes
+
+Please note *you can not use* ``drush up`` *with DKAN*. This is because
+DKAN is not packaged on Drupal.org.
+
+### Basic Upgrades
+
+If you are maintaining your site with [DKAN Tools](https://github.com/getdkan/dkan-tools), upgrading is as simple as running
+
+`dktl make --tag=<tag version>`
+
+Or update the version number in your compser.json file and run `composer update`:
+
+```
+"require": {
+    "getdkan/dkan": "2.0.0"
+}
+```
+
+### Upgrading DKAN from 7.x to 8.x
+
+The easiest method will be to stand up a fresh Drupal 8 DKAN site and harvest the datasets from your Drupal 7 DKAN site.
 
 ## Configuring DKTL commands
 
