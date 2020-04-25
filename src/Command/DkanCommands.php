@@ -82,11 +82,9 @@ class DkanCommands extends \Robo\Tasks
     /**
      * Run DKAN PhpUnit Tests and send a coverage report to CodeClimate.
      */
-    public function dkanTestPhpunitCoverage($args)
+    public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
         $this->taskExec("dktl installphpunit")->run();
-
-        putenv("CC_TEST_REPORTER_ID={$args[0]}");
 
         $proj_dir = Util::getProjectDirectory();
         $dkan_dir = "{$proj_dir}/docroot/modules/contrib/dkan2";
@@ -112,9 +110,11 @@ class DkanCommands extends \Robo\Tasks
         $result = $phpunitExec->run();
 
         $this->taskExec(
-            "./cc-test-reporter after-build --coverage-input-type clover --exit-code $?"
+            "./cc-test-reporter after-build -r {$code_climate_reporter_id} --coverage-input-type clover --exit-code $?"
         )
-            ->dir($dkan_dir)->run();
+            ->dir($dkan_dir)
+            ->silent(true)
+            ->run();
         return $result;
     }
 }
