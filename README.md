@@ -102,7 +102,7 @@ directory structure, created when we run `dktl init`.
     ├── docroot           # Drupal core
     |   └── modules
     |       └── contrib
-    |           └── dkan2 # The upstream DKAN core codebase
+    |           └── dkan # The upstream DKAN core codebase
     |
     ├── src               # Site-specific configuration, code and files.
     │   ├── make          # Overrides for DKAN and Drupal makefiles
@@ -127,7 +127,7 @@ In _/src/make/composer.json_ we can define the contributed modules, themes, and 
 
 ```json
   "require": {
-    "getdkan/dkan2": "dev-master",
+    "getdkan/dkan": "2.x-dev",
     "drupal/deploy": "3.1"
   }
 ```

@@ -109,7 +109,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         `cd sandbox && dktl make`;
         $output = [];
         exec("ls sandbox/docroot/modules/contrib", $output);
-        $this->assertContains("dkan2", $output);
+        $this->assertContains("dkan", $output);
     }
 
     private function install()

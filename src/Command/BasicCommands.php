@@ -55,7 +55,7 @@ class BasicCommands extends \Robo\Tasks
 
         // Add project dependencies.
         // $this->addDrush();
-        $this->addDkan2($opts);
+        $this->addDkan($opts);
 
         // Run composer install while passing the options.
         $composerBools = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
@@ -89,24 +89,24 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->success("drush/drush added as a project dependency.");
     }
 
-    private function addDkan2(array $opts)
+    private function addDkan(array $opts)
     {
-        $dkanVersion = 'dev-master';
-        // Find Dkan2 version from options' tag or branch values.
+        $dkanVersion = '2.x-dev';
+        // Find Dkan version from options' tag or branch values.
         if ($opts['tag']) {
             $dkanVersion = $opts['tag'];
         } elseif ($opts['branch']) {
             $dkanVersion = "dev-{$opts['branch']}";
         }
 
-        $addDkan2 = $this->taskComposerRequire()
-            ->dependency("getdkan/dkan2", $dkanVersion)
+        $addDkan = $this->taskComposerRequire()
+            ->dependency("getdkan/dkan", $dkanVersion)
             ->run();
-        if ($addDkan2->getExitCode() != 0) {
-            $this->io()->error('Unable to add Drush and Dkan2 dependencies.');
+        if ($addDkan->getExitCode() != 0) {
+            $this->io()->error('Unable to add Drush and Dkan dependencies.');
             exit;
         }
-        $this->io()->success("getdkan/dkan2 added as a project dependency.");
+        $this->io()->success("getdkan/dkan added as a project dependency.");
     }
 
     public function makeAddSymlinksToDrupalRoot()
