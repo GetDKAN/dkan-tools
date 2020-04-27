@@ -118,7 +118,8 @@ class DkanCommands extends \Robo\Tasks
         return $result;
     }
 
-    private function installCodeClimateTestReporter($dkanDir) {
+    private function installCodeClimateTestReporter($dkanDir)
+    {
         if (!file_exists("{$dkanDir}/cc-test-reporter")) {
             $this->taskExec(
                 "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > "
@@ -129,7 +130,8 @@ class DkanCommands extends \Robo\Tasks
         }
     }
 
-    private function inGitDetachedState($dkanDirPath) {
+    private function inGitDetachedState($dkanDirPath)
+    {
         $output = [];
         exec("cd {$dkanDirPath} && git rev-parse --abbrev-ref HEAD", $output);
         return (isset($output[0]) && $output[0] == 'HEAD');
