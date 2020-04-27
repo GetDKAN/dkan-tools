@@ -84,10 +84,21 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
+
+
         $this->taskExec("dktl installphpunit")->run();
 
         $proj_dir = Util::getProjectDirectory();
         $dkan_dir = "{$proj_dir}/docroot/modules/contrib/dkan";
+
+        $output = [];
+        // Due to particularities of Composer, when we asked for the 2.x branch, we get a detached HEAD state.
+        // Code Climate's test reporter gets information from git. If we recognized a detached HEAD state, lets
+        // checkout our master branch: 2.x.
+        exec("cd {$dkan_dir} && git rev-parse --abbrev-ref HEAD", $output);
+        if (isset($output[0]) && $output[0] == 'HEAD') {
+            exec("cd {$dkan_dir} && git checkout 2.x");
+        }
 
         if (!file_exists("{$dkan_dir}/cc-test-reporter")) {
             $this->taskExec(
