@@ -87,34 +87,53 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("dktl installphpunit")->run();
 
         $proj_dir = Util::getProjectDirectory();
-        $dkan_dir = "{$proj_dir}/docroot/modules/contrib/dkan";
+        $dkanDir = "{$proj_dir}/docroot/modules/contrib/dkan";
 
-        if (!file_exists("{$dkan_dir}/cc-test-reporter")) {
-            $this->taskExec(
-                "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > "
-                . "./cc-test-reporter"
-            )
-                ->dir($dkan_dir)->run();
-            $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkan_dir)->run();
+        // Due to particularities of Composer, when we asked for the 2.x branch, we get a detached HEAD state.
+        // Code Climate's test reporter gets information from git. If we recognized a detached HEAD state, lets
+        // checkout our master branch: 2.x.
+        if ($this->inGitDetachedState($dkanDir)) {
+            exec("cd {$dkanDir} && git checkout 2.x");
         }
+
+        $this->installCodeClimateTestReporter($dkanDir);
 
         $phpunit_executable = "phpunit";
 
-        $this->taskExec("./cc-test-reporter before-build")->dir($dkan_dir)->run();
+        $this->taskExec("./cc-test-reporter before-build")->dir($dkanDir)->run();
 
         $phpunitExec = $this->taskExec($phpunit_executable)
             ->option('testsuite', 'DKAN Test Suite')
             ->option('coverage-clover', 'clover.xml')
-            ->dir($dkan_dir);
+            ->dir($dkanDir);
 
         $result = $phpunitExec->run();
 
         $this->taskExec(
             "./cc-test-reporter after-build -r {$code_climate_reporter_id} --coverage-input-type clover --exit-code $?"
         )
-            ->dir($dkan_dir)
+            ->dir($dkanDir)
             ->silent(true)
             ->run();
         return $result;
+    }
+
+    private function installCodeClimateTestReporter($dkanDir)
+    {
+        if (!file_exists("{$dkanDir}/cc-test-reporter")) {
+            $this->taskExec(
+                "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > "
+                . "./cc-test-reporter"
+            )
+                ->dir($dkanDir)->run();
+            $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkanDir)->run();
+        }
+    }
+
+    private function inGitDetachedState($dkanDirPath)
+    {
+        $output = [];
+        exec("cd {$dkanDirPath} && git rev-parse --abbrev-ref HEAD", $output);
+        return (isset($output[0]) && $output[0] == 'HEAD');
     }
 }
