@@ -91,22 +91,31 @@ class BasicCommands extends \Robo\Tasks
 
     private function addDkan(array $opts)
     {
-        $dkanVersion = '2.x-dev';
-        // Find Dkan version from options' tag or branch values.
-        if ($opts['tag']) {
-            $dkanVersion = $opts['tag'];
-        } elseif ($opts['branch']) {
-            $dkanVersion = "dev-{$opts['branch']}";
-        }
-
         $addDkan = $this->taskComposerRequire()
-            ->dependency("getdkan/dkan", $dkanVersion)
+            ->dependency("getdkan/dkan", $this->getDkanVersion($opts))
             ->run();
         if ($addDkan->getExitCode() != 0) {
             $this->io()->error('Unable to add Drush and Dkan dependencies.');
             exit;
         }
         $this->io()->success("getdkan/dkan added as a project dependency.");
+    }
+
+    private function getDkanVersion(array $opts)
+    {
+        $dkanVersion = '2.x-dev';
+        // Find Dkan version from options' tag or branch values.
+        if ($opts['tag']) {
+            $dkanVersion = $opts['tag'];
+        } elseif ($opts['branch']) {
+            $branch = $opts['branch'];
+            if (is_numeric($branch[0])) {
+                $dkanVersion = "{$branch}-dev";
+            } else {
+                $dkanVersion = "dev-{$branch}";
+            }
+        }
+        return $dkanVersion;
     }
 
     public function makeAddSymlinksToDrupalRoot()
