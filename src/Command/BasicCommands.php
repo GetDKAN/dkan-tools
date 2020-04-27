@@ -96,7 +96,12 @@ class BasicCommands extends \Robo\Tasks
         if ($opts['tag']) {
             $dkanVersion = $opts['tag'];
         } elseif ($opts['branch']) {
-            $dkanVersion = "dev-{$opts['branch']}";
+            $branch = $opts['branch'];
+            if (is_numeric($branch[0])) {
+                $dkanVersion = "{$branch}-dev";
+            } else {
+                $dkanVersion = "dev-{$branch}";
+            }
         }
 
         $addDkan = $this->taskComposerRequire()
