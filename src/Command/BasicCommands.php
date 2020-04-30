@@ -35,6 +35,8 @@ class BasicCommands extends \Robo\Tasks
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
      * @option frontend
      *   Build with the DKAN frontend application.
+     * @option frontend-branch
+     *   Specify data-catalog-frontend branch to build.
      * @option tag
      *   Specify DKAN tagged release to build.
      * @option branch
@@ -47,6 +49,7 @@ class BasicCommands extends \Robo\Tasks
         'no-dev' => false,
         'optimize-autoloader' => false,
         'frontend' => false,
+        'frontend-branch' => 'master',
         'tag' => null,
         'branch' => null,
         ])
@@ -70,8 +73,9 @@ class BasicCommands extends \Robo\Tasks
         // Symlink dirs from src into docroot.
         $this->makeAddSymlinksToDrupalRoot();
 
-        if ($opts['frontend'] === true) {
-            $this->installFrontend();
+        if ($opts['frontend'] === true || $opts['frontend-branch'] !== 'master') {
+            $frontend_opts['branch'] = $opts['frontend-branch'];
+            $this->installFrontend($frontend_opts);
         }
 
         $this->io()->success("dktl make completed.");
@@ -134,11 +138,11 @@ class BasicCommands extends \Robo\Tasks
         }
     }
 
-    private function installFrontend()
+    private function installFrontend($options)
     {
         $this->io()->section('Adding frontend application');
 
-        $result = $this->downloadFrontend();
+        $result = $this->downloadFrontend($options);
 
         if ($result && $result->getExitCode() === 0) {
             $this->io()->note(
@@ -221,11 +225,11 @@ class BasicCommands extends \Robo\Tasks
         return $result;
     }
 
-    private function downloadFrontend()
+    private function downloadFrontend($options)
     {
         $result = $this->taskExec('git clone')
             ->option('depth', '1')
-            ->option('branch', 'master')
+            ->option('branch', $options['branch'])
             ->arg('https://github.com/GetDKAN/data-catalog-frontend.git')
             ->arg('frontend')
             ->dir('src')
