@@ -7,7 +7,12 @@ use Robo\Tasks;
 
 class InstallCommands extends Tasks
 {
-    public function install($opts = ['frontend' => false, 'existing-config' => false, 'demo-backend' => false, 'demo' => false])
+    public function install($opts = [
+        'frontend' => false,
+        'existing-config' => false,
+        'demo-backend' => false,
+        'demo' => false
+        ])
     {
         if ($opts['existing-config']) {
             $result = $this->taskExec('drush si -y --existing-config')
