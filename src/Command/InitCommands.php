@@ -35,9 +35,6 @@ class InitCommands extends \Robo\Tasks
     {
         $this->io()->section('Initializing src directory');
         if (file_exists('src')) {
-            if ($directory == "src/site") {
-                $this->_exec("chmod -R 777 {$directory}");
-            }
             $this->io()->warning('The src directory already exists in this directory; skipping.');
         } else {
             $this->createSrcDirectory($opts['host']);
