@@ -33,7 +33,7 @@ class InstallCommands extends Tasks
     private function standardInstallation()
     {
         `dktl drush si standard -y`;
-        `dktl drush en dkan ground_control harvest dblog config_update_ui -y`;
+        `dktl drush en dkan dblog config_update_ui -y`;
         `dktl drush config-set system.performance css.preprocess 0 -y`;
         `dktl drush config-set system.performance js.preprocess 0 -y`;
         return $this->taskExec('drush config-set system.site page.front "/home" -y')
@@ -43,7 +43,7 @@ class InstallCommands extends Tasks
 
     private function setupDemo()
     {
-        `dktl drush en dummy frontend -y`;
+        `dktl drush en fixtures frontend -y`;
         `dktl drush dummy:create`;
         `dktl drush queue:run datastore_import`;
         `dktl drush metadata-search:rebuild-tracker`;
