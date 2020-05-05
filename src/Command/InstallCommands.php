@@ -43,10 +43,10 @@ class InstallCommands extends Tasks
 
     private function setupDemo()
     {
-        `dktl drush en fixtures frontend -y`;
-        `dktl drush dummy:create`;
+        `dktl drush en sample_content frontend -y`;
+        `dktl drush dkan:sample-content:create`;
         `dktl drush queue:run datastore_import`;
-        `dktl drush metadata-search:rebuild-tracker`;
+        `dktl drush dkan:metastore-search:rebuild-tracker`;
         `dktl drush sapi-i`;
         `dktl frontend:install`;
         `dktl frontend:build`;
