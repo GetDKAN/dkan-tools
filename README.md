@@ -68,8 +68,7 @@ dktl make
 
   - Make options:
       * `--prefer-source` If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
-      * `--frontend` To **download** the React frontend application to _src/frontend_ and symlink the files to _docroot/data-catalog-frontend_.
-      * `--frontend-branch=<branch>` Works like the `--frontend` flag but instead of using master branch, it uses the specified branch from data-catalog-frontend.
+      * `--frontend` To **download** the React frontend application to _src/frontend_ and symlink the files to _docroot/data-catalog-frontend_. The master branch will be downloaded unless you specify a branch from data-catalog-frontend like this `--frontend=<branch-name>`.
       * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
       * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
 
