@@ -47,7 +47,7 @@ class BasicCommands extends \Robo\Tasks
         'prefer-dist' => false,
         'no-dev' => false,
         'optimize-autoloader' => false,
-        'frontend' => 'master',
+        'frontend' => null,
         'tag' => null,
         'branch' => null,
         ])
