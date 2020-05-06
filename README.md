@@ -81,6 +81,7 @@ dktl install
       * `--frontend` Add this option again to **enable** the dkan_frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content.
       * `--existing-config` Add this option to preserve existing configuration.
       * `--demo` Use this option to have the frontend enabled, example content created, and the React pages built.
+      * `--demo-backend` Use this option to have the example content created, imported to the datastore and indexed without the React frontend.
 
 
 6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.

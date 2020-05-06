@@ -7,7 +7,12 @@ use Robo\Tasks;
 
 class InstallCommands extends Tasks
 {
-    public function install($opts = ['frontend' => false, 'existing-config' => false, 'demo' => false])
+    public function install($opts = [
+        'frontend' => false,
+        'existing-config' => false,
+        'demo-backend' => false,
+        'demo' => false
+        ])
     {
         if ($opts['existing-config']) {
             $result = $this->taskExec('drush si -y --existing-config')
@@ -17,6 +22,9 @@ class InstallCommands extends Tasks
             $result = $this->standardInstallation();
         }
 
+        if ($opts['demo-backend'] === true) {
+            $result = $this->buildBackend();
+        }
         if ($opts['demo'] === true) {
             $opts = ['frontend' => false];
             $result = $this->setupDemo();
@@ -41,13 +49,21 @@ class InstallCommands extends Tasks
             ->run();
     }
 
-    private function setupDemo()
+    private function buildBackend()
     {
-        `dktl drush en dkan_dummy_content dkan_frontend -y`;
+        `dktl drush en dkan_dummy_content -y`;
         `dktl drush dkan-dummy-content:create`;
         `dktl drush queue:run dkan_datastore_import`;
         `dktl drush dkan-search:rebuild-tracker`;
-        `dktl drush sapi-i`;
+        return  $this->taskExec(`drush sapi-i`)
+            ->dir(Util::getProjectDocroot())
+            ->run();
+    }
+
+    private function setupDemo()
+    {
+        $this->buildBackend();
+        `dktl drush en dkan_frontend -y`;
         `dktl frontend:get`;
         `dktl frontend:install`;
         `dktl frontend:build`;
