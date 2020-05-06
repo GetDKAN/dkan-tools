@@ -48,6 +48,7 @@ class InstallCommands extends Tasks
         `dktl drush queue:run dkan_datastore_import`;
         `dktl drush dkan-search:rebuild-tracker`;
         `dktl drush sapi-i`;
+        `dktl frontend:get`;
         `dktl frontend:install`;
         `dktl frontend:build`;
         return  $this->taskExec('drush cr')
