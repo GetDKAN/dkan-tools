@@ -35,6 +35,11 @@ class InstallCommands extends Tasks
                 ->dir(Util::getProjectDocroot())
                 ->run();
         }
+        // Workaround for https://www.drupal.org/project/drupal/issues/3091285.
+        $result = $this->taskExec('chmod u+w sites/default')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+
         return $result;
     }
 
