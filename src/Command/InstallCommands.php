@@ -41,13 +41,22 @@ class InstallCommands extends Tasks
             ->run();
     }
 
-    private function setupDemo()
+    private function buildBackend()
     {
-        `dktl drush en sample_content frontend -y`;
+        `dktl drush en sample_content -y`;
         `dktl drush dkan:sample-content:create`;
         `dktl drush queue:run datastore_import`;
         `dktl drush dkan:metastore-search:rebuild-tracker`;
-        `dktl drush sapi-i`;
+        return  $this->taskExec(`drush sapi-i`)
+            ->dir(Util::getProjectDocroot())
+            ->run();
+    }
+
+    private function setupDemo()
+    {
+        $this->buildBackend();
+        `dktl drush en frontend -y`;
+        `dktl frontend:get`;
         `dktl frontend:install`;
         `dktl frontend:build`;
         return  $this->taskExec('drush cr')
