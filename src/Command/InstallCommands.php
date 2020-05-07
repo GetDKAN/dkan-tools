@@ -7,7 +7,12 @@ use Robo\Tasks;
 
 class InstallCommands extends Tasks
 {
-    public function install($opts = ['frontend' => false, 'existing-config' => false, 'demo' => false])
+    public function install($opts = [
+        'frontend' => false,
+        'existing-config' => false,
+        'demo-backend' => false,
+        'demo' => false
+        ])
     {
         if ($opts['existing-config']) {
             $result = $this->taskExec('drush si -y --existing-config')
@@ -17,6 +22,9 @@ class InstallCommands extends Tasks
             $result = $this->standardInstallation();
         }
 
+        if ($opts['demo-backend'] === true) {
+            $result = $this->buildBackend();
+        }
         if ($opts['demo'] === true) {
             $opts = ['frontend' => false];
             $result = $this->setupDemo();
@@ -27,6 +35,11 @@ class InstallCommands extends Tasks
                 ->dir(Util::getProjectDocroot())
                 ->run();
         }
+        // Workaround for https://www.drupal.org/project/drupal/issues/3091285.
+        $result = $this->taskExec('chmod u+w sites/default')
+            ->dir(Util::getProjectDocroot())
+            ->run();
+
         return $result;
     }
 

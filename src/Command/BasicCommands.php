@@ -34,7 +34,8 @@ class BasicCommands extends \Robo\Tasks
      * @option optimize-autoloader
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
      * @option frontend
-     *   Build with the DKAN frontend application.
+     *   - Build with the DKAN frontend application.
+     *   - You may specify which data-catalog-frontend branch to build, defaults to master.
      * @option tag
      *   Specify DKAN tagged release to build.
      * @option branch
@@ -46,7 +47,7 @@ class BasicCommands extends \Robo\Tasks
         'prefer-dist' => false,
         'no-dev' => false,
         'optimize-autoloader' => false,
-        'frontend' => false,
+        'frontend' => null,
         'tag' => null,
         'branch' => null,
         ])
@@ -54,7 +55,7 @@ class BasicCommands extends \Robo\Tasks
         $this->io()->section("Running dktl make");
 
         // Add project dependencies.
-        // $this->addDrush();
+        $this->addDrush();
         $this->addDkan($opts);
 
         // Run composer install while passing the options.
@@ -70,8 +71,11 @@ class BasicCommands extends \Robo\Tasks
         // Symlink dirs from src into docroot.
         $this->makeAddSymlinksToDrupalRoot();
 
-        if ($opts['frontend'] === true) {
-            $this->installFrontend();
+        if ($opts['frontend']) {
+            $branch = ($opts['frontend'] == 1) ? 'master' : $opts['frontend'];
+            $result = $this->taskExec('dktl frontend:get')
+                ->arg($branch)
+                ->run();
         }
 
         $this->io()->success("dktl make completed.");
@@ -134,32 +138,6 @@ class BasicCommands extends \Robo\Tasks
         }
     }
 
-    private function installFrontend()
-    {
-        $this->io()->section('Adding frontend application');
-
-        $result = $this->downloadFrontend();
-
-        if ($result && $result->getExitCode() === 0) {
-            $this->io()->note(
-                'Successfully downloaded data-catalog-frontend to /src/frontend'
-            );
-        }
-
-        if (file_exists('src/frontend')) {
-            `dktl frontend:install`;
-            $this->docrootSymlink('src/frontend', self::DRUPAL_FOLDER_NAME . '/data-catalog-frontend');
-        }
-
-        $this->io()->note(
-            'You are building DKAN with the React frontend application. ' .
-            'In order for the frontend to find the correct routes to work correctly,' .
-            'you will need to enable the dkan_frontend module. ' .
-            'Do this by running "dktl install" with the "--frontend" option as well, ' .
-            'or else run "drush en dkan_frontend" after installation.'
-        );
-    }
-
     public function installphpunit()
     {
         $result = $this->taskExec("which phpunit")->run();
@@ -218,29 +196,6 @@ class BasicCommands extends \Robo\Tasks
         } else {
             $this->io()->success("Symlinked $target to $link");
         }
-        return $result;
-    }
-
-    private function downloadFrontend()
-    {
-        $result = $this->taskExec('git clone')
-            ->option('depth', '1')
-            ->option('branch', 'master')
-            ->arg('https://github.com/GetDKAN/data-catalog-frontend.git')
-            ->arg('frontend')
-            ->dir('src')
-            ->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not download front-end app.');
-            return $result;
-        }
-        $result = $this->_deleteDir('src/frontend/.git');
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not remove front-end git folder.');
-            return $result;
-        }
-
-        $this->io()->success('frontend application added.');
         return $result;
     }
 
