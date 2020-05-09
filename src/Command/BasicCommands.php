@@ -76,6 +76,7 @@ class BasicCommands extends \Robo\Tasks
             $result = $this->taskExec('dktl frontend:get')
                 ->arg($branch)
                 ->run();
+            $result = $this->taskExec('dktl frontend:install')->run();
         }
 
         $this->io()->success("dktl make completed.");
