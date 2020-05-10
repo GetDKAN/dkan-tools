@@ -30,7 +30,7 @@ class DockerCommands extends \Robo\Tasks
      */
     public function dockerCompose()
     {
-        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+        throw new \Exception(self::DKTL_DOCKER_PHP_ERROR);
     }
 
     /**
@@ -38,7 +38,7 @@ class DockerCommands extends \Robo\Tasks
      */
     public function url()
     {
-        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+        throw new \Exception(self::DKTL_DOCKER_PHP_ERROR);
     }
 
     /**
@@ -46,7 +46,7 @@ class DockerCommands extends \Robo\Tasks
      */
     public function surl()
     {
-        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+        throw new \Exception(self::DKTL_DOCKER_PHP_ERROR);
     }
 
     /**
@@ -54,7 +54,7 @@ class DockerCommands extends \Robo\Tasks
      */
     public function uli()
     {
-        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+        throw new \Exception(self::DKTL_DOCKER_PHP_ERROR);
     }
 
     /**
@@ -62,6 +62,6 @@ class DockerCommands extends \Robo\Tasks
      */
     public function suli()
     {
-        throw new \Exception(DKTL_DOCKER_PHP_ERROR);
+        throw new \Exception(self::DKTL_DOCKER_PHP_ERROR);
     }
 }
