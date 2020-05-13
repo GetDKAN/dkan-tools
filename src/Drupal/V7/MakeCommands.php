@@ -189,9 +189,9 @@ class MakeCommands extends \Robo\Tasks
     /**
      * Link src/modules to  docroot/sites/all/modules/custom.
      */
-    private function linkSrcSitesAll($original, $test)
+    private function linkSrcSitesAll($original, $dest)
     {
-        if (!file_exists($original) || !file_exists('docroot')) {
+        if (!file_exists("src/$original") || !file_exists('docroot')) {
             $this->io()->error("Could not link {$original}. " .
                 "Folders 'src/{$original}' and 'docroot' must both be present to create link.");
             exit;
