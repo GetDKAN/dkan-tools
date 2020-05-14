@@ -31,7 +31,7 @@ class InstallCommands extends Tasks
         }
         if ($opts['frontend'] === true) {
             $result = $this->taskExec('drush en -y')
-                ->arg('dkan_frontend')
+                ->arg('frontend')
                 ->dir(Util::getProjectDocroot())
                 ->run();
         }

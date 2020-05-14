@@ -54,9 +54,9 @@ class FrontendCommands extends Tasks
 
         $this->io()->note(
             'In order for the frontend to find the correct routes to work correctly,' .
-            'you will need to enable the dkan_frontend module. ' .
+            'you will need to enable the dkan frontend module. ' .
             'Do this by running "dktl install" with the "--frontend" or "--demo" option as well, ' .
-            'or else run "drush en dkan_frontend" after installation.'
+            'or else run "drush en frontend" after installation.'
         );
 
         $this->io()->note(
