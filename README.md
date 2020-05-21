@@ -29,7 +29,7 @@ Alternatively, you could add _/myworkspace/dkan-tools/bin_ directly to your `$PA
 export PATH=$PATH:/myworkspace/dkan-tools/bin
 ```
 
-#### Setup and start the proxy:
+### Setup and start the proxy:
 Docker will server your website from an arbitrary port on your computer (Ex. http://localhost:87689). To access your site at a more stable place, a proxy can be used:
   - Add `dkan` to `/etc/hosts`
   - Start the proxy: `docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy`
@@ -64,10 +64,10 @@ dktl get <drupal-version>
 | command ~~~~~~~~~~~~ | options ~~~~~~~~~~~~~~~~ |  |
 | :------------- | :------------------ | :---------- |
 |  `dktl make`   | `--prefer-source`          |  If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.    |
-|                | `--tag=<tag>`              | To build a site using a specific DKAN 2.x [tag](https://github.com/GetDKAN/dkan/releases) rather than from master.       |
+|                | `--tag=<tag>`              | To build a site using a specific DKAN 2.x [tag](https://github.com/GetDKAN/dkan/releases) rather than from master.   |
 |                | `--branch=<branch>`        | Similarly, you can build a specific [branch](https://github.com/GetDKAN/dkan/branches) of DKAN by using this option. |
-|                | `--frontend`               |  Download the React frontend application to _src/frontend_, install its dependencies, and symlink the files to _docroot/data-catalog-frontend_.                                             |
-|                | `--frontend=<branch>`      |  Same as above but will use the specified [branch](https://github.com/GetDKAN/data-catalog-frontend/branches) from data-catalog-frontend |
+|                | `--frontend`               |  Download the React frontend application to _src/frontend_, install its dependencies, and symlink the files to _docroot/data-catalog-frontend_. |
+|                | `--frontend=<branch>`      |  Same as above but will use the specified [branch](https://github.com/GetDKAN/data-catalog-frontend/branches) from data-catalog-frontend. |
 
 5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
@@ -78,7 +78,11 @@ dktl get <drupal-version>
 |                | `--demo`            | Enable the DKAN frontend module, create sample content, index the content, and build the React pages. |
 |                | `--demo-backend`    | Create sample content, index the content, and import data to the datastore without the React frontend. |
 
-6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.
+6. Access the site:
+    - If you have set up the proxy: `dktl drush uli --uri=dkan`
+    - If you skipped the proxy step, you can find the local site URL by typing `dktl url`.*
+
+> __NOTE:__ * You will need to perform step 4 from the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#manual-set-up) installation instructions to get your front end working.
 
 ## Basic usage
 
