@@ -62,7 +62,7 @@ dktl get <drupal-version>
 > __NOTE:__ If you just want to spin up a demo site, simply run `dkan make && dkan install --demo`. The following options are available for building specific pieces of DKAN for development or testing.
 
 | command ~~~~~~~~~~~~ | options ~~~~~~~~~~~~~~~~ |  |
-| :------------- | :------------------------- | :------------------------- |
+| :------------- | :------------------ | :---------- |
 |  `dktl make`   | `--prefer-source`          |  If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.    |
 |                | `--tag=<tag>`              | To build a site using a specific DKAN 2.x [tag](https://github.com/GetDKAN/dkan/releases) rather than from master.       |
 |                | `--branch=<branch>`        | Similarly, you can build a specific [branch](https://github.com/GetDKAN/dkan/branches) of DKAN by using this option. |
@@ -72,11 +72,11 @@ dktl get <drupal-version>
 5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
 | command ~~~~~~~~~~~~ | options ~~~~~~~~~~~~~~~~ |  |
-| :------------- | :------------------------- | :------------------------- |
+| :------------- | :------------------ | :---------- |
 | `dktl install` | `--existing-config` | Add this option to preserve existing configuration.  |
 |                | `--frontend`        | Enable the DKAN frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content. |
 |                | `--demo`            | Enable the DKAN frontend module, create sample content, index the content, and build the React pages. |
-|                | `--demo-backend`    | Use this option to have example content created, imported to the datastore and indexed without the React frontend. |
+|                | `--demo-backend`    | Create sample content, index the content, and import data to the datastore without the React frontend. |
 
 6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.
 
