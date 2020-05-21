@@ -38,8 +38,6 @@ After the proxy is up and configured, your site should be accessible at http://d
 
 > __NOTE:__ DKAN's decoupled frontend, by default, will expect DKAN to exist at http://dkan. Enabling the proxy is required for the frontend to work properly out of the box.
 
-## Spin up a demo site
-If you just
 ## Starting a new project
 1. To start a project with `dktl`, create a project directory.
 
