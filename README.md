@@ -67,7 +67,7 @@ dktl get <drupal-version>
 |                | `--tag=<tag>`              | To build a site using a specific DKAN 2.x [tag](https://github.com/GetDKAN/dkan/releases) rather than from master.       |
 |                | `--branch=<branch>`        | Similarly, you can build a specific [branch](https://github.com/GetDKAN/dkan/branches) of DKAN by using this option. |
 |                | `--frontend`               |  Download the React frontend application to _src/frontend_, install its dependencies, and symlink the files to _docroot/data-catalog-frontend_.                                             |
-|                | `--frontend=<branch>`      |  Same as above but will use the specified branch from [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend/branches) |
+|                | `--frontend=<branch>`      |  Same as above but will use the specified [branch](https://github.com/GetDKAN/data-catalog-frontend/branches) from data-catalog-frontend |
 
 5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
