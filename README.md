@@ -82,7 +82,7 @@ dktl get <drupal-version>
     - If you have set up the proxy: `dktl drush uli --uri=dkan`
     - If you skipped the proxy step, you can find the local site URL by typing `dktl url`.*
 
-> __NOTE:__ * You will need to perform step 4 from the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#manual-set-up) installation instructions to get your front end working.
+> __NOTE:__ * Without the proxy you will need to perform step 4 from the [data-catalog-frontend](https://github.com/GetDKAN/data-catalog-frontend#manual-set-up) installation instructions to get your front end working.
 
 ## Basic usage
 
