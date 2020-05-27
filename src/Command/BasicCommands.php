@@ -2,16 +2,19 @@
 
 namespace DkanTools\Command;
 
+use DkanTools\SymlinksTrait;
 use DkanTools\Util\Util;
-use Symfony\Component\Filesystem\Filesystem;
+use Robo\Tasks;
 
 /**
  * This is project's console commands configuration for Robo task runner.
  *
  * @see http://robo.li/
  */
-class BasicCommands extends \Robo\Tasks
+class BasicCommands extends Tasks
 {
+    use SymlinksTrait;
+
     const DRUPAL_FOLDER_NAME = "docroot";
 
     /**
@@ -69,7 +72,7 @@ class BasicCommands extends \Robo\Tasks
         $install->run();
 
         // Symlink dirs from src into docroot.
-        $this->makeAddSymlinksToDrupalRoot();
+        $this->addSymlinksToDrupalRoot();
 
         if ($opts['frontend']) {
             $branch = ($opts['frontend'] == 1) ? 'master' : $opts['frontend'];
@@ -80,6 +83,10 @@ class BasicCommands extends \Robo\Tasks
         }
 
         $this->io()->success("dktl make completed.");
+    }
+
+    public function makeAddSymlinksToDocroot() {
+        $this->addSymlinksToDrupalRoot();
     }
 
     private function addDrush()
@@ -123,22 +130,6 @@ class BasicCommands extends \Robo\Tasks
         return $dkanVersion;
     }
 
-    public function makeAddSymlinksToDrupalRoot()
-    {
-        $targetsAndLinks = [
-            ['target' => 'src/site',    'link' => '/sites/default'],
-            ['target' => 'src/modules', 'link' => '/modules/custom'],
-            ['target' => 'src/themes',  'link' => '/themes/custom'],
-            ['target' => 'src/schema',  'link' => '/schema'],
-        ];
-        foreach ($targetsAndLinks as $targetAndLink) {
-            $this->docrootSymlink(
-                $targetAndLink['target'],
-                self::DRUPAL_FOLDER_NAME . $targetAndLink['link']
-            );
-        }
-    }
-
     public function installphpunit()
     {
         $result = $this->taskExec("which phpunit")->run();
@@ -164,39 +155,6 @@ class BasicCommands extends \Robo\Tasks
 
         $result = $this->taskExec("ln -s /root/.composer/vendor/bin/phpunit /usr/local/bin/phpunit")->run();
 
-        return $result;
-    }
-
-    /**
-     * Link src/modules to docroot/sites/all/modules/custom.
-     */
-    private function docrootSymlink($target, $link)
-    {
-        $project_dir = Util::getProjectDirectory();
-        $target = $project_dir . "/{$target}";
-        $link = $project_dir . "/{$link}";
-        $link_parts = pathinfo($link);
-        $link_dirname = $link_parts['dirname'];
-        $target_path_relative_to_link = (new Filesystem())->makePathRelative($target, $link_dirname);
-
-        if (!file_exists($target) || !file_exists(self::DRUPAL_FOLDER_NAME)) {
-            $this->io()->warning(
-                "Skipping linking $target. Folders $target and '" .
-                self::DRUPAL_FOLDER_NAME."' must both be present to create link."
-            );
-            return;
-        }
-
-        $result = $this->taskFilesystemStack()->stopOnFail()
-            ->remove($link)
-            ->symlink($target_path_relative_to_link, $link)
-            ->run();
-
-        if ($result->getExitCode() != 0) {
-            $this->io()->warning('Could not create link');
-        } else {
-            $this->io()->success("Symlinked $target to $link");
-        }
         return $result;
     }
 
