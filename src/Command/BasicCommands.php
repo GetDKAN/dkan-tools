@@ -85,7 +85,7 @@ class BasicCommands extends Tasks
         $this->io()->success("dktl make completed.");
     }
 
-    public function makeAddSymlinksToDocroot() {
+    public function makeAddSymlinksToDrupalRoot() {
         $this->addSymlinksToDrupalRoot();
     }
 
