@@ -19,8 +19,10 @@ class ProxyCommands extends \Robo\Tasks
      * "dktl drush cc all".
      *
      * @param array $cmd Array of arguments to create a full Drush command.
+     *
+     * @aliases drush
      */
-    public function drush(array $cmd)
+    public function proxyDrush(array $cmd)
     {
         $drupal_root = Util::getProjectDocroot();
         $drushExec = $this->taskExec('drush')->dir($drupal_root);
@@ -32,8 +34,10 @@ class ProxyCommands extends \Robo\Tasks
 
     /**
      * Proxy to composer.
+     *
+     * @aliases composer
      */
-    public function composer(array $cmd)
+    public function proxyComposer(array $cmd)
     {
         $exec = $this->taskExec('composer');
         foreach ($cmd as $arg) {

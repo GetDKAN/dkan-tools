@@ -1,18 +1,18 @@
 <?php
 
-
 namespace DkanTools;
 
 use DkanTools\Util\Util;
-use Symfony\Component\Filesystem\Filesystem;
+use Robo\Tasks;
 
-  /**
+/**
    * This is project's console commands configuration for Robo task runner.
    *
    * @see http://robo.li/
    */
-class BasicCommands extends \Robo\Tasks
+class BasicCommands extends Tasks
 {
+    use SymlinksTrait;
 
     const DRUPAL_MIN_VERSION = "8.8";
     const DRUPAL_FOLDER_NAME = "docroot";
@@ -42,6 +42,9 @@ class BasicCommands extends \Robo\Tasks
         // install Drupal in it.
         $this->modifyComposerPaths();
         $this->taskComposerInstall()->run();
+
+        // Symlink src directories to docroot.
+        $this->addSymlinksToDrupalRoot();
 
         Util::cleanupTmp();
         $this->io()->success("dktl get completed.");
