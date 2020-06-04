@@ -12,7 +12,15 @@ DKAN Tools was designed with a [Docker](https://www.docker.com/)-based local dev
 
 That's it! All other dependencies are included in the Docker containers that dkan-tools will create.
 
-It is also possible to run most DKAN Tools commands using a local webserver, database and PHP setup, but this practice is less supported.
+---
+
+:warning: **IMPORTANT**
+
+It is also possible to run most DKAN Tools commands using a local webserver, database and PHP setup, but this practice is **less supported**.
+
+To use the `dktl` commands outside of the docker evironments you will need to run `export DKTL_MODE="HOST"`
+
+---
 
 ## Installation
 
@@ -33,10 +41,16 @@ export PATH=$PATH:/myworkspace/dkan-tools/bin
 Docker will server your website from an arbitrary port on your computer (Ex. http://localhost:87689). To access your site at a more stable place, a proxy can be used:
   - Add `dkan` to `/etc/hosts`
   - Start the proxy: `docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy`
-  
-After the proxy is up and configured, your site should be accessible at http://dkan.
-  
-> __NOTE:__ DKAN's decoupled frontend, by default, will expect DKAN to exist at http://dkan. Enabling the proxy is required for the frontend to work properly out of the box.
+
+---
+
+:warning: **IMPORTANT**
+
+DKAN's decoupled frontend, by default, will expect DKAN to exist at http://dkan. Enabling the proxy is required for the frontend to work properly out of the box.
+
+If you want to skip the proxy or are setting up a production environment, (after downloading the data-catalog-frontend app) be sure to edit the `/src/frontend/.env.production` file to change the GATSBY_API_URL to reflect your site url.
+
+---
 
 ## Starting a new project
 1. To start a project with `dktl`, create a project directory.
@@ -62,24 +76,44 @@ dktl get <drupal-version>
 ```bash
 dktl make
 ```
-  - Make options:
+  - MAKE OPTIONS:
       * `--prefer-source` If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
-      * `--frontend` To **download** the React frontend application to _src/frontend_, grab its dependencies, and symlink the files to _docroot/data-catalog-frontend_. The master branch will be downloaded unless you specify a branch from data-catalog-frontend like this `--frontend=<branch-name>`.
       * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
       * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
+      * `--frontend` **Downloads** the React frontend application (data-catalog-frontend) to _src/frontend_, installs its dependencies, and symlinks the files to _docroot/data-catalog-frontend_.
+      * `--frontend=<branch-name>` Same as above but will use the specified branch from data-catalog-frontend.
 
 5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
 ```bash
 dktl install
 ```
-  - Install options:
-      * `--frontend` Add this option again to **enable** the DKAN frontend module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content.
+  - INSTALL OPTIONS:
       * `--existing-config` Add this option to preserve existing configuration.
-      * `--demo` Use this option to have the frontend enabled, example content created, and the React pages built.
-      * `--demo-backend` Use this option to have example content created, imported to the datastore and indexed without the React frontend.
+      * `--frontend` Enables the DKAN frontend Drupal module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content.
+      * `--demo` Enables the DKAN frontend Drupal module, creates sample content, indexes the content, and **Builds** the React pages.
+      * `--demo-backend` Creates sample content, indexes the content, and imports data to the datastore without the React frontend.
 
-6. Access the site: `dktl drush uli --uri=dkan`, or you can find the local site URL by typing `dktl url`.
+6. Access the site: If the proxy was set up and configured, and you installed the frontend, your site should be accessible at http://dkan.
+  - log in: `dktl drush uli --uri=dkan`
+  - If you skipped the proxy step, you can find the local site URL by typing `dktl url`.
+
+
+## Adding DKAN to an existing Drupal Site
+
+```
+composer require 'getdkan/dkan:2.1.0'
+dktl drush en dkan frontend sample_content
+dktl drush dkan:sample-content:create
+dktl drush sapi-i
+dktl frontend:install
+```
+Edit the `/src/frontend/.env.production` file to change the GATSBY_API_URL to reflect your site url. (`dktl url`)
+
+```
+dktl frontend:build
+```
+
 
 ## Basic usage
 
