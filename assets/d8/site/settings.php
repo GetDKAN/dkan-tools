@@ -8,4 +8,5 @@ foreach (scandir(__DIR__) as $file) {
 }
 
 $config_directories['sync'] = '../config/sync';
+$settings["config_sync_directory"] = '../config/sync';
 $settings['hash_salt'] = '{HASH_SALT}';
