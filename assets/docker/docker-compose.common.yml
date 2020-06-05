@@ -55,6 +55,7 @@ services:
       - DKTL_DOCKER=1
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - AWS_PROFILE
       - PROXY_DOMAIN
       - PLATFORM
       - XDEBUG_CONFIG=idekey=PHPSTORM
