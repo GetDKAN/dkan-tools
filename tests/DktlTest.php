@@ -88,7 +88,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
 
     private function get()
     {
-        `cd sandbox && dktl get 8.8.4`;
+        `cd sandbox && dktl get 9.0.1`;
         $output = [];
         exec("ls sandbox", $output);
         $this->assertContains("composer.json", $output);
