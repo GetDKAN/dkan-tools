@@ -52,6 +52,7 @@ fi
 export DKTL_PROJECT_DIRECTORY
 
 DKTL_DIRECTORY=$(which dktl)
+
 if [[ -L $(which dktl) ]]; then
   # readlink command needs -f to work properly in linux
   if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
@@ -70,21 +71,46 @@ fi
 
 # Setup for Docker mode and Docker-specific commands.
 if [ "$DKTL_MODE" = "DOCKER" ]; then
-  # Check for proxy container, get domain from that.
-  if [ -z "$PROXY_DOMAIN" ]; then
-    PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
+  WEB_DOMAIN="localtest.me"
+  # Will use dktl-proxy to use {Slug}.{Web Domain}.
+  export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+
+  # Helper dktl docker mode functions.
+  function dktl_proxy_connect () {
+    network="${DKTL_SLUG}_default"
+    if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Connected dktl-proxy to \"${network}\" network."
+    fi
+  }
+
+  function dc_up () {
+    # Check containers state, Run is missing, make sure dktl-proxy is connected
+    # to the same network.
+    containers=$($BASE_DOCKER_COMPOSE_COMMAND ps -q)
+    if [ -z "$containers" ]; then
+      echo "Starting docker containers."
+      $BASE_DOCKER_COMPOSE_COMMAND up -d
+
+      dktl_proxy_connect
+    fi
+  }
+
+  # Make sure the proxy container is up.
+  proxy_service_ps=$(docker ps -f 'name=dktl-proxy'  --format '{{.Names}}' 2>/dev/null)
+
+  if [[ -z $proxy_service_ps ]]; then
+    echo "Running dktl-proxy.."
+    docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
+      -v '/var/run/docker.sock:/var/run/docker.sock' \
+      --name 'dktl-proxy' \
+      traefik:v2.0 \
+      "--log.level=INFO" "--api.insecure=true" "--providers.docker=true" "--providers.docker.exposedbydefault=false" "--entrypoints.web.address=:80" "--entrypoints.websecure.address=:443"
   fi
-  # If no proxy is running, use the overridden or default proxy domain
-  if [ -z "$PROXY_DOMAIN" ]; then
-    [ "$AHOY_WEB_DOMAIN" ] && WEB_DOMAIN=$AHOY_WEB_DOMAIN || WEB_DOMAIN="localtest.me"
-    PROXY_DOMAIN=${WEB_DOMAIN}
-  fi
-  export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
-  
+
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
-  PROXY_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.noproxy.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
-  BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -f $PROXY_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+  BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+
   if [ -f $OVERRIDES_CONF ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
   fi
@@ -94,34 +120,56 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     EXEC_OPTS='-T'
   elif [ -t 1 ]; then
     EXEC_OPTS=''
-  else 
+  else
     EXEC_OPTS='-T';
   fi
 
   # Run docker commands immediately then exit
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
-    $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
+    dc_up
+
+    $BASE_DOCKER_COMPOSE_COMMAND "${@:2}"
     exit 0
   elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
-    echo "http://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2)"
+    echo "http://$DKTL_PROXY_DOMAIN"
     exit 0
   elif [ "$1" = "surl" ] || [ "$1" = "docker:surl" ]; then
-    echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
+    echo "https://$DKTL_PROXY_DOMAIN"
     exit 0
   elif [ "$1" = "uli" ]; then
+    dc_up
+
     dktl drush uli --uri=`dktl url`
     exit 0
   elif [ "$1" = "suli" ]; then
+    dc_up
+
     dktl drush uli --uri=`dktl surl`
     exit 0
+  elif [ "$1" = "down" ]; then
+    network="${DKTL_SLUG}_default"
+
+    if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Disconnected dktl-proxy from \"${network}\" network."
+    fi
+
+    $BASE_DOCKER_COMPOSE_COMMAND down "${@:2}"
+    exit 0
+  elif [ "$1" = "dktl-proxy:connect" ]; then
+    dktl_proxy_connect
+    # Restart container to refresh config.
+    $BASE_DOCKER_COMPOSE_COMMAND restart
+    exit 0
+  elif [ "$1" = "dktl-proxy:kill" ]; then
+    echo "Removing dktl-proxy ..."
+    docker stop dktl-proxy >/dev/null 2>&1
+    docker rm dktl-proxy >/dev/null 2>&1
+    exit 0
   fi
-  
-  # Check containers state
-  containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
-  if [ -z "$containers" ]; then
-    echo "Starting docker containers."
-    $BASE_DOCKER_COMPOSE_COMMAND up -d
-  fi
+
+  # At this point, we will need to have the docker-compose environment up and
+  # running.
+  dc_up
 
   # The containers are running, set DKTL inside the cli container.
   ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
@@ -130,11 +178,11 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 
-  # Proxy pass to internal DKTL and save exit status
+  # Proxy pass to internal DKTL and save exit status.
   $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
   exit_status=$?
-  
-  # Reset web and cli containers if xdebug
+
+  # Reset web and cli containers if xdebug.
   if [ $? -eq 0 ] && [[ $1 == "xdebug"* ]]; then
     $BASE_DOCKER_COMPOSE_COMMAND restart web
     $BASE_DOCKER_COMPOSE_COMMAND restart cli
@@ -147,9 +195,8 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     fi
   fi
 
-  # Now that we've run some cleanup ...
-  # if we encountered a non-zero exit status during the docker exec, pass it on
-  
+  # Now that we've run some cleanup...
+  # if we encountered a non-zero exit status during the docker exec, pass it on.
   if [ $exit_status -ne 0 ]; then
     exit $exit_status
   fi
@@ -166,12 +213,12 @@ elif [ "$DKTL_MODE" = "HOST" ]; then
     composer install --working-dir=$DKTL_DIRECTORY
   fi
 
-  
+
   # For several commands, we want to insert a "--" to pass all arguments as an array.
 
   case $1 in
       drush | phpunit | *test* )
-          php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"          
+          php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"
           ;;
       *)
           php $DKTL_DIRECTORY/bin/app.php $1 "${@:2}"
