@@ -12,7 +12,6 @@ services:
       - db
       # Uncomment this and the memcached service definition below to start using memcached.
       - memcached
-      - solr
     volumes:
       # PHP configuration overrides
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
@@ -68,7 +67,6 @@ services:
       # Uncomment this and the browser service definition below to start using selenium2.
       - browser
       - memcached
-      - solr
     ports:
       - "8888"
     volumes:
@@ -128,15 +126,5 @@ services:
     labels:
       - traefik.enable=false
 
-  solr:
-    hostname: solr
-    image: devinci/drupal-solr:3.x
-    ports:
-      - "8983"
-    volumes:
-      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
-    labels:
-      - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
-    network_mode: bridge
 volumes:
   composer:
