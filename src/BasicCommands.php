@@ -23,7 +23,7 @@ class BasicCommands extends Tasks
    * We get both Drupal and DKAN on the make step, using composer.
    *
    * @param string $drupalVersion
-   *   Drupal semantic version, i.e. 8.8.4 or 9.0.0-beta1
+   *   Drupal semantic version, i.e. 9.0.1
    */
     public function get(string $drupalVersion)
     {
