@@ -78,18 +78,6 @@ services:
       - traefik.enable=false
     network_mode: bridge
 
-  # ngrok node
-  # Uncomment the service definition section below to start using ngrok for sharing your local web server with the world.
-  # share:
-  #   hostname: share
-  #   image: fnichol/ngrok
-  #   ports:
-  #     - "4040:4040"
-  #     # Use IP based mapping when working with multiple projects. See docs (^^) for more details.
-  #     #- 192.168.10.10:4040:4040
-  #   links:
-  #     - web:http
-
   # selenium2 node
   # Uncomment the service definition section below and the link in the web service above to start using selenium2 driver for Behat tests requiring JS support.
   browser:
