@@ -46,7 +46,7 @@ class InstallCommands extends Tasks
     private function standardInstallation()
     {
         `dktl drush si standard -y`;
-        `dktl drush en dkan dblog config_update_ui -y`;
+        `dktl drush en dkan config_update_ui -y`;
         `dktl drush config-set system.performance css.preprocess 0 -y`;
         `dktl drush config-set system.performance js.preprocess 0 -y`;
         return $this->taskExec('drush config-set system.site page.front "/home" -y')
