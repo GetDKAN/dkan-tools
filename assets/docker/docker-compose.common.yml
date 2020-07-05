@@ -10,6 +10,7 @@ services:
       - "8888"
     links:
       - db
+      - solr
     volumes:
       # PHP configuration overrides
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
@@ -62,6 +63,7 @@ services:
     links:
       - db
       - web
+      - solr
     ports:
       - "8888"
     volumes:
@@ -76,5 +78,15 @@ services:
       - traefik.enable=false
     network_mode: bridge
 
+  solr:
+    hostname: solr
+    image: devinci/drupal-solr:3.x
+    ports:
+      - "8983"
+    volumes:
+      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
+    labels:
+      - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
+    network_mode: bridge
 volumes:
   composer:
