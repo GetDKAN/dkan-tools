@@ -79,6 +79,8 @@ services:
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws
       - composer:/root/.composer
+      # Share git configuration
+      - ~/.gitconfig:/root/.gitconfig
     labels:
       - traefik.enable=false
     network_mode: bridge
