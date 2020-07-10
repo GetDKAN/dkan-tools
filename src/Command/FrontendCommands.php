@@ -10,14 +10,17 @@ class FrontendCommands extends Tasks
   /**
    * Get frontend app.
    */
-    public function frontendGet($branch = 'master')
+    public function frontendGet($repo = 'https://github.com/GetDKAN/data-catalog-react.git', $branch = 'master')
     {
         $this->io()->section('Adding frontend application');
+
+        $a = explode('/', $repo);
+        $name = str_replace('.git', '', end($a));
 
         $result = $this->taskExec('git clone')
             ->option('depth', '1')
             ->option('-b', $branch)
-            ->arg('https://github.com/GetDKAN/data-catalog-react.git')
+            ->arg($repo)
             ->arg('frontend')
             ->dir('src')
             ->run();
@@ -31,7 +34,7 @@ class FrontendCommands extends Tasks
 
         if ($result && $result->getExitCode() === 0) {
             $this->io()->note(
-                'Successfully downloaded data-catalog-frontend to /src/frontend'
+                'Successfully downloaded ' . $name . ' to /src/frontend'
             );
         }
 

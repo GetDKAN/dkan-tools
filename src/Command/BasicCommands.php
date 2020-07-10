@@ -37,8 +37,10 @@ class BasicCommands extends Tasks
      * @option optimize-autoloader
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
      * @option frontend
-     *   - Build with the DKAN frontend application.
-     *   - You may specify which data-catalog-react branch to build, defaults to master.
+     *   - Build with the standard DKAN frontend application.
+     *   - You may specify which branch to build, defaults to master.
+     * @option fe-repo
+     *   Pass the remote url of an alternate frontend application.
      * @option tag
      *   Specify DKAN tagged release to build.
      * @option branch
@@ -51,11 +53,26 @@ class BasicCommands extends Tasks
         'no-dev' => false,
         'optimize-autoloader' => false,
         'frontend' => null,
+        'fe-repo' => null,
         'tag' => null,
         'branch' => null,
         ])
     {
         $this->io()->section("Running dktl make");
+
+        // Check frontend repo value.
+        if ($opts['fe-repo']) {
+          if ($this->isValidUrl($opts['fe-repo'])) {
+            $repo = $opts['fe-repo'];
+          }
+          else {
+            $this->io()->error($opts['fe-repo'] . " is not a valid url.");
+            exit;
+          }
+        }
+        else {
+          $repo = 'https://github.com/GetDKAN/data-catalog-react.git';
+        }
 
         // Add project dependencies.
         $this->addDrush();
@@ -77,6 +94,7 @@ class BasicCommands extends Tasks
         if ($opts['frontend']) {
             $branch = ($opts['frontend'] == 1) ? 'master' : $opts['frontend'];
             $result = $this->taskExec('dktl frontend:get')
+                ->arg($repo)
                 ->arg($branch)
                 ->run();
             $result = $this->taskExec('dktl frontend:install')->run();
@@ -200,4 +218,20 @@ class BasicCommands extends Tasks
         }
         return $matches[1];
     }
+
+    public function isValidUrl($url)
+    {
+      // first do some quick sanity checks:
+      if (!$url || !is_string($url)) {
+          return false;
+      }
+      // quick check url is roughly a valid http request: ( http://blah/... )
+      if ( ! preg_match('/^http(s)?:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*(:[0-9]+)?(\/.*)?$/i', $url) ) {
+
+          return false;
+      }
+
+      // good enough!
+      return true;
+  }
 }

@@ -82,8 +82,9 @@ dktl make
       * `--prefer-source` If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
       * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
       * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
-      * `--frontend` **Downloads** the React frontend application (data-catalog-frontend) to _src/frontend_, installs its dependencies, and symlinks the files to _docroot/data-catalog-frontend_.
+      * `--frontend` **Downloads** the default React frontend application (data-catalog-react) to _src/frontend_, installs its dependencies, and symlinks the files to _docroot/data-catalog-frontend_.
       * `--frontend=<branch-name>` Same as above but will use the specified branch from data-catalog-frontend.
+      * `--fe-repo=<https://githbub.com/org/repo.git>` Pass a remote url to specify an alternate frontend application.
 
 5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
