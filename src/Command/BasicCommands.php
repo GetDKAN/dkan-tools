@@ -62,16 +62,14 @@ class BasicCommands extends Tasks
 
         // Check frontend repo value.
         if ($opts['fe-repo']) {
-          if ($this->isValidUrl($opts['fe-repo'])) {
-            $repo = $opts['fe-repo'];
-          }
-          else {
-            $this->io()->error($opts['fe-repo'] . " is not a valid url.");
-            exit;
-          }
-        }
-        else {
-          $repo = 'https://github.com/GetDKAN/data-catalog-react.git';
+            if ($this->isValidUrl($opts['fe-repo'])) {
+                $repo = $opts['fe-repo'];
+            } else {
+                $this->io()->error($opts['fe-repo'] . " is not a valid url.");
+                exit;
+            }
+        } else {
+            $repo = 'https://github.com/GetDKAN/data-catalog-react.git';
         }
 
         // Add project dependencies.
@@ -221,17 +219,15 @@ class BasicCommands extends Tasks
 
     public function isValidUrl($url)
     {
-      // first do some quick sanity checks:
-      if (!$url || !is_string($url)) {
-          return false;
-      }
-      // quick check url is roughly a valid http request: ( http://blah/... )
-      if ( ! preg_match('/^http(s)?:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*(:[0-9]+)?(\/.*)?$/i', $url) ) {
-
-          return false;
-      }
-
-      // good enough!
-      return true;
-  }
+        // Quick sanity checks.
+        if (!$url || !is_string($url)) {
+            return false;
+        }
+        // Url is roughly a valid http request.
+        if (!preg_match('/^http(s)?:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*(:[0-9]+)?(\/.*)?$/i', $url)) {
+            return false;
+        }
+        // Good enough!
+        return true;
+    }
 }
