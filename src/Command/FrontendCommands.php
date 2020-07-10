@@ -17,7 +17,7 @@ class FrontendCommands extends Tasks
         $result = $this->taskExec('git clone')
             ->option('depth', '1')
             ->option('-b', $branch)
-            ->arg('https://github.com/GetDKAN/data-catalog-frontend.git')
+            ->arg('https://github.com/GetDKAN/data-catalog-react.git')
             ->arg('frontend')
             ->dir('src')
             ->run();
@@ -43,12 +43,12 @@ class FrontendCommands extends Tasks
      */
     public function frontendLink()
     {
-        $result = $this->taskExec('ln -s ../src/frontend data-catalog-frontend')
+        $result = $this->taskExec('ln -s ../src/frontend frontend')
           ->dir("docroot")
           ->run();
         if ($result && $result->getExitCode() === 0) {
             $this->io()->success(
-                'Successfully symlinked /src/frontend to docroot/data-catalog-frontend'
+                'Successfully symlinked /src/frontend to docroot/frontend'
             );
         }
 

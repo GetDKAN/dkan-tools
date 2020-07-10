@@ -21,7 +21,7 @@ class DkanCommands extends \Robo\Tasks
 
         if ($arg === 'frontend') {
             $this->taskExec("npm install cypress")
-            ->dir("{$proj_dir}/docroot/data-catalog-frontend")
+            ->dir("{$proj_dir}/docroot/frontend")
             ->run();
 
             return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')

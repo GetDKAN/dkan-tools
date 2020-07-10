@@ -38,7 +38,7 @@ class BasicCommands extends Tasks
      *   Convert PSR-0/4 autoloading to classmap to get a faster autoloader.
      * @option frontend
      *   - Build with the DKAN frontend application.
-     *   - You may specify which data-catalog-frontend branch to build, defaults to master.
+     *   - You may specify which data-catalog-react branch to build, defaults to master.
      * @option tag
      *   Specify DKAN tagged release to build.
      * @option branch
