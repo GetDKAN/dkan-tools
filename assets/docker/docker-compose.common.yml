@@ -3,7 +3,7 @@ version: "2"
 services:
   web:
     hostname: web
-    image: getdkan/dkan-docker:php72-web
+    image: getdkan/dkan-web:classic
     ports:
       - "80"
       - "443"
@@ -49,7 +49,7 @@ services:
   # Used for all console commands and tools.
   cli:
     hostname: cli
-    image: getdkan/dkan-docker:php72-cli
+    image: getdkan/dkan-cli:classic
     environment:
       - DKTL_MODE=HOST
       - DKTL_DOCKER=1
