@@ -53,7 +53,7 @@ class BasicCommands extends Tasks
         'no-dev' => false,
         'optimize-autoloader' => false,
         'frontend' => null,
-        'fe-repo' => null,
+        'fe-repo' => 'https://github.com/GetDKAN/data-catalog-react.git',
         'tag' => null,
         'branch' => null,
         ])
@@ -61,15 +61,11 @@ class BasicCommands extends Tasks
         $this->io()->section("Running dktl make");
 
         // Check frontend repo value.
-        if ($opts['fe-repo']) {
-            if ($this->isValidUrl($opts['fe-repo'])) {
-                $repo = $opts['fe-repo'];
-            } else {
-                $this->io()->error($opts['fe-repo'] . " is not a valid url.");
-                exit;
-            }
+        if ($opts['fe-repo'] && $this->isValidUrl($opts['fe-repo'])) {
+            $repo = $opts['fe-repo'];
         } else {
-            $repo = 'https://github.com/GetDKAN/data-catalog-react.git';
+            $this->io()->error($opts['fe-repo'] . " is not a valid url.");
+            exit;
         }
 
         // Add project dependencies.
