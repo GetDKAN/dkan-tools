@@ -41,39 +41,10 @@ trait TestingTrait
         if (!file_exists($dest_dir . '/bin')) {
             $this->io()->section('Linking test environment ' . $dest_dir . ' to ' . $src_dir);
             $this->_mkdir($dest_dir . '/bin');
-            $this->_symlink('../../../' . $src_dir . '/bin/behat', $dest_dir . '/bin/behat');
             $this->_symlink('../../../' . $src_dir . '/bin/phpunit', $dest_dir . '/bin/phpunit');
             $this->_symlink('../../' . $src_dir . '/vendor', $dest_dir . '/vendor');
             $this->_symlink('../../' . $src_dir . '/dkanextension', $dest_dir . '/dkanextension');
         }
-    }
-    
-
-    /**
-     * Helper function to run Behat tests in a particular directory.
-     *
-     * @param string $dir test directory
-     * @param string $suite name of the test suite to run
-     * @param array $args additional arguments to pass to behat.
-     */
-    protected function testingBehat($dir, $suite, array $args)
-    {
-        $files = array($dir . '/behat.yml', $dir . '/behat.docker.yml');
-        Util::ensureFilesExist($files, 'Behat config file');
-        $behatExec = $this->taskExec('bin/behat')
-            ->dir($dir)
-            ->arg('--colors')
-            ->arg('--suite=' . $suite)
-            ->arg('--format=pretty')
-            ->arg('--out=std')
-            ->arg('--format=junit')
-            ->arg('--out=assets/junit')
-            ->arg('--config=behat.docker.yml');
-
-        foreach ($args as $arg) {
-            $behatExec->arg($arg);
-        }
-        return $behatExec->run();
     }
 
     /**

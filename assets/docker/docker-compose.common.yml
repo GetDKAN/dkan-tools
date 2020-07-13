@@ -10,8 +10,6 @@ services:
       - "8888"
     links:
       - db
-      # Uncomment this and the memcached service definition below to start using memcached.
-      - memcached
       - solr
     volumes:
       # PHP configuration overrides
@@ -65,9 +63,6 @@ services:
     links:
       - db
       - web
-      # Uncomment this and the browser service definition below to start using selenium2.
-      - browser
-      - memcached
       - solr
     ports:
       - "8888"
@@ -82,51 +77,6 @@ services:
     labels:
       - traefik.enable=false
     network_mode: bridge
-
-  # Memcached node
-  # Uncomment the service definition section below and the link in the web service above to start using memcached.
-  memcached:
-    hostname: memcached
-    image: memcached
-    environment:
-      # Memcached memory limit in megabytes
-      - MEMCACHED_MEMORY_LIMIT=128
-    labels:
-      - traefik.enable=false
-    network_mode: bridge
-
-  # ngrok node
-  # Uncomment the service definition section below to start using ngrok for sharing your local web server with the world.
-  # share:
-  #   hostname: share
-  #   image: fnichol/ngrok
-  #   ports:
-  #     - "4040:4040"
-  #     # Use IP based mapping when working with multiple projects. See docs (^^) for more details.
-  #     #- 192.168.10.10:4040:4040
-  #   links:
-  #     - web:http
-
-  # selenium2 node
-  # Uncomment the service definition section below and the link in the web service above to start using selenium2 driver for Behat tests requiring JS support.
-  browser:
-    hostname: browser
-    image: selenium/standalone-chrome-debug:2.53.1
-    # This helps keep selenium-chrome from crashing because it uses shared memory.
-    ports:
-      - "5900"
-    volumes:
-      - /dev/shm:/dev/shm
-      # Project root folder mapping
-      - "../../:/var/www/"
-    links:
-      - web
-    environment:
-      # no_proxy="" required for default Docker For Mac system proxy that contains a space and prevents Selenium from loading.
-      - no_proxy=""
-    network_mode: bridge
-    labels:
-      - traefik.enable=false
 
   solr:
     hostname: solr
