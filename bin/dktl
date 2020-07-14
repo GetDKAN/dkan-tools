@@ -52,6 +52,7 @@ fi
 export DKTL_PROJECT_DIRECTORY
 
 DKTL_DIRECTORY=$(which dktl)
+
 if [[ -L $(which dktl) ]]; then
   # readlink command needs -f to work properly in linux
   if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
@@ -70,17 +71,22 @@ fi
 
 # Setup for Docker mode and Docker-specific commands.
 if [ "$DKTL_MODE" = "DOCKER" ]; then
-  # Check for proxy container, get domain from that.
-  if [ -z "$PROXY_DOMAIN" ]; then
-    PROXY_DOMAIN=`docker inspect proxy 2> /dev/null | grep docker.domain | tr -d ' ",-' | cut -d \= -f 2 | head -1`
-  fi
-  # If no proxy is running, use the overridden or default proxy domain
-  if [ -z "$PROXY_DOMAIN" ]; then
-    [ "$AHOY_WEB_DOMAIN" ] && WEB_DOMAIN=$AHOY_WEB_DOMAIN || WEB_DOMAIN="localtest.me"
-    PROXY_DOMAIN=${WEB_DOMAIN}
-  fi
-  export DKTL_PROXY_DOMAIN=$PROXY_DOMAIN
+  WEB_DOMAIN="localtest.me"
+  # Will use dktl-proxy to use {Slug}.{Web Domain}.
+  export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
   
+  # Make sure the proxy container is up.
+  proxy_service_ps=$(docker ps -f 'name=dktl-proxy'  --format '{{.Names}}' 2>/dev/null)
+
+  if [[ -z $proxy_service_ps ]]; then
+    echo "Running dktl-proxy.."
+    docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
+      -v '/var/run/docker.sock:/var/run/docker.sock' \
+      --name 'dktl-proxy' \
+      traefik:v2.0 \
+      "--log.level=INFO" "--api.insecure=true" "--providers.docker=true" "--providers.docker.exposedbydefault=false" "--entrypoints.web.address=:80" "--entrypoints.websecure.address=:443"
+  fi
+
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
   BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
@@ -98,15 +104,28 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     EXEC_OPTS='-T';
   fi
 
+  # Check containers state, Run is missing, make sure dktl-proxy is connected
+  # to the same network.
+  containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
+  if [ -z "$containers" ]; then
+    echo "Starting docker containers."
+    $BASE_DOCKER_COMPOSE_COMMAND up -d
+
+    network="${DKTL_SLUG}_default"
+    if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Connected dktl-proxy to \"${network}\" network."
+    fi
+  fi
+
   # Run docker commands immediately then exit
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
-    $BASE_DOCKER_COMPOSE_COMMAND ${@:2}
+    $BASE_DOCKER_COMPOSE_COMMAND "${@:2}"
     exit 0
   elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
-    echo "http://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 80|cut -d ':' -f2)"
+    echo "http://$DKTL_PROXY_DOMAIN"
     exit 0
   elif [ "$1" = "surl" ] || [ "$1" = "docker:surl" ]; then
-    echo "https://$PROXY_DOMAIN:$($BASE_DOCKER_COMPOSE_COMMAND port web 443|cut -d ':' -f2)"
+    echo "https://$DKTL_PROXY_DOMAIN"
     exit 0
   elif [ "$1" = "uli" ]; then
     dktl drush uli --uri=`dktl url`
@@ -114,15 +133,23 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   elif [ "$1" = "suli" ]; then
     dktl drush uli --uri=`dktl surl`
     exit 0
+  elif [ "$1" = "down" ]; then
+    network="${DKTL_SLUG}_default"
+
+    if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Disconnected dktl-proxy from \"${network}\" network."
+    fi
+
+    $BASE_DOCKER_COMPOSE_COMMAND down "${@:2}"
+    exit 0
+  elif [ "$1" = "kill" ]; then
+    # Kill docker-compose services + dktl-proxy
+    dktl down
+
+    docker stop dktl-proxy >/dev/null 2>&1
+    docker rm dktl-proxy >/dev/null 2>&1
   fi
   
-  # Check containers state
-  containers=$($BASE_DOCKER_COMPOSE_COMMAND top)
-  if [ -z "$containers" ]; then
-    echo "Starting docker containers."
-    $BASE_DOCKER_COMPOSE_COMMAND up -d
-  fi
-
   # The containers are running, set DKTL inside the cli container.
   ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
   if [ -z "$ALIAS" ]; then
