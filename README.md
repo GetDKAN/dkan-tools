@@ -109,13 +109,19 @@ dktl down
 This will keep files downloaded during the make phase, as well as any changes
 made to them. But any databose will be removed and all content lost.
 
-8. Stop the docker-compose project and `dkan-proxy`
+8. Connect `dkan-proxy` to the docker-compose project network
 
 ```bash
-dktl kill
+dktl dktl-proxy:connect
 ```
 
-Run dktl down, and then remove the dkan-proxy singleton container.
+9. Remove the `dkan-proxy` container
+
+```bash
+dktl dktl-proxy:kill
+```
+
+Remove the dkan-proxy singleton container.
 
 ## Adding DKAN to an existing Drupal Site
 

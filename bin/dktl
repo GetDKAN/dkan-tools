@@ -75,6 +75,14 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   # Will use dktl-proxy to use {Slug}.{Web Domain}.
   export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
 
+  # Helper dktl docker mode functions.
+  function dktl_proxy_connect () {
+    network="${DKTL_SLUG}_default"
+    if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Connected dktl-proxy to \"${network}\" network."
+    fi
+  }
+
   function dc_up () {
     # Check containers state, Run is missing, make sure dktl-proxy is connected
     # to the same network.
@@ -83,10 +91,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
       echo "Starting docker containers."
       $BASE_DOCKER_COMPOSE_COMMAND up -d
 
-      network="${DKTL_SLUG}_default"
-      if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
-        echo "Connected dktl-proxy to \"${network}\" network."
-      fi
+      dktl_proxy_connect
     fi
   }
 
@@ -150,10 +155,13 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 
     $BASE_DOCKER_COMPOSE_COMMAND down "${@:2}"
     exit 0
-  elif [ "$1" = "kill" ]; then
-    # Kill docker-compose services + dktl-proxy
-    dktl down
-
+  elif [ "$1" = "dktl-proxy:connect" ]; then
+    dktl_proxy_connect
+    # Restart container to refresh config.
+    $BASE_DOCKER_COMPOSE_COMMAND restart
+    exit 0
+  elif [ "$1" = "dktl-proxy:kill" ]; then
+    echo "Removing dktl-proxy ..."
     docker stop dktl-proxy >/dev/null 2>&1
     docker rm dktl-proxy >/dev/null 2>&1
     exit 0
