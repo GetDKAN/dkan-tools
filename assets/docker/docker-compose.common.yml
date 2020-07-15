@@ -46,12 +46,13 @@ services:
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
+      - NODE_ENV=development
       - DKTL_MODE=HOST
       - DKTL_DOCKER=1
+      - DKTL_PROXY_DOMAIN
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_PROFILE
-      - DKTL_PROXY_DOMAIN
       - PLATFORM
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - XDEBUG_DKTL=1
