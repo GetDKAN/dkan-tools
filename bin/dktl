@@ -156,6 +156,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 
     docker stop dktl-proxy >/dev/null 2>&1
     docker rm dktl-proxy >/dev/null 2>&1
+    exit 0
   fi
 
   # At this point, we will need to have the docker-compose environment up and
