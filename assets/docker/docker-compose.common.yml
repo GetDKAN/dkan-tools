@@ -22,8 +22,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.passHostHeader=true"
-      - "traefik.http.routers.web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
-      - "traefik.http.routers.web.entrypoints=web"
+      - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
+      - "traefik.http.routers.${DKTL_SLUG}-web.entrypoints=web"
 
   # DB node
   db:
