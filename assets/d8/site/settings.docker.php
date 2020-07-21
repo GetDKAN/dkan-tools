@@ -16,5 +16,5 @@ if (getenv("DKTL_DOCKER") == "1") {
     ];
 
     $proxy_domain = getenv('DKTL_PROXY_DOMAIN');
-    $settings['file_public_base_url'] = "//$proxy_domain/sites/default/files";
+    $settings['file_public_base_url'] = "http://$proxy_domain/sites/default/files";
 }
