@@ -65,7 +65,7 @@ mkdir my_project && cd my_project
 dktl init
 ```
 
-3. Get Drupal, only versions 8.8 or above are supported:
+3. Get Drupal (only versions 8.8 or above are supported; 8.9.1 currently recommended) and start a new project based on [drupal/recommended-project](https://github.com/drupal/recommended-project):
 
 ```bash
 dktl get <drupal-version>
@@ -151,31 +151,6 @@ directory structure, created when we run `dktl init`.
 If it is necessary or expedient to overwrite files in DKAN or Drupal core, it is recommended that you create a _/src/patches_ directory where you can store local [patch](https://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git/)
 files with the changes. A patch will make it possible to re-apply these changes once a
 newer version of DKAN or Drupal is applied to your project.
-
-### The /src/make folder
-
-DKAN uses [Drush Make](https://docs.drush.org/en/8.x/make/) to define its dependencies. DKAN Tools also uses Drush Make to apply overrides patches to DKAN in a managed way, without having to hack either the Drupal or DKAN core.
-
-In _/src/make/composer.json_ we can define the contributed modules, themes, and libraries that our site uses. For example if our site uses the [Deploy](https://www.drupal.org/project/deploy) module we can add this to _/src/make/drupal.make_ under the `require` section:
-
-```json
-  "require": {
-    "getdkan/dkan": "2.x-dev",
-    "drupal/deploy": "3.1"
-  }
-```
-
-If our site requires a custom patch to the deploy module, we add it to _/src/patches_. For remote patches (usually from [Drupal.org](https://www.drupal.org)) we just need the url to the patch:
-
-```json
-  "extra": {
-    "patches": {
-      "drupal/deploy": {
-        "3005415": "https://www.drupal.org/files/issues/2018-10-09/use_plain_text_format-3005415.patch"
-      }
-    }
-  }
-```
 
 ### The src/site folder
 

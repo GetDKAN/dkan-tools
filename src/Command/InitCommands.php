@@ -56,7 +56,16 @@ class InitCommands extends \Robo\Tasks
     {
         $this->_mkdir('src');
 
-        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command', 'make'];
+        $directories = [
+            'docker',
+            'modules',
+            'themes',
+            'site',
+            'tests',
+            'script',
+            'command',
+            'schema',
+        ];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
@@ -73,7 +82,6 @@ class InitCommands extends \Robo\Tasks
         $this->createSiteFilesDirectory();
         $this->createSettingsFiles($host);
         $this->setupScripts();
-        $this->createMakeFiles();
     }
 
     private function setupScripts()
@@ -90,23 +98,6 @@ class InitCommands extends \Robo\Tasks
             ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
             $result = $task->run();
             $this->_exec("chmod +x {$project_dir}/src/script/{$file}.sh");
-
-            $this->directoryAndFileCreationCheck($result, $f);
-        }
-    }
-
-    private function createMakeFiles()
-    {
-        $dktlRoot = Util::getDktlDirectory();
-
-        $files = ['composer'];
-
-        foreach ($files as $file) {
-            $f = "src/make/{$file}.json";
-
-            $task = $this->taskWriteToFile($f)
-            ->textFromFile("$dktlRoot/assets/d8/composer.json");
-            $result = $task->run();
 
             $this->directoryAndFileCreationCheck($result, $f);
         }

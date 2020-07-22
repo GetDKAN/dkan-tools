@@ -21,10 +21,9 @@ class BasicCommands extends Tasks
      * Get all necessary dependencies and "make" a working codebase.
      *
      * Running `dktl make` will:
-     *   1. Modify the stock drupal composer.json file to merge in anything in src/make
-     *   2. Use composer to download and build all php dependencies.
-     *   3. Symlink a number of dirs from /src into docroot.
-     *   4. If requested, pull the DKAN frontend application into docroot.
+     *   1. Use composer to download and build all php dependencies.
+     *   2. Symlink a number of dirs from /src into docroot.
+     *   3. If requested, pull the DKAN frontend application into docroot.
      *
      * @option yes
      *   Skip confirmation step, overwrite existing no matter what. Use with caution!
