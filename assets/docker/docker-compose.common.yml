@@ -58,6 +58,8 @@ services:
       - XDEBUG_DKTL=1
     links:
       - "web:${DKTL_PROXY_DOMAIN}"
+      # Link web to dkan for backward compatibility.
+      - "web:dkan"
     ports:
       - "8888"
     volumes:

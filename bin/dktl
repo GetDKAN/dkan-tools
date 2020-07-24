@@ -96,15 +96,23 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   }
 
   # Make sure the proxy container is up.
-  proxy_service_ps=$(docker ps -f 'name=dktl-proxy'  --format '{{.Names}}' 2>/dev/null)
+  proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
 
   if [[ -z $proxy_service_ps ]]; then
     echo "Running dktl-proxy.."
-    docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
+    # Make sure no old instance is using the name.
+    docker rm dktl-proxy >/dev/null 2>&1
+
+    if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
       -v '/var/run/docker.sock:/var/run/docker.sock' \
       --name 'dktl-proxy' \
       traefik:v2.0 \
-      "--log.level=INFO" "--api.insecure=true" "--providers.docker=true" "--providers.docker.exposedbydefault=false" "--entrypoints.web.address=:80" "--entrypoints.websecure.address=:443"
+      "--log.level=INFO" "--api.insecure=true" "--providers.docker=true" "--providers.docker.exposedbydefault=false" "--entrypoints.web.address=:80" "--entrypoints.websecure.address=:443" \
+      >/dev/null; \
+    then
+      echo -n "Failed to start the dktl-proxy container..."
+    fi
+
   fi
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
@@ -179,7 +187,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   fi
 
   # Proxy pass to internal DKTL and save exit status.
-  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION=$DRUPAL_VERSION dktl $1 "${@:2}"
+  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION="$DRUPAL_VERSION" dktl "$1" "${@:2}"
   exit_status=$?
 
   # Reset web and cli containers if xdebug.
@@ -188,9 +196,9 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
     $BASE_DOCKER_COMPOSE_COMMAND restart cli
   fi
 
-  if [ -z $DKTL_CHOWN ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
+  if [ -z "$DKTL_CHOWN" ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:
-    if [ ! -z "`find $DKTL_PROJECT_DIRECTORY -user root -print -quit`" ]; then
+    if [ -n "$(find "$DKTL_PROJECT_DIRECTORY" -user root -print -quit)" ]; then
         $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chown -R `id -u`:`id -g` /var/www
     fi
   fi
