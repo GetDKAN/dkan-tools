@@ -20,4 +20,18 @@ class TestCommands extends \Robo\Tasks
             throw new \Exception("Cypress tests failed.");
         }
     }
+
+    /**
+     * Run dkan-tools' own suite of unit tests.
+     */
+    public function testDktl()
+    {
+        $dktlDir = Util::getDktlDirectory();
+        $result = $this->taskExec("{$dktlDir}/vendor/bin/phpunit")
+            ->dir($dktlDir)
+            ->run();
+        if ($result->getExitCode() != 0) {
+            throw new \Exception("DKTL unit tests failed.");
+        }
+    }
 }
