@@ -54,8 +54,6 @@ class InitCommands extends \Robo\Tasks
 
     private function createSrcDirectory($host = "")
     {
-        $this->_mkdir('docroot');
-
         $this->_mkdir('src');
 
         $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command', 'make'];
