@@ -34,5 +34,5 @@ jobs:
             export PATH=$PATH:~/project/bin
             cd ~/project
             dktl init
-            dktl dc exec cli ./vendor/bin/phpunit
+            dktl test:dktl
 
