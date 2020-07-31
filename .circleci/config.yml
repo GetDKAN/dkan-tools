@@ -35,4 +35,17 @@ jobs:
             cd ~/project
             dktl init
             dktl test:dktl
-
+      - run:
+          name: Test build
+          command: |
+            export PATH=$PATH:~/project/bin
+            cd ~/project
+            dktl init
+            dktl get 8.9.2
+            dktl make
+            dktl install --demo
+            dktl curl `dktl surl`
+            dktl dkan:test-phpunit
+            dktl dkan:test-dredd
+            dktl dkan:test-cypress
+            dktl xdebug:enable
