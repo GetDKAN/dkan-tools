@@ -5,9 +5,9 @@ services:
     hostname: web
     image: getdkan/dkan-web:latest
     ports:
-      - "80"
-      - "443"
-      - "8888"
+      - "80:80"
+      - "443:443"
+      - "8888:8888"
     volumes:
       # PHP configuration overrides
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
@@ -30,7 +30,7 @@ services:
     hostname: db
     image: wodby/mariadb:latest
     ports:
-      - "3306"
+      - "3306:3306"
     # MYSQL Credentials in mysql.env
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
@@ -61,7 +61,7 @@ services:
       # Link web to dkan for backward compatibility.
       - "web:dkan"
     ports:
-      - "8888"
+      - "8888:8888"
     volumes:
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
       # Load the DKAN tools dir
@@ -75,7 +75,7 @@ services:
     hostname: solr
     image: devinci/drupal-solr:3.x
     ports:
-      - "8983"
+      - "8983:8983"
     volumes:
       - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
     labels:
