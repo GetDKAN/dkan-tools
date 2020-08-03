@@ -16,6 +16,16 @@ class Util
         return getenv("DKTL_DIRECTORY");
     }
 
+    public static function getDktlProxyDomain()
+    {
+        if ($proxy = getenv("DKTL_PROXY_DOMAIN")) {
+            return $proxy;
+        }
+        else {
+            return '';
+        }
+    }
+
     public static function getProjectDirectory()
     {
         if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "init") {
