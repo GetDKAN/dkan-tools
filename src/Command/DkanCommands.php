@@ -61,12 +61,14 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunit(array $args)
     {
-
         $proj_dir = Util::getProjectDirectory();
 
-        $this->taskExec("dktl installphpunit")->run();
+        $phpunit_executable = $phpunit_executable = "{$proj_dir}/vendor/bin/phpunit";
 
-        $phpunit_executable = "phpunit";
+        if (!file_exists($phpunit_executable)) {
+            $this->taskExec("dktl installphpunit")->run();
+            $phpunit_executable = "phpunit";
+        }
 
         $phpunitExec = $this->taskExec($phpunit_executable)
             ->option('testsuite', 'DKAN Test Suite')
