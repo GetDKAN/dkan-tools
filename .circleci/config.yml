@@ -41,7 +41,9 @@ jobs:
             export PATH=$PATH:~/project/bin
             cd ~/project
             dktl init
+            dktl dc up -d
             dktl get 8.9.2
+            dktl dktl-proxy:connect
             dktl make
             dktl install --demo
             dktl dkan:test-phpunit
