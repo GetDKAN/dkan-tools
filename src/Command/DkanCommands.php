@@ -63,11 +63,9 @@ class DkanCommands extends \Robo\Tasks
     {
         $proj_dir = Util::getProjectDirectory();
 
-        $projectPhpunit = $phpunit_executable = "{$proj_dir}/vendor/bin/phpunit";
+        $phpunit_executable = $phpunit_executable = "{$proj_dir}/vendor/bin/phpunit";
 
-        if (file_exists($projectPhpunit)) {
-            $phpunit_executable = $projectPhpunit;
-        } else {
+        if (!file_exists($phpunit_executable)) {
             $this->taskExec("dktl installphpunit")->run();
             $phpunit_executable = "phpunit";
         }
