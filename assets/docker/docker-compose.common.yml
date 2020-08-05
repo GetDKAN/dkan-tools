@@ -71,16 +71,5 @@ services:
       - ~/.aws:/root/.aws
       - composer:/root/.composer
 
-  solr:
-    hostname: solr
-    image: devinci/drupal-solr:3.x
-    ports:
-      - "8983"
-    volumes:
-      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
-    labels:
-      - traefik.enable=false
-      - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
-
 volumes:
   composer:
