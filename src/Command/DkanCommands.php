@@ -25,7 +25,7 @@ class DkanCommands extends \Robo\Tasks
         $url = Util::getDktlProxyDomain();
         $url = $url ? 'https://' . $url : '';
         $this->io()->text("Docs site: $url/modules/contrib/dkan/docs/index.html");
-}
+    }
 
     /**
      * Run DKAN Cypress Tests.

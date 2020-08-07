@@ -20,8 +20,7 @@ class Util
     {
         if ($proxy = getenv("DKTL_PROXY_DOMAIN")) {
             return $proxy;
-        }
-        else {
+        } else {
             return '';
         }
     }
