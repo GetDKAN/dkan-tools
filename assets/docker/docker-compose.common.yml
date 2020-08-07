@@ -8,24 +8,22 @@ services:
       - "80"
       - "443"
       - "8888"
-    links:
-      - db
-      - solr
     volumes:
       # PHP configuration overrides
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
-    network_mode: bridge
-    labels:
-      - "traefik.frontend.rule=Host:${DKTL_SLUG}.${DKTL_PROXY_DOMAIN}"
-      - "traefik.frontend.passHostHeader=true"
+    env_file:
+      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
       # no_proxy="" required for default Docker For Mac system proxy that contains a space and prevents Selenium from loading.
       # Linked containers to browser will also need this setting.
       - PROXY_DOMAIN
-      - no_proxy=""
       - DKTL_DOCKER=1
-    env_file:
-      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
+      - no_proxy=localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
+      - "traefik.http.routers.${DKTL_SLUG}-web.entrypoints=web"
 
   # DB node
   db:
@@ -39,31 +37,29 @@ services:
     volumes:
        # MySQL configuration overrides
        - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
-    labels:
-      - traefik.enable=false
-    network_mode: bridge
 
   # CLI node
   # Used for all console commands and tools.
   cli:
     hostname: cli
     image: getdkan/dkan-cli:latest
+    env_file:
+      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
+      - NODE_ENV=development
       - DKTL_MODE=HOST
       - DKTL_DOCKER=1
+      - DKTL_PROXY_DOMAIN
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_PROFILE
-      - PROXY_DOMAIN
       - PLATFORM
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - XDEBUG_DKTL=1
-    env_file:
-      - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     links:
-      - db
-      - web
-      - solr
+      - "web:${DKTL_PROXY_DOMAIN}"
+      # Link web to dkan for backward compatibility.
+      - "web:dkan"
     ports:
       - "8888"
     volumes:
@@ -74,19 +70,5 @@ services:
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws
       - composer:/root/.composer
-    labels:
-      - traefik.enable=false
-    network_mode: bridge
-
-  solr:
-    hostname: solr
-    image: devinci/drupal-solr:3.x
-    ports:
-      - "8983"
-    volumes:
-      - "${DKTL_DIRECTORY}/assets/docker/etc/solr/3.x:/var/lib/solr/conf"
-    labels:
-      - "traefik.frontend.rule=Host:${DKTL_SLUG}-solr.${DKTL_PROXY_DOMAIN}"
-    network_mode: bridge
 volumes:
   composer:

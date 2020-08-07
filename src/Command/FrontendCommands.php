@@ -88,7 +88,10 @@ class FrontendCommands extends Tasks
    */
     public function frontendBuild()
     {
-        $task = $this->taskExec("npm run build")->dir("src/frontend");
+        // Override GATSBY_API_URL with our own proxed domain.
+        $task = $this
+            ->taskExec('DYNAMIC_API_URL="/api/1" GATSBY_API_URL="http://$DKTL_PROXY_DOMAIN/api/1" npm run build')
+            ->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not build the front-end.');

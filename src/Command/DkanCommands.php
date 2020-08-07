@@ -24,7 +24,7 @@ class DkanCommands extends \Robo\Tasks
             ->dir("{$proj_dir}/docroot/data-catalog-frontend")
             ->run();
 
-            return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
+            return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("{$proj_dir}/docroot/data-catalog-frontend")
             ->run();
         }
@@ -33,7 +33,7 @@ class DkanCommands extends \Robo\Tasks
         ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
         ->run();
 
-        return $this->taskExec("CYPRESS_baseUrl=http://web npx cypress run")
+        return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
             ->run();
     }
@@ -61,12 +61,8 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunit(array $args)
     {
-
         $proj_dir = Util::getProjectDirectory();
-
-        $this->taskExec("dktl installphpunit")->run();
-
-        $phpunit_executable = "phpunit";
+        $phpunit_executable = $this->getPhpUnitExecutable();
 
         $phpunitExec = $this->taskExec($phpunit_executable)
             ->option('testsuite', 'DKAN Test Suite')
@@ -84,8 +80,6 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
-        $this->taskExec("dktl installphpunit")->run();
-
         $proj_dir = Util::getProjectDirectory();
         $dkanDir = "{$proj_dir}/docroot/modules/contrib/dkan";
 
@@ -98,7 +92,7 @@ class DkanCommands extends \Robo\Tasks
 
         $this->installCodeClimateTestReporter($dkanDir);
 
-        $phpunit_executable = "phpunit";
+        $phpunit_executable = $this->getPhpUnitExecutable();
 
         $this->taskExec("./cc-test-reporter before-build")->dir($dkanDir)->run();
 
@@ -128,6 +122,20 @@ class DkanCommands extends \Robo\Tasks
                 ->dir($dkanDir)->run();
             $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkanDir)->run();
         }
+    }
+
+    private function getPhpUnitExecutable()
+    {
+        $proj_dir = Util::getProjectDirectory();
+
+        $phpunit_executable = $phpunit_executable = "{$proj_dir}/vendor/bin/phpunit";
+
+        if (!file_exists($phpunit_executable)) {
+            $this->taskExec("dktl installphpunit")->run();
+            $phpunit_executable = "phpunit";
+        }
+
+        return $phpunit_executable;
     }
 
     private function inGitDetachedState($dkanDirPath)

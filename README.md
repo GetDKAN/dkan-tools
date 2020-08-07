@@ -37,16 +37,18 @@ Alternatively, you could add _/myworkspace/dkan-tools/bin_ directly to your `$PA
 export PATH=$PATH:/myworkspace/dkan-tools/bin
 ```
 
-#### Setup and start the proxy:
-Docker will server your website from an arbitrary port on your computer (Ex. http://localhost:87689). To access your site at a more stable place, a proxy can be used:
-  - Add `dkan` to `/etc/hosts`
-  - Start the proxy: `docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy`
+#### DKTL proxy:
+dkan-tools leverages traefik to route traffic based on a per-environment domain
+name. traefik is ran as singleton service named `dktl-proxy`.
+
+dktl-proxy will server your website from a constructed domain in the form of
+"{{dktl-slug}}.localtest.me", where dktl-slug is the per project string
+identifing the current enviroment. If your project directory is dkan, the
+project will be served at `//dkan.localtest.me`
 
 ---
 
 :warning: **IMPORTANT**
-
-DKAN's decoupled frontend, by default, will expect DKAN to exist at http://dkan. Enabling the proxy is required for the frontend to work properly out of the box.
 
 If you want to skip the proxy or are setting up a production environment, (after downloading the data-catalog-frontend app) be sure to edit the `/src/frontend/.env.production` file to change the GATSBY_API_URL to reflect your site url.
 
@@ -98,6 +100,28 @@ dktl install
   - log in: `dktl drush uli --uri=dkan`
   - If you skipped the proxy step, you can find the local site URL by typing `dktl url`.
 
+7. Stop the docker-compose project.
+
+```bash
+dktl down
+```
+
+This will keep files downloaded during the make phase, as well as any changes
+made to them. But any databose will be removed and all content lost.
+
+8. Connect `dkan-proxy` to the docker-compose project network
+
+```bash
+dktl dktl-proxy:connect
+```
+
+9. Remove the `dkan-proxy` container
+
+```bash
+dktl dktl-proxy:kill
+```
+
+Remove the dkan-proxy singleton container.
 
 ## Adding DKAN to an existing Drupal Site
 

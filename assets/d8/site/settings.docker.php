@@ -14,5 +14,7 @@ if (getenv("DKTL_DOCKER") == "1") {
             ],
         ],
     ];
-    $settings['file_public_base_url'] = "http://dkan/sites/default/files";
+
+    $proxy_domain = getenv('DKTL_PROXY_DOMAIN');
+    $settings['file_public_base_url'] = "http://$proxy_domain/sites/default/files";
 }
