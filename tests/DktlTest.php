@@ -67,7 +67,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
     {
         `cd sandbox && dktl dkan:docs`;
         $output = [];
-        exec("cd sandbox && dktl dkan:docs", $output);
+        exec("cd sandbox && export DKTL_PROJECT_DIRECTORY=`pwd` && dktl dkan:docs", $output);
         $this->assertContains("Generating page index", $output);
         $this->assertContains("Docs site:", $output);
         $this->assertDirectoryExists('sandbox/docroot/modules/contrib/dkan/docs');
