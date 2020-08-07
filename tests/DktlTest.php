@@ -63,6 +63,16 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         $this->install();
     }
 
+    public function testDkanDocs()
+    {
+        `cd sandbox && dktl dkan:docs`;
+        $output = [];
+        exec("cd sandbox && dktl dkan:docs", $output);
+        $this->assertContains("Generating page index", $output);
+        $this->assertContains("Docs site:", $output);
+        $this->assertDirectoryExists('sandbox/docroot/modules/contrib/dkan/docs');
+    }
+
     private function init()
     {
         `cd sandbox && dktl init`;
