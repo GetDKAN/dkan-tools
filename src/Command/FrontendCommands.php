@@ -3,42 +3,41 @@
 
 namespace DkanTools\Command;
 
+use DkanTools\Util\Util;
 use Robo\Tasks;
 
 class FrontendCommands extends Tasks
 {
-  /**
-   * Get frontend app.
-   */
-    public function frontendGet($repo = 'https://github.com/GetDKAN/data-catalog-react.git', $branch = 'master')
+
+    const FRONTEND_DIR = 'src/frontend';
+
+    /**
+    * Get frontend app.
+    */
+    public function frontendGet($version = 'master')
     {
-        $this->io()->section('Adding frontend application');
+        if (file_exists(self::FRONTEND_DIR)) {
+            throw new \Exception(self::FRONTEND_DIR . ' already exists.');
+        }
 
-        $a = explode('/', $repo);
-        $name = str_replace('.git', '', end($a));
+        $archiveUrl = 'https://github.com/GetDKAN/data-catalog-react';
+        $archiveUrl .= "/archive/{$version}.zip";
 
-        $result = $this->taskExec('git clone')
-            ->option('depth', '1')
-            ->option('-b', $branch)
-            ->arg($repo)
-            ->arg('frontend')
-            ->dir('src')
+        $this->io()->section('Downloading frontend application');
+
+        Util::prepareTmp();
+        $dest = Util::TMP_DIR . "/frontend.zip";
+
+        $result = $this->taskExec("wget -O $dest $archiveUrl")
             ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not download front-end app.');
-            if (file_exists('src/frontend')) {
-                $this->io()->warning('src/frontend already exists.');
-            }
-            return $result;
+            throw new \Exception('Could not download front-end app.');
         }
-
-        if ($result && $result->getExitCode() === 0) {
-            $this->io()->note(
-                'Successfully downloaded ' . $name . ' to /src/frontend'
-            );
-        }
-
+        $this->taskExtract(Util::TMP_DIR . '/frontend.zip')
+            ->to(self::FRONTEND_DIR)
+            ->run();
         $this->frontendLink();
+        Util::cleanupTmp();
     }
 
     /**
@@ -54,18 +53,6 @@ class FrontendCommands extends Tasks
                 'Successfully symlinked /src/frontend to docroot/frontend'
             );
         }
-
-        $this->io()->note(
-            'In order for the frontend to find the correct routes to work correctly,' .
-            'you will need to enable the dkan frontend module. ' .
-            'Do this by running "dktl install" with the "--frontend" or "--demo" option as well, ' .
-            'or else run "drush en frontend" after installation.'
-        );
-
-        $this->io()->note(
-            'To save your customizations and make the frontend code part of your project, ' .
-            'remove the "src/frontend/.git" file.'
-        );
     }
 
   /**
