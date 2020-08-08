@@ -76,7 +76,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
 
   # Helper dktl docker mode functions.
-  function dktl_proxy_connect () {
+  function proxy_connect () {
     network="${DKTL_SLUG}_default"
     if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
       echo "Connected dktl-proxy to \"${network}\" network."
@@ -91,7 +91,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
       echo "Starting docker containers."
       $BASE_DOCKER_COMPOSE_COMMAND up -d
 
-      dktl_proxy_connect
+      proxy_connect
     fi
   }
 
@@ -138,22 +138,6 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 
     $BASE_DOCKER_COMPOSE_COMMAND "${@:2}"
     exit 0
-  elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
-    echo "http://$DKTL_PROXY_DOMAIN"
-    exit 0
-  elif [ "$1" = "surl" ] || [ "$1" = "docker:surl" ]; then
-    echo "https://$DKTL_PROXY_DOMAIN"
-    exit 0
-  elif [ "$1" = "uli" ]; then
-    dc_up
-
-    dktl drush uli --uri=`dktl url`
-    exit 0
-  elif [ "$1" = "suli" ]; then
-    dc_up
-
-    dktl drush uli --uri=`dktl surl`
-    exit 0
   elif [ "$1" = "down" ]; then
     network="${DKTL_SLUG}_default"
 
@@ -163,12 +147,12 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
 
     $BASE_DOCKER_COMPOSE_COMMAND down "${@:2}"
     exit 0
-  elif [ "$1" = "dktl-proxy:connect" ]; then
+  elif [ "$1" = "docker:proxy-connect" ] || [ "$1" = "proxy:connect" ]; then
     dktl_proxy_connect
     # Restart container to refresh config.
     $BASE_DOCKER_COMPOSE_COMMAND restart
     exit 0
-  elif [ "$1" = "dktl-proxy:kill" ]; then
+  elif [ "$1" = "docker:proxy-kill" ] || [ "$1" = "proxy:kill" ]; then
     echo "Removing dktl-proxy ..."
     docker stop dktl-proxy >/dev/null 2>&1
     docker rm dktl-proxy >/dev/null 2>&1
@@ -194,6 +178,11 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
   if [ $? -eq 0 ] && [[ $1 == "xdebug"* ]]; then
     $BASE_DOCKER_COMPOSE_COMMAND restart web
     $BASE_DOCKER_COMPOSE_COMMAND restart cli
+  fi
+
+  # Proxy connect if we just ran make.
+  if [ $? -eq 0 ] && [[ $1 == "make"* ]]; then
+    proxy_connect
   fi
 
   if [ -z "$DKTL_CHOWN" ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
