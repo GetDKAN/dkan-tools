@@ -145,7 +145,7 @@ if [ "$DKTL_MODE" = "DOCKER" ]; then
       echo "Disconnected dktl-proxy from \"${network}\" network."
     fi
 
-    $BASE_DOCKER_COMPOSE_COMMAND down "${@:2}"
+    $BASE_DOCKER_COMPOSE_COMMAND down -v"${@:2}"
     exit 0
   elif [ "$1" = "docker:proxy-connect" ] || [ "$1" = "proxy:connect" ]; then
     dktl_proxy_connect
