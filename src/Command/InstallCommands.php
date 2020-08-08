@@ -7,12 +7,13 @@ use Robo\Tasks;
 
 class InstallCommands extends Tasks
 {
-    public function install($opts = [
-        'frontend' => false,
-        'existing-config' => false,
-        'demo-backend' => false,
-        'demo' => false
-        ])
+    const DRUSH = "../vendor/bin/drush";
+    /**
+     * Perform Drupal/DKAN database installation
+     *
+     * @option existing-config
+     */
+    public function install($opts = ['existing-config' => false])
     {
         if ($opts['existing-config']) {
             $result = $this->taskExec('drush si -y --existing-config')
@@ -22,9 +23,6 @@ class InstallCommands extends Tasks
             $result = $this->standardInstallation();
         }
 
-        if ($opts['demo-backend'] === true) {
-            $result = $this->buildBackend();
-        }
         if ($opts['demo'] === true) {
             $opts = ['frontend' => false];
             $result = $this->setupDemo();
@@ -45,34 +43,50 @@ class InstallCommands extends Tasks
 
     private function standardInstallation()
     {
-        `dktl drush si standard -y`;
-        `dktl drush en dkan config_update_ui -y`;
-        `dktl drush config-set system.performance css.preprocess 0 -y`;
-        `dktl drush config-set system.performance js.preprocess 0 -y`;
-        return $this->taskExec('drush config-set system.site page.front "/home" -y')
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec(self::DRUSH . ' si standard -y')
+            ->exec(self::DRUSH . " en dkan config_update_ui -y")
+            ->exec(self::DRUSH . " config-set system.performance css.preprocess 0 -y")
+            ->exec(self::DRUSH . " config-set system.performance js.preprocess 0 -y")
+            ->exec(self::DRUSH . " config-set system.site page.front \"/home\" -y")
             ->dir(Util::getProjectDocroot())
             ->run();
     }
 
-    private function buildBackend()
+    /**
+     * Install DKAN sample content.
+     */
+    public function installSample()
     {
-        `dktl drush en sample_content -y`;
-        `dktl drush dkan:sample-content:create`;
-        `dktl drush queue:run datastore_import`;
-        `dktl drush dkan:metastore-search:rebuild-tracker`;
-        return  $this->taskExec(`drush sapi-i`)
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec(self::DRUSH . ' en sample_content -y')
+            ->exec(self::DRUSH . ' dkan:sample-content:create')
+            ->exec(self::DRUSH . ' queue:run datastore_import')
+            ->exec(self::DRUSH . ' dkan:metastore-search:rebuild-tracker')
+            ->exec(self::DRUSH . ' sapi-i')
             ->dir(Util::getProjectDocroot())
             ->run();
     }
 
-    private function setupDemo()
+    /**
+     * Install DKAN demo (includes frontend and sample content)
+     *
+     * @aliases demo
+     */
+    public function installDemo()
     {
-        $this->buildBackend();
-        `dktl drush en frontend -y`;
-        `dktl frontend:get`;
-        `dktl frontend:install`;
-        `dktl frontend:build`;
-        return  $this->taskExec('drush cr')
+        $this->install();
+        $this->installSample();
+
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec(self::DRUSH . ' en frontend -y')
+            ->exec('dktl frontend:get')
+            ->exec('dktl frontend:install')
+            ->exec('dktl frontend:build')
+            ->exec(self::DRUSH . ' cr')
             ->dir(Util::getProjectDocroot())
             ->run();
     }
