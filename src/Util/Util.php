@@ -26,6 +26,15 @@ class Util
         return getenv("DKTL_PROJECT_DIRECTORY");
     }
 
+    public static function getUri()
+    {
+        $domain = getenv("DKTL_PROXY_DOMAIN");
+        if ($domain) {
+            $domain = "http://" . $domain;
+        }
+        return $domain;
+    }
+
     public static function getProjectDocroot()
     {
         return self::getProjectDirectory() . "/docroot";
@@ -62,18 +71,7 @@ class Util
         $headers = @get_headers($url);
         return (count(preg_grep('/^HTTP.*404/', $headers)) > 0) ? false : true;
     }
-
-    public static function getAllFilesWithExtension($path, $ext)
-    {
-        $files_with_extension = [];
-        $subs = self::getAllSubdirectories($path);
-        foreach ($subs as $sub) {
-            $files = self::getFilesWithExtension($sub, $ext);
-            $files_with_extension = array_merge($files_with_extension, $files);
-        }
-        return $files_with_extension;
-    }
-
+    
     public static function directoryAndFileCreationCheck(\Robo\Result $result, $df, $io)
     {
         if ($result->getExitCode() == 0 && file_exists($df)) {

@@ -3,17 +3,21 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
+use DkanTools\DrupalProjectTrait;
 
 class InitCommands extends \Robo\Tasks
 {
+    use DrupalProjectTrait;
 
-  /**
-   * Initialize DKAN project directory.
-   */
-    public function init($opts = ['host' => ''])
+    /**
+     * Initialize DKAN project directory.
+    */
+    public function init($opts = ['drupal' => null, 'dkan' => null])
     {
         $this->initConfig();
-        $this->initSrc($opts);
+        $this->initSrc();
+        $this->initDrupal($opts['drupal']);
+        $this->initDkan($opts['dkan']);
     }
 
     private function initConfig()
@@ -31,14 +35,30 @@ class InitCommands extends \Robo\Tasks
         }
     }
 
-    private function initSrc($opts)
+    private function initSrc()
     {
         $this->io()->section('Initializing src directory');
         if (file_exists('src')) {
             $this->io()->warning('The src directory already exists in this directory; skipping.');
-        } else {
-            $this->createSrcDirectory($opts['host']);
+            exit;
         }
+
+        $this->_mkdir('src');
+
+        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
+
+        foreach ($directories as $directory) {
+            $dir = "src/{$directory}";
+            $result = $this->_mkdir($dir);
+            if ($directory == "site") {
+                $this->_exec("chmod -R 777 {$dir}");
+            }
+            $this->directoryAndFileCreationCheck($result, $dir);
+        }
+
+        $this->createSiteFilesDirectory();
+        $this->createSettingsFiles();
+        $this->setupScripts();
     }
 
     private function createDktlYmlFile()
@@ -50,30 +70,6 @@ class InitCommands extends \Robo\Tasks
         ->run();
 
         $this->directoryAndFileCreationCheck($result, $f);
-    }
-
-    private function createSrcDirectory($host = "")
-    {
-        $this->_mkdir('src');
-
-        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command', 'make'];
-
-        foreach ($directories as $directory) {
-            $dir = "src/{$directory}";
-
-            $result = $this->_mkdir($dir);
-
-            if ($directory == "site") {
-                $this->_exec("chmod -R 777 {$dir}");
-            }
-
-            $this->directoryAndFileCreationCheck($result, $dir);
-        }
-
-        $this->createSiteFilesDirectory();
-        $this->createSettingsFiles($host);
-        $this->setupScripts();
-        $this->createMakeFiles();
     }
 
     private function setupScripts()
@@ -95,23 +91,6 @@ class InitCommands extends \Robo\Tasks
         }
     }
 
-    private function createMakeFiles()
-    {
-        $dktlRoot = Util::getDktlDirectory();
-
-        $files = ['composer'];
-
-        foreach ($files as $file) {
-            $f = "src/make/{$file}.json";
-
-            $task = $this->taskWriteToFile($f)
-            ->textFromFile("$dktlRoot/assets/d8/composer.json");
-            $result = $task->run();
-
-            $this->directoryAndFileCreationCheck($result, $f);
-        }
-    }
-
     private function createSiteFilesDirectory()
     {
         $directory = 'src/site/files';
@@ -121,7 +100,7 @@ class InitCommands extends \Robo\Tasks
         $this->directoryAndFileCreationCheck($result, $directory);
     }
 
-    private function createSettingsFiles($host = "")
+    private function createSettingsFiles()
     {
         $dktlRoot = Util::getDktlDirectory();
         $hash_salt = Util::generateHashSalt(55);
@@ -132,52 +111,16 @@ class InitCommands extends \Robo\Tasks
             $f = "src/site/{$setting}";
             if ($setting == 'settings.php') {
                 $result = $this->taskWriteToFile($f)
-                ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
+                ->textFromFile("$dktlRoot/assets/site/{$setting}")
                 ->place('HASH_SALT', $hash_salt)
                 ->run();
             } else {
                 $result = $this->taskWriteToFile($f)
-                ->textFromFile("$dktlRoot/assets/d8/site/{$setting}")
+                ->textFromFile("$dktlRoot/assets/site/{$setting}")
                 ->run();
             }
             $this->directoryAndFileCreationCheck($result, $f);
         }
-
-        if (!empty($host)) {
-            $this->initHost($host);
-        }
-    }
-
-  /**
-   * Initialize host settings.
-   *
-   * @todo Fix opts, make required.
-   */
-    private function initHost($host)
-    {
-        $dktlRoot = Util::getDktlDirectory();
-        $settingsFile = "settings.$host.php";
-        if (!$host) {
-            throw new \Exception("Host not specified.");
-            exit;
-        }
-        if (!file_exists("$dktlRoot/assets/site/$settingsFile")) {
-            $this->io()->warning("Host settings for '$host' not supported; skipping.");
-            exit;
-        }
-        if (!file_exists('site')) {
-            throw new \Exception("The project's site directory must be initialized before adding host settings.");
-            exit;
-        }
-        if (file_exists("site/$settingsFile")) {
-            $this->io()->warning("Host settings for '$host' already initialized; skipping.");
-            exit;
-        }
-        $result = $this->taskWriteToFile("site/settings.$host.php")
-        ->textFromFile("$dktlRoot/assets/site/settings.$host.php")
-        ->run();
-
-        return $result;
     }
 
     private function directoryAndFileCreationCheck(\Robo\Result $result, $df)
@@ -193,23 +136,37 @@ class InitCommands extends \Robo\Tasks
     /**
      * Generates basic configuration for a DKAN project to work with CircleCI.
      */
-    public function initCircleCI()
+    private function initCircleCI()
     {
         $dktl_dir = Util::getDktlDirectory();
         $project_dir = Util::getProjectDirectory();
         return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
     }
 
-    /**
-     * Generates basic configuration for a DKAN project to work with ProboCI.
-     */
-    public function initProboCI()
+    public function initDrupal($drupalVersion = "8")
     {
-        $dktl_dir = Util::getDktlDirectory();
-        $project_dir = Util::getProjectDirectory();
-        $collection = $this->collectionBuilder();
-        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/.probo.yml {$project_dir}"));
-        $collection->addTask($this->taskExec("cp -r {$dktl_dir}/assets/settings.probo.php {$project_dir}/src/site"));
-        return $collection->run();
+        // Validate version is semantic and at least the minium set
+        // in DrupalProjectTrait.
+        $this->drupalProjectValidateVersion($drupalVersion);
+        Util::prepareTmp();
+
+        // Composer's create-project requires an empty folder, so run it in
+        // Util::Tmp, then move the 2 composer files back into project root.
+        $this->drupalProjectCreate($drupalVersion);
+        $this->drupalProjectMoveComposerFiles();
+
+        // Modify project's scaffold and installation paths to `docroot`, then
+        // install Drupal in it.
+        $this->drupalProjectSetDocrootPath();
+
+        Util::cleanupTmp();
+    }
+
+    public function initDkan(string $version = null)
+    {
+        $this->taskComposerRequire()
+            ->dependency('getdkan/dkan', $version)
+            ->option('--no-update')
+            ->run();
     }
 }
