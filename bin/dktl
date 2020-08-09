@@ -1,10 +1,11 @@
 #!/bin/bash
 
+# Primary workflow for dktl command. Executed on last line of script.
 main() {
   set_mode
   set_platform
-  check_dependencies
   set_directory
+  check_dependencies
 
   set_project_directory "$@"
   set_slug
@@ -12,8 +13,21 @@ main() {
   if [ "$DKTL_MODE" = "DOCKER" ]; then
     dktl_docker_run "$@"
   elif [ "$DKTL_MODE" = "HOST" ]; then
-    # For several commands, pass through arguments. https://bit.ly/30IlWGk
+    dktl_run "$@"
+  fi
+}
+
+# Execute the dkan-tools app on the local host.
+dktl_run() {
+    # Check whether dkan-tools' dependencies have been initialized.
+    if [ -z "$(ls -lha $DKTL_DIRECTORY | grep vendor)" ]; then
+      echo "Composer Install"
+      composer install --working-dir=$DKTL_DIRECTORY    
+    fi
+
+    # Finally, execute the php app.
     case $1 in
+        # Pass through arguments for these. See: https://bit.ly/30IlWGk
         drush | phpunit | *test* )
             php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"
             ;;
@@ -21,7 +35,7 @@ main() {
             php $DKTL_DIRECTORY/bin/app.php $1 "${@:2}"
             ;;
     esac
-  fi
+
 }
 
 # Execute the dkan-tools app in the CLI container.
@@ -32,8 +46,10 @@ dktl_docker_run() {
   dc_up
   dktl_set_alias
 
-  # Proxy pass to internal DKTL and save exit status.
-  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli env DRUPAL_VERSION="$DRUPAL_VERSION" dktl "$1" "${@:2}"
+  # Proxy-pass to docker and save exit status. The command will re-
+  # run in host mode inside the cli container, so dktl_run will still
+  # ultimately be run whichever mode dktl is set to. 
+  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli dktl "$1" "${@:2}"
   exit_status=$?
 
   dktl_docker_cleanup "$@"
@@ -77,12 +93,7 @@ check_dependencies() {
     if [ -z `which php` ] || [ -z `which composer` ]; then
       echo "php and composer are required. Exiting."
       exit 1
-     # Check whether dkan-tools' dependencies have been initialized.
-    elif [ -z "$(ls -lha $DKTL_DIRECTORY | grep vendor)" ]; then
-      echo "Vendor dependencies not found; run composer install"
-      exit 1
     fi
-
   fi
 }
 
@@ -133,6 +144,8 @@ set_slug() {
   fi
 }
 
+# Set the following variables for use with docker-compose commands:
+# DKTL_PROXY_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
 docker_vars_init() {
   WEB_DOMAIN="localtest.me"
   export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
