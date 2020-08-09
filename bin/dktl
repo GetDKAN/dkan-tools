@@ -97,7 +97,7 @@ check_dependencies() {
   fi
 }
 
-# Set DKTL_PROJECT_DIRECTORY
+# Set DKTL_PROJECT_DIRECTORY. Needs "$@" because dktl init hsa different logic.
 set_project_directory() {
   # Find project root so we can run from anywhere
   find_up () {
