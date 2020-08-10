@@ -3,3 +3,5 @@
 .swp
 .vscode
 .idea
+/tests/shunit2
+/tests/testproject
