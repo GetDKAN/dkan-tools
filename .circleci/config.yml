@@ -11,7 +11,7 @@ jobs:
       - run:
           name: environment setup
           command: |
-            composer --global require phpunit/phpunit
+            sudo apt-get update
       - run:
           name: debug
           command: |
