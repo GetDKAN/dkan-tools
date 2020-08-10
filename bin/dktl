@@ -203,7 +203,7 @@ dc_down() {
     echo "Disconnected dktl-proxy from \"${network}\" network."
   fi
 
-  $BASE_DOCKER_COMPOSE_COMMAND down "${@:2}"
+  $BASE_DOCKER_COMPOSE_COMMAND down -v "${@:2}"
 }
 
 # Make sure the proxy container is up.
