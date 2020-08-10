@@ -22,8 +22,7 @@ class DkanCommands extends \Robo\Tasks
         $this->taskExec("doxygen")
             ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
             ->run();
-        $url = Util::getDktlProxyDomain();
-        $url = $url ? 'https://' . $url : '';
+        $url = Util::getUri();
         $this->io()->text("Docs site: $url/modules/contrib/dkan/docs/index.html");
     }
 
