@@ -3,7 +3,7 @@ version: "2"
 services:
   web:
     hostname: web
-    image: getdkan/dkan-web:latest
+    image: getdkan/dkan-web:v0.2.0
     ports:
       - "80"
       - "443"
@@ -28,7 +28,7 @@ services:
   # DB node
   db:
     hostname: db
-    image: wodby/mariadb:latest
+    image: wodby/mariadb:10.3-3.8.5
     ports:
       - "3306"
     # MYSQL Credentials in mysql.env
@@ -42,7 +42,7 @@ services:
   # Used for all console commands and tools.
   cli:
     hostname: cli
-    image: getdkan/dkan-cli:latest
+    image: getdkan/dkan-cli:v0.2.1
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
