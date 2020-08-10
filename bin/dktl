@@ -1,5 +1,9 @@
 #!/bin/bash
 
+################################################################################
+# DKAN-tools bash script.                                                      #
+################################################################################
+
 # Primary workflow for dktl command. Executed on last line of script.
 main() {
   set_mode
@@ -139,7 +143,8 @@ set_slug() {
     DKTL_SLUG=${DKTL_PROJECT_DIRECTORY##*/}
     DKTL_SLUG=${DKTL_SLUG//-/}
     DKTL_SLUG=${DKTL_SLUG//_/}
-    DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]") # Mixed case dirs cause issue with docker image names
+    # Mixed case dirs cause issue with docker image names
+    DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]")
     export DKTL_SLUG
   fi
 }
@@ -152,7 +157,10 @@ docker_vars_init() {
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
-  BASE_DOCKER_COMPOSE_COMMAND="docker-compose -f $COMMON_CONF -p "${DKTL_SLUG}" --project-directory $DKTL_PROJECT_DIRECTORY"
+  BASE_DOCKER_COMPOSE_COMMAND="docker-compose \
+    --file $COMMON_CONF \
+    --project-name "${DKTL_SLUG}" \
+    --project-directory $DKTL_PROJECT_DIRECTORY"
 
   if [ -f $OVERRIDES_CONF ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
@@ -205,12 +213,13 @@ proxy_setup() {
     echo "Running dktl-proxy.."
     # Make sure no old instance is using the name.
     docker rm dktl-proxy >/dev/null 2>&1
-
     if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
       -v '/var/run/docker.sock:/var/run/docker.sock' \
       --name 'dktl-proxy' \
       traefik:v2.0 \
-      "--log.level=INFO" "--api.insecure=true" "--providers.docker=true" "--providers.docker.exposedbydefault=false" "--entrypoints.web.address=:80" "--entrypoints.websecure.address=:443" \
+      --log.level=INFO --api.insecure=true --providers.docker=true \
+      --providers.docker.exposedbydefault=false --entrypoints.web.address=:80 \
+      --entrypoints.websecure.address=:443 \
       >/dev/null; \
     then
       echo -n "Failed to start the dktl-proxy container..."
@@ -248,8 +257,10 @@ docker_command_intercept() {
 dktl_set_alias() {
   ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
   if [ -z "$ALIAS" ]; then
-    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chmod 777 /usr/local/dkan-tools/bin/dktl
-    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
+    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli \
+      chmod 777 /usr/local/dkan-tools/bin/dktl
+    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli \
+      ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 }
 
