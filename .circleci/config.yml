@@ -3,16 +3,19 @@ jobs:
   build:
     parallelism: 1
     machine:
-      image: circleci/php:latest
+      image: circleci/classic:latest
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
       - run:
+          name: environment setup
+          command: |
+            composer --global require phpunit/phpunit
+      - run:
           name: debug
           command: |
             pwd
             ls
-            which composer
-            which docker
-            which php
+            docker ps
+            composer
