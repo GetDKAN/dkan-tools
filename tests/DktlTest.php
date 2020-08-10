@@ -51,7 +51,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
     {
         `cd sandbox && dktl init`;
         $output = [];
-        exec("cd sandbox && dktl get 9.0.0-beta2", $output);
+        exec("cd sandbox && dktl get 8.9.2", $output);
         $this->assertContains(' [OK] composer project created.', $output);
     }
 
@@ -61,6 +61,16 @@ class DktlTest extends \PHPUnit\Framework\TestCase
         $this->get();
         $this->make();
         $this->install();
+    }
+
+    public function testDkanDocs()
+    {
+        `cd sandbox && dktl dkan:docs`;
+        $output = [];
+        exec("cd sandbox && export DKTL_PROJECT_DIRECTORY=`pwd` && dktl dkan:docs", $output);
+        $this->assertContains("Generating page index", $output);
+        $this->assertContains("Docs site:", $output);
+        $this->assertDirectoryExists('sandbox/docroot/modules/contrib/dkan/docs');
     }
 
     private function init()
@@ -88,7 +98,7 @@ class DktlTest extends \PHPUnit\Framework\TestCase
 
     private function get()
     {
-        `cd sandbox && dktl get 9.0.1`;
+        `cd sandbox && dktl get 8.9.2`;
         $output = [];
         exec("ls sandbox", $output);
         $this->assertContains("composer.json", $output);
