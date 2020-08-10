@@ -231,12 +231,12 @@ docker_command_intercept() {
   elif [ "$1" = "down" ]; then
     dc_down
     exit 0
-  elif [ "$1" = "proxy:connect" ]; then
+  elif [ "$1" = "docker:proxy-connect" ] || [ "$1" = "proxy:connect" ]; then
     proxy_connect
     # Restart container to refresh config.
     $BASE_DOCKER_COMPOSE_COMMAND restart
     exit 0
-  elif [ "$1" = "proxy:kill" ]; then
+  elif [ "$1" = "docker:proxy-kill" ] || [ "$1" = "proxy:kill" ]; then
     echo "Removing dktl-proxy ..."
     docker stop dktl-proxy >/dev/null 2>&1
     docker rm dktl-proxy >/dev/null 2>&1
