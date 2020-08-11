@@ -11,11 +11,13 @@ jobs:
       - run:
           name: Install shunit
           command: |
-            pwd
-            ls -la
+            cd tests
+            wget https://github.com/kward/shunit2/archive/v2.1.8.tar.gz
+            mkdir shunit2 && tar xf v2.1.8.tar.gz -C shunit2 --strip-components 1
+
       - run:
           name: Run tests
           command: |
             cd tests
-            ls
+            ./dktl_test.sh
 
