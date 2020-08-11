@@ -99,7 +99,7 @@ testFrontEnd() {
     assertContains "${result}" "Compiled successfully."
 
     result=`curl $url`
-    assertContains "${result}" "<div id="root"></div>"
+    assertContains "${result}" '<div id="root"></div>'
 }
 
 testBringDown() {
