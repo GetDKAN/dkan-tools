@@ -76,7 +76,7 @@ class FrontendCommands extends Tasks
             ->run();
         if (!$result->getMessage() || !is_object(json_decode($result->getMessage()))) {
             $this->io()->note("Frontend version not found; defaulting to latest.");
-            $version = ["@civicactions/data-catalog-react", "latest"];
+            $version = ["@civicactions/data-catalog-react" => "latest"];
         } else {
             $version = (array) json_decode($result->getMessage());
         }
