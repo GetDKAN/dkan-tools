@@ -47,7 +47,6 @@ class FrontendCommands extends Tasks
         $this->taskExtract(Util::TMP_DIR . '/' . $frontendArchive)
             ->to(self::FRONTEND_DIR)
             ->run();
-        $this->frontendLink();
         Util::cleanupTmp();
     }
 
@@ -108,6 +107,9 @@ class FrontendCommands extends Tasks
     {
         if (!file_exists(self::FRONTEND_DIR)) {
             $this->frontendGet($version);
+        }
+        if (!file_exists("docroot/frontend")) {
+            $this->frontendLink();
         }
         $result = $this->taskExec("npm install")
             ->dir("src/frontend")
