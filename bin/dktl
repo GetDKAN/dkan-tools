@@ -274,6 +274,7 @@ dktl_docker_cleanup() {
   # Proxy connect if we just ran make.
   if [ $? -eq 0 ] && [[ $1 == "init"* ]]; then
     proxy_connect
+    $BASE_DOCKER_COMPOSE_COMMAND restart web
   fi
 
   if [ -z "$DKTL_CHOWN" ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
