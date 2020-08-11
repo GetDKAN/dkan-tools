@@ -148,7 +148,8 @@ class FrontendCommands extends Tasks
         $this->io()->success('front-end build.');
     }
 
-    private function frontendModulePresent() {
+    private function frontendModulePresent() 
+    {
         return false;
     }
 }

@@ -51,15 +51,7 @@ class InitCommands extends \Robo\Tasks
         $this->_mkdir('src');
         $this->_mkdir('docroot');
 
-        $directories = [
-            'docker',
-            'modules',
-            'themes',
-            'site',
-            'test',
-            'script',
-            'command'
-        ];
+        $directories = ['docker', 'modules', 'themes', 'site', 'test', 'script', 'command'];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
