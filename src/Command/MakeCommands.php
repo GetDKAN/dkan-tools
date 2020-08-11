@@ -45,7 +45,8 @@ class MakeCommands extends Tasks
         $this->io()->section("Running dktl make");
 
         // Run composer install while passing the options.
-        $install = $this->taskComposerInstall();
+        $install = $this->taskComposerInstall()
+            ->dir(Util::getProjectDirectory());
         foreach ($opts as $composerBool) {
             if ($composerBool === true) {
                 $install->option($composerBool);

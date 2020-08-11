@@ -272,7 +272,7 @@ dktl_docker_cleanup() {
   fi
 
   # Proxy connect if we just ran make.
-  if [ $? -eq 0 ] && [[ $1 == "make"* ]]; then
+  if [ $? -eq 0 ] && [[ $1 == "init"* ]]; then
     proxy_connect
   fi
 

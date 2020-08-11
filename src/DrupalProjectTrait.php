@@ -44,17 +44,12 @@ trait DrupalProjectTrait
     private function drupalProjectMoveComposerFiles()
     {
         $moveFiles = $this->taskFilesystemStack()
-        ->rename(
-            Util::TMP_DIR . "/composer.json",
-            Util::getProjectDirectory() . "/composer.json",
-            true
-        )
-        ->rename(
-            Util::TMP_DIR . "/composer.lock",
-            Util::getProjectDirectory() . "/composer.lock",
-            true
-        )
-        ->run();
+            ->rename(
+                Util::TMP_DIR . "/composer.json",
+                Util::getProjectDirectory() . "/composer.json",
+                true
+            )
+            ->run();
         if ($moveFiles->getExitCode() != 0) {
             $this->io()->error('could not move composer files.');
             exit;

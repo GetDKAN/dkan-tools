@@ -12,6 +12,7 @@ use DkanTools\Util\Util;
  */
 class DkanCommands extends \Robo\Tasks
 {
+    const DRUSH = "../vendor/bin/drush";
 
     /**
      * Build DKAN docs with doxygen.
@@ -157,5 +158,24 @@ class DkanCommands extends \Robo\Tasks
         $output = [];
         exec("cd {$dkanDirPath} && git rev-parse --abbrev-ref HEAD", $output);
         return (isset($output[0]) && $output[0] == 'HEAD');
+    }
+
+
+    /**
+     * Create a new demo project.
+     *
+     * @aliases demo
+     */
+    public function dkanDemo()
+    {
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl make")
+            ->exec("dktl install")
+            ->exec("dktl install:sample")
+            ->exec("dktl frontend:install")
+            ->exec("dktl frontend:build")
+            ->exec("dktl drush cr")
+            ->run();
     }
 }

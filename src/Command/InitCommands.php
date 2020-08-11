@@ -12,8 +12,13 @@ class InitCommands extends \Robo\Tasks
     /**
      * Initialize DKAN project directory.
     */
-    public function init($opts = ['drupal' => null, 'dkan' => null])
+    public function init($opts = ['drupal' => '9.0.0', 'dkan' => null])
     {
+        // Validate version is semantic and at least the minium set
+        // in DrupalProjectTrait.
+        if (!$this->drupalProjectValidateVersion($opts['drupal'])) {
+            exit;
+        }
         $this->initConfig();
         $this->initSrc();
         $this->initDrupal($opts['drupal']);
@@ -44,8 +49,17 @@ class InitCommands extends \Robo\Tasks
         }
 
         $this->_mkdir('src');
+        $this->_mkdir('docroot');
 
-        $directories = ['docker', 'modules', 'themes', 'site', 'tests', 'script', 'command'];
+        $directories = [
+            'docker',
+            'modules',
+            'themes',
+            'site',
+            'test',
+            'script',
+            'command'
+        ];
 
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
@@ -61,14 +75,21 @@ class InitCommands extends \Robo\Tasks
         $this->setupScripts();
     }
 
-    private function createDktlYmlFile()
+    private function createSiteCommands()
     {
         $dktlRoot = Util::getDktlDirectory();
-        $f = 'dktl.yml';
+        $f = 'command/SiteCommands.php';
         $result = $this->taskWriteToFile($f)
-        ->textFromFile("$dktlRoot/assets/dktl.yml")
-        ->run();
+            ->textFromFile("$dktlRoot/assets/command/SiteCommands.php")
+            ->run();
 
+        $this->directoryAndFileCreationCheck($result, $f);
+    }
+
+    private function createDktlYmlFile()
+    {
+        $f = Util::getProjectDirectory() . '/dktl.yml';
+        $result = $this->taskExec('touch')->arg($f)->run();
         $this->directoryAndFileCreationCheck($result, $f);
     }
 
@@ -83,7 +104,7 @@ class InitCommands extends \Robo\Tasks
             $f = "src/script/{$file}.sh";
 
             $task = $this->taskWriteToFile($f)
-            ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
+                ->textFromFile("{$dktlRoot}/assets/script/{$file}.sh");
             $result = $task->run();
             $this->_exec("chmod +x {$project_dir}/src/script/{$file}.sh");
 
@@ -145,9 +166,6 @@ class InitCommands extends \Robo\Tasks
 
     public function initDrupal($drupalVersion = "8")
     {
-        // Validate version is semantic and at least the minium set
-        // in DrupalProjectTrait.
-        $this->drupalProjectValidateVersion($drupalVersion);
         Util::prepareTmp();
 
         // Composer's create-project requires an empty folder, so run it in

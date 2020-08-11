@@ -25,12 +25,11 @@ class ExecCommands extends \Robo\Tasks
     public function execDrush(array $cmd)
     {
         $projectDir = Util::getProjectDirectory();
-        $drushExec = $this->taskExec("{$projectDir}/vendor/bin/drush")
-            ->dir(Util::getProjectDocroot())
-            ->option('uri', Util::getUri());
+        $drushExec = $this->taskExec("{$projectDir}/vendor/bin/drush")->dir($projectDir);
         foreach ($cmd as $arg) {
             $drushExec->arg($arg);
         }
+        $drushExec->option('uri', Util::getUri());
         return $drushExec->run();
     }
 
