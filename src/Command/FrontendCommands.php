@@ -33,7 +33,7 @@ class FrontendCommands extends Tasks
         Util::prepareTmp();
 
         $result = $this->taskExec("npm pack")
-            ->arg("@civicactions/data-catalog-react@$version")
+            ->arg("$version")
             ->dir(Util::TMP_DIR)
             ->printOutput(false)
             ->run();
@@ -52,33 +52,35 @@ class FrontendCommands extends Tasks
     }
 
     /**
-     * Determine frontend version based on DKAN.
+     * Determine frontend version based on DKAN composer.json or defaults.
      *
      * Starting with DKAN 2.3.x, the DKAN composer.json file specifies a
      * version for the decoupled frontend app, using the format:
      *
      * "extra": {
      *     "dkan-frontend": {
-     *         "data-catalog-react":"0.2.0"
+     *         "@civicactions/data-catalog-react":"0.2.0"
      *     }
      * }
      */
-    private function getFrontendVersion()
+    private function getFrontEndVersion()
     {
         if (!file_exists('docroot') && !file_exists('docroot/core')) {
             throw new \Exception("You must have a drupal codebase in docroot.");
         }
 
         $result = $this->taskComposerConfig()
-            ->arg('extra.dkan-frontend.data-catalog-react')
+            ->arg('extra.dkan-frontend')
             ->dir('docroot/modules/contrib/dkan')
             ->printOutput(false)
             ->run();
-        if (!$result->getMessage()) {
+        if (!$result->getMessage() || !is_object(json_decode($result->getMessage()))) {
             $this->io()->note("Frontend version not found; defaulting to latest.");
-            return "latest";
+            $version = ["@civicactions/data-catalog-react", "latest"];
+        } else {
+            $version = (array) json_decode($result->getMessage());
         }
-        return $result->getMessage();
+        return array_keys($version)[0] . "@" . array_values($version)[0] ;
     }
 
 
