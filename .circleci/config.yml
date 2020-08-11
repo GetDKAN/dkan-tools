@@ -18,6 +18,7 @@ jobs:
       - run:
           name: Run tests
           command: |
+            export PATH=$PATH:/home/circleci/project/bin
             cd tests
             ./dktl_test.sh
 
