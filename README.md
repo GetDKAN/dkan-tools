@@ -54,7 +54,22 @@ If you want to skip the proxy or are setting up a production environment, (after
 
 ---
 
-## Starting a new project
+## DKAN Quick-Start Demo
+
+1. Create a project directory, initialize the project and run the demo script.
+
+```bash
+mkdir my_project && cd my_project
+dktl init
+dktl demo
+```
+
+## Starting a new project, step-by-step
+
+The `demo` command above is a wrapper for the following commands. To get a better
+idea of how DKAN and DKAN-tools work, you may want to follow these more detailed
+steps:
+
 1. To start a project with `dktl`, create a project directory.
 
 ```bash
@@ -67,41 +82,35 @@ mkdir my_project && cd my_project
 dktl init
 ```
 
-3. Get Drupal, only versions 8.8 or above are supported:
-
-```bash
-dktl get <drupal-version>
-```
-
-4. Get Drupal dependencies and DKAN modules.
+3. Make a full Drupal/DKAN codebase, primarily using composer.
 
 ```bash
 dktl make
 ```
-  - MAKE OPTIONS:
-      * `--prefer-source` If you are working directly on the DKAN project or one of its libraries and want to be able to commit changes and submit pull requests. This option will be passed directly to Composer; see the [Composer CLI documentation](https://getcomposer.org/doc/03-cli.md#command-line-interface-commands) for more details.
-      * `--tag=<tag>` To build a site using a specific DKAN tag rather than from master.
-      * `--branch=<branch-name>` Similarly, you can build a specific branch of DKAN by using this option.
-      * `--frontend` **Downloads** the default React frontend application (data-catalog-react) to _src/frontend_, installs its dependencies, and symlinks the files to _docroot/data-catalog-frontend_.
-      * `--frontend=<branch-name>` Same as above but will use the specified branch from data-catalog-frontend.
-      * `--fe-repo=<https://githbub.com/org/repo.git>` Pass a remote url to specify an alternate frontend application.
+`make` options (passed directly to `composer install`, see [documentation](https://getcomposer.org/doc/03-cli.md#install-i)):
+
+  * `--prefer-source`
+  * `--prefer-dist`
+  * `--no-dev`
+  * `--optimize-autoloader`
+
 
 5. Install DKAN. Creates a database, installs Drupal, enables DKAN.
 
 ```bash
 dktl install
 ```
-  - INSTALL OPTIONS:
-      * `--existing-config` Add this option to preserve existing configuration.
-      * `--frontend` Enables the DKAN frontend Drupal module. This module provides the routes that connect Drupal to the decoupled front end. Be sure to follow the [frontend](https://github.com/GetDKAN/data-catalog-frontend#using-the-app) instructions for building the React application and updating pages after adding your own content.
-      * `--demo` Enables the DKAN frontend Drupal module, creates sample content, indexes the content, and **Builds** the React pages.
-      * `--demo-backend` Creates sample content, indexes the content, and imports data to the datastore without the React frontend.
+`install` options:
+      
+  * `--existing-config` Add this option to preserve existing configuration.
 
 6. Access the site: If the proxy was set up and configured, and you installed the frontend, your site should be accessible at http://dkan.
-  - log in: `dktl drush uli --uri=dkan`
-  - If you skipped the proxy step, you can find the local site URL by typing `dktl url`.
 
-7. Stop the docker-compose project.
+```bash
+dktl drush uli 
+```
+
+7. Stop the docker-compose project, removing all containers and networks.
 
 ```bash
 dktl down
@@ -110,35 +119,15 @@ dktl down
 This will keep files downloaded during the make phase, as well as any changes
 made to them. But any databose will be removed and all content lost.
 
-8. Connect `dkan-proxy` to the docker-compose project network
-
-```bash
-dktl dktl-proxy:connect
-```
-
-9. Remove the `dkan-proxy` container
-
-```bash
-dktl dktl-proxy:kill
-```
-
-Remove the dkan-proxy singleton container.
-
 ## Adding DKAN to an existing Drupal Site
 
-```
-composer require 'getdkan/dkan:2.1.0'
-dktl drush en dkan frontend sample_content
-dktl drush dkan:sample-content:create
-dktl drush sapi-i
+```bash
+composer require 'getdkan/dkan'
+dktl drush en dkan
+dktl install:sample
 dktl frontend:install
-```
-Edit the `/src/frontend/.env.production` file to change the GATSBY_API_URL to reflect your site url. (`dktl url`)
-
-```
 dktl frontend:build
 ```
-
 
 ## Basic usage
 
@@ -163,7 +152,6 @@ directory structure, created when we run `dktl init`.
     |           └── dkan # The upstream DKAN core codebase
     |
     ├── src               # Site-specific configuration, code and files.
-    │   ├── make          # Overrides for DKAN and Drupal makefiles
     │   ├── modules       # Symlinked to docroot/modules/custom
     │   ├── script        # Deployment script and other misc utilities
     |   └── site          # Symlinked to docroot/sites/default
@@ -176,31 +164,6 @@ directory structure, created when we run `dktl init`.
 If it is necessary or expedient to overwrite files in DKAN or Drupal core, it is recommended that you create a _/src/patches_ directory where you can store local [patch](https://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git/)
 files with the changes. A patch will make it possible to re-apply these changes once a
 newer version of DKAN or Drupal is applied to your project.
-
-### The /src/make folder
-
-DKAN uses [Drush Make](https://docs.drush.org/en/8.x/make/) to define its dependencies. DKAN Tools also uses Drush Make to apply overrides patches to DKAN in a managed way, without having to hack either the Drupal or DKAN core.
-
-In _/src/make/composer.json_ we can define the contributed modules, themes, and libraries that our site uses. For example if our site uses the [Deploy](https://www.drupal.org/project/deploy) module we can add this to _/src/make/drupal.make_ under the `require` section:
-
-```json
-  "require": {
-    "getdkan/dkan": "2.x-dev",
-    "drupal/deploy": "3.1"
-  }
-```
-
-If our site requires a custom patch to the deploy module, we add it to _/src/patches_. For remote patches (usually from [Drupal.org](https://www.drupal.org)) we just need the url to the patch:
-
-```json
-  "extra": {
-    "patches": {
-      "drupal/deploy": {
-        "3005415": "https://www.drupal.org/files/issues/2018-10-09/use_plain_text_format-3005415.patch"
-      }
-    }
-  }
-```
 
 ### The src/site folder
 
