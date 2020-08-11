@@ -177,5 +177,7 @@ class DkanCommands extends \Robo\Tasks
             ->exec("dktl frontend:build")
             ->exec("dktl drush cr")
             ->run();
+        
+        $this->io()->success("Your demo site is available at: " . Util::getUri());
     }
 }
