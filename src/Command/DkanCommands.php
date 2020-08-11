@@ -40,7 +40,7 @@ class DkanCommands extends \Robo\Tasks
             ->run();
 
             return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
-            ->dir("{$proj_dir}/docroot/data-catalog-frontend")
+            ->dir("{$proj_dir}/docroot/frontend")
             ->run();
         }
 
