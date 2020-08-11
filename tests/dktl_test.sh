@@ -1,8 +1,11 @@
 #! /bin/sh
 # file: tests/dktl_test.sh
 #
-# Download https://github.com/kward/shunit2/archive/v2.1.8.tar.gz
-# and extract to tests/shunit2/
+# To run from this directory:
+#
+# wget https://github.com/kward/shunit2/archive/v2.1.8.tar.gz
+# mkdir shunit2 && tar xf v2.1.8.tar.gz -C shunit2 --strip-components 1
+# ./dktl_test.sh
 
 # Tests will break if name contains non-alphanumeric characters!
 export DKTL_TEST_PROJECT_NAME='testproject'
@@ -42,7 +45,7 @@ testUninitialized() {
 # }
 
 testDktlInit() {
-    result=`dktl init`
+    result=`dktl init --dkan=dev-add-cra-config`
     assertContains "${result}" 'composer project created.'
     
     result=`ls`
@@ -72,7 +75,6 @@ testDktlMake() {
 }
 
 testDktlInstall() {
-    dktl proxy:connect
     result=`dktl install`
     assertContains "${result}" "Performed install task: install_finished"
     url=`dktl url`
@@ -80,6 +82,8 @@ testDktlInstall() {
     assertContains "API" "${result}" "openapi"
     result=`curl $url/user/login`
     assertContains "${result}" "Enter your DKAN username"
+    result=`dktl install:sample`
+    assertContains "${result}" "Processed 16 items from the datastore_import"
 }
 
 testFrontEnd() {
@@ -93,6 +97,9 @@ testFrontEnd() {
     result=`dktl frontend:build`
     assertContains "${result}" "Enabled DKAN frontend module."
     assertContains "${result}" "Compiled successfully."
+
+    result=`curl $url`
+    assertContains "${result}" "<div id="root"></div>"
 }
 
 testBringDown() {
