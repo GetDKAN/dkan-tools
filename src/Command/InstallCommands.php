@@ -35,7 +35,7 @@ class InstallCommands extends Tasks
     {
         $this->taskExecStack()
             ->stopOnFail()
-            ->exec(self::DRUSH . ' si standard -y')
+            ->exec(self::DRUSH . ' site:install standard --site-name "DKAN" -y')
             ->exec(self::DRUSH . " en dkan config_update_ui -y")
             ->exec(self::DRUSH . " config-set system.performance css.preprocess 0 -y")
             ->exec(self::DRUSH . " config-set system.performance js.preprocess 0 -y")

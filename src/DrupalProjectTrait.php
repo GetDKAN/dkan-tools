@@ -79,6 +79,8 @@ trait DrupalProjectTrait
      * @param string $version
      *   Drupal semnatic version (e.g. "8.9.2", "9")
      * @return bool
+     *
+     * @todo Use some more standard composer validation here.
      */
     private function drupalProjectValidateVersion(string $version)
     {

@@ -9,30 +9,13 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Setup composer config
+          name: Install shunit
           command: |
-            cd ~
-            mkdir .composer
-            cd .composer
-            bash -c 'echo "{\"github-oauth\": {\"github.com\": \"$GITHUB_TOKEN\"}}"' > auth.json
-      - run:
-          name: Install DKTL
-          command: |
-            cd ~
-            chmod 777 ./project/bin/dktl
-            export PATH=$PATH:~/project/bin
-            which dktl
-      - run:
-          name: Initialize Project
-          command: |
-            export PATH=$PATH:~/project/bin
-            cd ~/project
-            dktl init
+            pwd
+            ls -la
       - run:
           name: Run tests
           command: |
-            export PATH=$PATH:~/project/bin
-            cd ~/project
-            dktl init
-            dktl test:dktl
+            cd tests
+            ls
 

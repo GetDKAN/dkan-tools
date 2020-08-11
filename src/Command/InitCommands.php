@@ -19,9 +19,9 @@ class InitCommands extends \Robo\Tasks
         if (!$this->drupalProjectValidateVersion($opts['drupal'])) {
             exit;
         }
+        $this->initDrupal($opts['drupal']);
         $this->initConfig();
         $this->initSrc();
-        $this->initDrupal($opts['drupal']);
         $this->initDkan($opts['dkan']);
     }
 
