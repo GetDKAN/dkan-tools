@@ -46,14 +46,6 @@ dktl-proxy will server your website from a constructed domain in the form of
 identifing the current enviroment. If your project directory is dkan, the
 project will be served at `//dkan.localtest.me`
 
----
-
-:warning: **IMPORTANT**
-
-If you want to skip the proxy or are setting up a production environment, (after downloading the data-catalog-frontend app) be sure to edit the `/src/frontend/.env.production` file to change the GATSBY_API_URL to reflect your site url.
-
----
-
 ## DKAN Quick-Start Demo
 
 1. Create a project directory, initialize the project and run the demo script.
