@@ -45,14 +45,14 @@ class MakeCommands extends Tasks
         $this->io()->section("Running dktl make");
 
         // Run composer install while passing the options.
-        $install = $this->taskComposerInstall()
-            ->dir(Util::getProjectDirectory());
-        foreach ($opts as $composerBool) {
-            if ($composerBool === true) {
-                $install->option($composerBool);
+        $composerInstall = $this->taskComposerInstall();
+        $composerOptions = ['prefer-source', 'prefer-dist', 'no-dev', 'optimize-autoloader'];
+        foreach ($composerOptions as $opt) {
+            if ($opts[$opt]) {
+                $composerInstall->option($opt);
             }
         }
-        $install->run();
+        $composerInstall->run();
 
         // Symlink dirs from src into docroot.
         $this->addSymlinksToDrupalRoot();
