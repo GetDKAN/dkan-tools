@@ -2,7 +2,6 @@
 
 namespace DkanTools\Custom;
 
-use Symfony\Component\Console\Input\InputOption;
 use DkanTools\Util\Util;
 
 /**

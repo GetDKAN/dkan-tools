@@ -5,83 +5,115 @@ namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
 use Robo\Tasks;
+use Symfony\Component\Console\Input\InputOption;
 
 class FrontendCommands extends Tasks
 {
 
     const FRONTEND_DIR = 'src/frontend';
+    const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-react/';
+    const FRONTEND_VCS_REF = 'master';
 
     /**
     * Download the DKAN frontend app to src/frontend.
-    * See https://www.npmjs.com/package/@civicactions/data-catalog-react
     *
-    * @param mixed $version
-    *   Version of frontend catalog to download. Defaults to "latest".
+    * If no url or ref are provided, DKAN Tools will probe DKAN's composer.json
+    * file, looking for the following configuration:
+    *
+    * "extra": {
+    *     "dkan-frontend": {
+    *         "@civicactions/data-catalog-react":"0.2.0"
+    *     }
+    * }
+    *
+    * If not found, the defaults set in self::FRONTEND_VCS_URL and
+    * self::FRONTEND_VCS_REF will be used.
+    *
+    * @option string type
+    *   The type of frontend package. "vcs" currently the only type supported.
+    * @option string url
+    *   URL for the frontend package. Currently only github URLs supported.
+    * @option string ref
+    *   Reference (tag, branch or commit) from the vcs system to use.
+    *
     */
-    public function frontendGet($version = null)
+    public function frontendGet($opts = ['type' => 'vcs', 'url' => null, 'ref' => null])
     {
         if (file_exists(self::FRONTEND_DIR)) {
             throw new \Exception(self::FRONTEND_DIR . ' already exists.');
         }
-
-        if (!$version) {
-            $version = $this->getFrontendVersion();
+        if ($opts['type'] != 'vcs') {
+            throw new \Exception('Only vcs is currently supported for type');
         }
+        $this->frontendGetPopulateDefaults($opts);
 
         $this->io()->section('Downloading frontend application');
 
+        $archiveUrl = $this->getVcsArchiveUrl($opts['url'], $opts['ref']);
+        $filename = pathinfo(parse_url($archiveUrl)['path'])['basename'];
+        $this->say($archiveUrl);
+
         Util::prepareTmp();
 
-        $result = $this->taskExec("npm pack")
-            ->arg("$version")
-            ->dir(Util::TMP_DIR)
-            ->printOutput(false)
-            ->run();
-
+        $result = $this->taskExec("wget $archiveUrl")->dir(Util::TMP_DIR)->run();
         if ($result->getExitCode() != 0) {
             throw new \Exception('Could not download front-end app.');
         }
-
-        $frontendArchive = $result->getMessage();
-
-        $this->taskExtract(Util::TMP_DIR . '/' . $frontendArchive)
-            ->to(self::FRONTEND_DIR)
-            ->run();
+        $this->taskExtract(Util::TMP_DIR . "/$filename")->to(self::FRONTEND_DIR)->run();
         Util::cleanupTmp();
     }
 
-    /**
-     * Determine frontend version based on DKAN composer.json or defaults.
-     *
-     * Starting with DKAN 2.3.x, the DKAN composer.json file specifies a
-     * version for the decoupled frontend app, using the format:
-     *
-     * "extra": {
-     *     "dkan-frontend": {
-     *         "@civicactions/data-catalog-react":"0.2.0"
-     *     }
-     * }
-     */
-    private function getFrontEndVersion()
+    private function frontendGetPopulateDefaults(&$opts)
     {
-        if (!file_exists('docroot') && !file_exists('docroot/core')) {
-            throw new \Exception("You must have a drupal codebase in docroot.");
+        if ($opts['url'] && $opts['ref']) {
+            return;
         }
-
         $result = $this->taskComposerConfig()
             ->arg('extra.dkan-frontend')
             ->dir('docroot/modules/contrib/dkan')
             ->printOutput(false)
             ->run();
         if (!$result->getMessage() || !is_object(json_decode($result->getMessage()))) {
-            $this->io()->note("Frontend version not found; defaulting to latest.");
-            $version = ["@civicactions/data-catalog-react" => "latest"];
+            $this->io()->note("Frontend info not found in DKAN, using DKAN-tools defaults.");
+            $defaults = ['url' => self::FRONTEND_VCS_URL, 'ref' => self::FRONTEND_VCS_REF ];
         } else {
-            $version = (array) json_decode($result->getMessage());
+            $dkanFrontend = json_decode($result->getMessage());
+            $defaults = ['url' => $dkanFrontend->url, 'ref' => $dkanFrontend->ref];
         }
-        return array_keys($version)[0] . "@" . array_values($version)[0] ;
+        foreach (['url', 'ref'] as $opt) {
+            if (!$opts[$opt]) {
+                $opts[$opt] = $defaults[$opt];
+            }
+        }
     }
 
+    /**
+     * Given a github (sorry no other vcs service supported for now), produce a
+     * URL for an archive.
+     *
+     * @param string $url
+     *   A github URL.
+     * @param string $ref
+     *   A commit, tag or branch.
+     *
+     * @return string
+     */
+    private function getVcsArchiveUrl($url, $ref)
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new \Exception('Invalid URL');
+        }
+
+        $urlparts = parse_url($url);
+        $host = $urlparts['host'];
+        $scheme = $urlparts['scheme'];
+
+        $pathparts = explode('/', substr($urlparts['path'], 1));
+        $user = $pathparts[0];
+        $repo = basename($pathparts[1], '.git');
+
+        return "$scheme://$host/$user/$repo/archive/$ref.zip";
+    }
 
     /**
     * Create symlink for src/frontend.
