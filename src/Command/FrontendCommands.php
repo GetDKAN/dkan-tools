@@ -76,23 +76,26 @@ class FrontendCommands extends Tasks
         if ($opts['url'] && $opts['ref']) {
             return;
         }
+        $defaults = ['url' => self::FRONTEND_VCS_URL, 'ref' => self::FRONTEND_VCS_REF ];
+        $note = "Frontend config not found in DKAN composer.json. Reverting to "
+            . "defaults from DKAN Tools";
+
         $result = $this->taskComposerConfig()
             ->arg('extra.dkan-frontend')
             ->dir('docroot/modules/contrib/dkan')
             ->printOutput(false)
             ->run();
-        if (!$result->getMessage() || !is_object(json_decode($result->getMessage()))) {
-            $this->io()->note("Frontend info not found in DKAN, using DKAN-tools defaults.");
-            $defaults = ['url' => self::FRONTEND_VCS_URL, 'ref' => self::FRONTEND_VCS_REF ];
-        } else {
+
+        if (is_object(json_decode($result->getMessage()))) {
             $dkanFrontend = json_decode($result->getMessage());
             $defaults = ['url' => $dkanFrontend->url, 'ref' => $dkanFrontend->ref];
+            $note = "Using DKAN composer.json settings for frontend repo. "
+                . "Ref $dkanFrontend->ref from $dkanFrontend->url.";
         }
-        foreach (['url', 'ref'] as $opt) {
-            if (!$opts[$opt]) {
-                $opts[$opt] = $defaults[$opt];
-            }
-        }
+
+        $this->io()->note($note);
+        $opts['url'] = $opts['url'] ? $opts['url'] : $defaults['url'];
+        $opts['ref'] = $opts['ref'] ? $opts['ref'] : $defaults['ref'];
     }
 
     /**
