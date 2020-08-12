@@ -26,23 +26,23 @@ testUninitialized() {
     assertContains "${result}" "DKTL is running outside of a DKTL project."
 }
 
-# testDktlInitWithBadParameter() {
-#     result=`dktl init --drupal=foobar`
-#     assertContains "${result}" "[ERROR] version format not semantic.";
-# }
+testDktlInitWithBadParameter() {
+    result=`dktl init --drupal=foobar`
+    assertContains "${result}" "[ERROR] version format not semantic.";
+}
 
-# testDktlInitDrupalVersionLessThanMinimum()
-# {
-#     result=`dktl init --drupal=8.7.1`;
-#     assertContains "${result}" "[ERROR] drupal version below minimal required."
-# }
+testDktlInitDrupalVersionLessThanMinimum()
+{
+    result=`dktl init --drupal=8.7.1`;
+    assertContains "${result}" "[ERROR] drupal version below minimal required."
+}
 
-# testDktlInitDrupalVersionMoreThanMaximum()
-# {
-#     result=`dktl init --drupal=77.7.7`
-#     assertContains "${result}" "Could not find package drupal/recommended-project with version 77.7.7."
-#     assertContains "${result}" "[ERROR] could not run composer create-project."
-# }
+testDktlInitDrupalVersionMoreThanMaximum()
+{
+    result=`dktl init --drupal=77.7.7`
+    assertContains "${result}" "Could not find package drupal/recommended-project with version 77.7.7."
+    assertContains "${result}" "[ERROR] could not run composer create-project."
+}
 
 testDktlInit() {
     result=`dktl init --dkan=dev-add-cra-config`
