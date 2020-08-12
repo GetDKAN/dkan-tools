@@ -51,7 +51,7 @@ class FrontendCommands extends Tasks
 
         $archiveUrl = $this->getVcsArchiveUrl($opts['url'], $opts['ref']);
         $filename = pathinfo(parse_url($archiveUrl)['path'])['basename'];
-        $this->say($archiveUrl);
+        $this->io()->text("Downloading frontend app from $archiveUrl");
 
         Util::prepareTmp();
 
@@ -133,12 +133,15 @@ class FrontendCommands extends Tasks
     /**
     * Download frontend app if not present, and run npm install.
     *
-    * Get frontend dependencies.
+    * The URL and branch/tag for the frontend app should be specified in the
+    * "extra" section of DKAN's composer.json. If you want to specify a
+    * different tag or branch, or different repo entirely, run "dktl
+    * frontend:get" first and specify the --ref and/or --url options.
     */
-    public function frontendInstall($version = null)
+    public function frontendInstall()
     {
         if (!file_exists(self::FRONTEND_DIR)) {
-            $this->frontendGet($version);
+            $this->frontendGet();
         }
         if (!file_exists("docroot/frontend")) {
             $this->frontendLink();
