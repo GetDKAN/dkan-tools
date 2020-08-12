@@ -11,6 +11,16 @@ class InitCommands extends \Robo\Tasks
 
     /**
      * Initialize DKAN project directory.
+     *
+     * This command will result in a project directory with all needed files
+     * and dirctories for development, including a composer.json (but NOT
+     * including any Composer dependencies.)
+     *
+     * @option str drupal
+     *   Drupal composer version (expressed as composer constraint).
+     * @option str dkan
+     *   DKAN version (expressed as composer constraint). Use 2.x-dev for current
+     *   bleeding edge.
     */
     public function init($opts = ['drupal' => '9.0.0', 'dkan' => null])
     {
@@ -25,6 +35,9 @@ class InitCommands extends \Robo\Tasks
         $this->initDkan($opts['dkan']);
     }
 
+    /**
+     * Create the dktl.yml file.
+     */
     private function initConfig()
     {
         $this->io()->section('Initializing dktl configuration');
@@ -40,6 +53,9 @@ class InitCommands extends \Robo\Tasks
         }
     }
 
+    /**
+     * Set up the src directory in a new project.
+     */
     private function initSrc()
     {
         $this->io()->section('Initializing src directory');
@@ -67,6 +83,9 @@ class InitCommands extends \Robo\Tasks
         $this->setupScripts();
     }
 
+    /**
+     * Create command directory and copy in sample SiteCommands.php file.
+     */
     private function createSiteCommands()
     {
         $dktlRoot = Util::getDktlDirectory();
@@ -85,6 +104,9 @@ class InitCommands extends \Robo\Tasks
         $this->directoryAndFileCreationCheck($result, $f);
     }
 
+    /**
+     * Set up scripts directory and copy in standard deploy.sh scripts.
+     */
     private function setupScripts()
     {
         $dktlRoot = Util::getDktlDirectory();
@@ -104,6 +126,10 @@ class InitCommands extends \Robo\Tasks
         }
     }
 
+    /**
+     * Create the "site" directory, which will by symlinked to
+     * docroot/sites/default.
+     */
     private function createSiteFilesDirectory()
     {
         $directory = 'src/site/files';
@@ -113,6 +139,11 @@ class InitCommands extends \Robo\Tasks
         $this->directoryAndFileCreationCheck($result, $directory);
     }
 
+    /**
+     * Add Drupal settings files to src/site.
+     *
+     * @todo The default.* files are probably no longer necessary.
+     */
     private function createSettingsFiles()
     {
         $dktlRoot = Util::getDktlDirectory();
@@ -136,6 +167,16 @@ class InitCommands extends \Robo\Tasks
         }
     }
 
+    /**
+     * Confirm file or directory was created successfully.
+     *
+     * @param \Robo\Result $result
+     *   The result of the task called to create the file.
+     * @param mixed $df
+     *   Path to file created.
+     *
+     * @return [type]
+     */
     private function directoryAndFileCreationCheck(\Robo\Result $result, $df)
     {
         if ($result->getExitCode() == 0 && file_exists($df)) {
@@ -156,7 +197,13 @@ class InitCommands extends \Robo\Tasks
         return $this->taskExec("cp -r {$dktl_dir}/assets/.circleci {$project_dir}")->run();
     }
 
-    public function initDrupal($drupalVersion = "8")
+    /**
+     * Create a new Drupal project in the current directory.
+     *
+     * @param mixed $drupalVersion
+     *   Drupal version to use, expressed as Composer constraint.
+     */
+    public function initDrupal($drupalVersion)
     {
         Util::prepareTmp();
 
@@ -172,6 +219,14 @@ class InitCommands extends \Robo\Tasks
         Util::cleanupTmp();
     }
 
+    /**
+     * Add DKAN as a depdency to the project's composer.json.
+     *
+     * @param string|null $version
+     *   Version of DKAN to pull in, expressed as Composer constraint.
+     *
+     * @return [type]
+     */
     public function initDkan(string $version = null)
     {
         $this->taskComposerRequire()

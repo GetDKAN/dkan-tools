@@ -152,6 +152,9 @@ class DkanCommands extends \Robo\Tasks
     /**
      * Create a new demo project.
      *
+     * Will have frontend and sample content. Run this immediately after dktl
+     * init.
+     *
      * @aliases demo
      */
     public function dkanDemo()

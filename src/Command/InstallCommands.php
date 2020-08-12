@@ -11,7 +11,8 @@ class InstallCommands extends Tasks
     /**
      * Perform Drupal/DKAN database installation
      *
-     * @option existing-config
+     * @option bool existing-config
+     *   Use drush site:install --existing-config option.
      */
     public function install($opts = ['existing-config' => false])
     {
@@ -31,6 +32,9 @@ class InstallCommands extends Tasks
         return $result;
     }
 
+    /**
+     * Run standard Drupal site installation, and enable config_update_ui.
+     */
     private function standardInstallation()
     {
         $this->taskExecStack()

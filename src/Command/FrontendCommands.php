@@ -63,6 +63,14 @@ class FrontendCommands extends Tasks
         Util::cleanupTmp();
     }
 
+    /**
+     * Populate the $opts array from frontend:get with url and ref from DKAN
+     * or else from defaults
+     *
+     * @param array $opts
+     *   An $opts array from the frontend:get command. Modified directly as
+     *   reference.
+     */
     private function frontendGetPopulateDefaults(&$opts)
     {
         if ($opts['url'] && $opts['ref']) {
@@ -192,6 +200,9 @@ class FrontendCommands extends Tasks
         return false;
     }
 
+    /**
+     * Run cypress tests on the frontend app.
+     */
     public function frontendTest()
     {
         $this->taskExec("npm install cypress")
