@@ -12,29 +12,32 @@ use DkanTools\Util\Util;
  */
 class DkanCommands extends \Robo\Tasks
 {
+    const DRUSH = "../vendor/bin/drush";
+
+    /**
+     * Build DKAN docs with doxygen.
+     */
+    public function dkanDocs()
+    {
+        $proj_dir = Util::getProjectDirectory();
+        $this->taskExec("doxygen")
+            ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
+            ->run();
+        $url = Util::getUri();
+        $this->io()->text("Docs site: $url/modules/contrib/dkan/docs/index.html");
+    }
+
     /**
      * Run DKAN Cypress Tests.
      */
-    public function dkanTestCypress($arg = null)
+    public function dkanTestCypress()
     {
-        $proj_dir = Util::getProjectDirectory();
-
-        if ($arg === 'frontend') {
-            $this->taskExec("npm install cypress")
-            ->dir("{$proj_dir}/docroot/data-catalog-frontend")
-            ->run();
-
-            return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
-            ->dir("{$proj_dir}/docroot/data-catalog-frontend")
-            ->run();
-        }
-
         $this->taskExec("npm install cypress")
-        ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
-        ->run();
+            ->dir("docroot/modules/contrib/dkan")
+            ->run();
 
         return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
-            ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
+            ->dir("docroot/modules/contrib/dkan")
             ->run();
     }
 
@@ -143,5 +146,29 @@ class DkanCommands extends \Robo\Tasks
         $output = [];
         exec("cd {$dkanDirPath} && git rev-parse --abbrev-ref HEAD", $output);
         return (isset($output[0]) && $output[0] == 'HEAD');
+    }
+
+
+    /**
+     * Create a new demo project.
+     *
+     * Will have frontend and sample content. Run this immediately after dktl
+     * init.
+     *
+     * @aliases demo
+     */
+    public function dkanDemo()
+    {
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl make")
+            ->exec("dktl install")
+            ->exec("dktl install:sample")
+            ->exec("dktl frontend:install")
+            ->exec("dktl frontend:build")
+            ->exec("dktl drush cr")
+            ->run();
+        
+        $this->io()->success("Your demo site is available at: " . Util::getUri());
     }
 }

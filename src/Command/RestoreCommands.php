@@ -221,4 +221,40 @@ class RestoreCommands extends \Robo\Tasks
             throw new \Exception("Error retrieving file.");
         }
     }
+
+
+  /**
+   * Create a database dump excluding devel and datastore tables.
+   *
+   * Run drush command on $alias to create a database dump excluding tables
+   * related to devel and datastore.
+   *
+   * @param String $alias Drush alias of the site we want the db from.
+   */
+    public function restoreGrabDatabase($alias)
+    {
+      // Tables for which we want the structure and not the data.
+        $structure_tables_common = array(
+        'accesslog', 'batch', 'cache', 'cache_*', '*_cache', 'ctools_views_cache',
+        'ctools_object_cache', 'flood', 'history', 'queue', 'search_*',
+        'semaphore', 'sessions', 'watchdog'
+        );
+        $structure_tables_devel = array('devel_queries', 'devel_times');
+        $structure_tables_webform = array('webform_submitted_data');
+        $structure_tables = array_merge(
+            $structure_tables_common,
+            $structure_tables_devel,
+            $structure_tables_webform
+        );
+        $structure_tables_list = implode(', ', $structure_tables);
+      // Tables to be completely skipped.
+        $skip_tables = array('dkan_datastore_*');
+        $skip_tables_list = implode(', ', $skip_tables);
+
+        return $this->taskExec("drush $alias sql-dump")
+            ->option('structure-tables-list', $structure_tables_list)
+            ->option('skip-tables-list', $skip_tables_list)
+            ->rawArg('> excluded_tables.sql')
+            ->run();
+    }
 }
