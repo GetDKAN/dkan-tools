@@ -28,7 +28,7 @@ services:
   # DB node
   db:
     hostname: db
-    image: wodby/mariadb:10.3-3.8.5
+    image: circleci/mariadb:10.3.23
     ports:
       - "3306"
     # MYSQL Credentials in mysql.env

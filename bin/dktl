@@ -185,14 +185,17 @@ proxy_connect () {
 }
 
 dc_up () {
-  # Check containers state, Run is missing, make sure dktl-proxy is connected
-  # to the same network.
+  # Check containers state, fun if missing. Make sure dktl-proxy is connected
+  # to the same network. We can set the var DKTL_CLI_ONLY to only bring up cli.
   containers=$($BASE_DOCKER_COMPOSE_COMMAND ps -q)
   if [ -z "$containers" ]; then
     echo "Starting docker containers."
-    $BASE_DOCKER_COMPOSE_COMMAND up -d
-
-    proxy_connect
+    if [ -z "$DKTL_CLI_ONLY" ]; then
+      $BASE_DOCKER_COMPOSE_COMMAND up -d
+      proxy_connect
+    else
+      $BASE_DOCKER_COMPOSE_COMMAND up -d  --no-deps cli
+    fi    
   fi
 }
 
@@ -206,10 +209,10 @@ dc_down() {
   $BASE_DOCKER_COMPOSE_COMMAND down -v "${@:2}"
 }
 
-# Make sure the proxy container is up.
+# Make sure the proxy container is up. If $DKTL_CLI_ONLY, skip.
 proxy_setup() {
   proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
-  if [[ -z $proxy_service_ps ]]; then
+  if [[ -z $proxy_service_ps ]] && [[ -z $DKTL_CLI_ONLY ]]; then
     echo "Running dktl-proxy.."
     # Make sure no old instance is using the name.
     docker rm dktl-proxy >/dev/null 2>&1
@@ -271,8 +274,8 @@ dktl_docker_cleanup() {
     $BASE_DOCKER_COMPOSE_COMMAND restart cli
   fi
 
-  # Proxy connect if we just ran make.
-  if [ $? -eq 0 ] && [[ $1 == "init"* ]]; then
+  # Proxy connect if we just ran init (unless DKTL_CLI_ONLY).
+  if [ $? -eq 0 ] && [[ $1 == "init"* ]] && [ -z "$DKTL_CLI_ONLY" ]; then
     proxy_connect
     $BASE_DOCKER_COMPOSE_COMMAND restart web
   fi
