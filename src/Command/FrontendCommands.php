@@ -11,7 +11,7 @@ class FrontendCommands extends Tasks
 {
 
     const FRONTEND_DIR = 'src/frontend';
-    const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-react/';
+    const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-app/';
     const FRONTEND_VCS_REF = 'master';
 
     /**
