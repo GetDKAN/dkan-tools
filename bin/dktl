@@ -153,7 +153,9 @@ set_slug() {
 # DKTL_PROXY_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
 docker_vars_init() {
   WEB_DOMAIN="localtest.me"
-  export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+  if [ -z $DKTL_PROXY_DOMAIN ]; then
+    export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+  fi
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
@@ -176,11 +178,13 @@ docker_vars_init() {
   fi
 }
 
-# Set up subdomain with traefic proxy.
+# Set up subdomain with traefic proxy, unless DKTL_NO_PROXY.
 proxy_connect () {
   network="${DKTL_SLUG}_default"
-  if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
-    echo "Connected dktl-proxy to \"${network}\" network."
+  if [ ! -z "$DKTL_NO_PROXY "]; then
+    if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Connected dktl-proxy to \"${network}\" network."
+    fi
   fi
 }
 
