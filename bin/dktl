@@ -181,7 +181,7 @@ docker_vars_init() {
 # Set up subdomain with traefic proxy, unless DKTL_NO_PROXY.
 proxy_connect () {
   network="${DKTL_SLUG}_default"
-  if [ ! -z "$DKTL_NO_PROXY "]; then
+  if [ ! -z "$DKTL_NO_PROXY" ]; then
     if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
       echo "Connected dktl-proxy to \"${network}\" network."
     fi
