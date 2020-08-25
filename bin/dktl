@@ -152,8 +152,12 @@ set_slug() {
 # Set the following variables for use with docker-compose commands:
 # DKTL_PROXY_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
 docker_vars_init() {
-  WEB_DOMAIN="localtest.me"
-  export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+  if [ -z $WEB_DOMAIN ]; then
+    WEB_DOMAIN="localtest.me"
+  fi
+  if [ -z $DKTL_PROXY_DOMAIN ]; then
+    export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+  fi
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
