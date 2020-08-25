@@ -12,8 +12,6 @@ use DkanTools\Util\Util;
  */
 class DkanCommands extends \Robo\Tasks
 {
-    const DRUSH = "../vendor/bin/drush";
-
     /**
      * Build DKAN docs with doxygen.
      */
@@ -32,6 +30,9 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestCypress()
     {
+        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
+        $this->dkanTestUser("testeditor", "testeditor", "administrator");
+
         $this->taskExec("npm install cypress")
             ->dir("docroot/modules/contrib/dkan")
             ->run();
@@ -46,13 +47,13 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestDredd()
     {
-        $proj_dir = Util::getProjectDirectory();
+        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
         $this->taskExec("npm install dredd")
-            ->dir("{$proj_dir}/docroot/modules/contrib/dkan")
+            ->dir("docroot/modules/contrib/dkan")
             ->run();
 
         return $this->taskExec("npx dredd --hookfiles=./dredd-hooks.js")
-            ->dir("{$proj_dir}/docroot/modules/contrib/dkan/dredd")
+            ->dir("docroot/modules/contrib/dkan/dredd")
             ->run();
     }
 
@@ -170,5 +171,14 @@ class DkanCommands extends \Robo\Tasks
             ->run();
         
         $this->io()->success("Your demo site is available at: " . Util::getUri());
+    }
+
+    private function dkanTestUser($name, $pass, $roll)
+    {
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl drush user:create $name --password=$pass")
+            ->exec("dktl drush user-add-role $roll $name")
+            ->run();
     }
 }

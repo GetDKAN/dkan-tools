@@ -45,7 +45,7 @@ testDktlInitDrupalVersionMoreThanMaximum()
 }
 
 testDktlInit() {
-    result=`dktl init --dkan=dev-add-cra-config`
+    result=`dktl init`
     assertContains "${result}" 'composer project created.'
     
     result=`ls`
