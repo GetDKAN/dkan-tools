@@ -6,24 +6,14 @@ services:
     image: getdkan/dkan-web:v0.2.0
     ports:
       - "80"
-      - "443"
-      - "8888"
     volumes:
       # PHP configuration overrides
       - "${DKTL_PROJECT_DIRECTORY}:/var/www/:delegated"
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
-      # no_proxy="" required for default Docker For Mac system proxy that contains a space and prevents Selenium from loading.
-      # Linked containers to browser will also need this setting.
-      - PROXY_DOMAIN
       - DKTL_DOCKER=1
-      - no_proxy=localhost
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
-      - "traefik.http.routers.${DKTL_SLUG}-web.entrypoints=web"
+      - DKTL_PROXY_DOMAIN
 
   # DB node
   db:

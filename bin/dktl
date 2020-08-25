@@ -4,6 +4,9 @@
 # DKAN-tools bash script.                                                      #
 ################################################################################
 
+DKTL_SSL=false
+DKTL_SSL_MAIL="null@example.com"
+
 # Primary workflow for dktl command. Executed on last line of script.
 main() {
   set_mode
@@ -160,11 +163,21 @@ docker_vars_init() {
   fi
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
+  NOSSL_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.nossl.yml"
+  SSL_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.ssl.yml"
+
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
+
   BASE_DOCKER_COMPOSE_COMMAND="docker-compose \
     --file $COMMON_CONF \
     --project-name "${DKTL_SLUG}" \
     --project-directory $DKTL_PROJECT_DIRECTORY"
+
+  if [ "$DKTL_SSL" = true ]; then
+    BASE_DOCKER_COMPOSE_COMMAND+=" -f $SSL_CONF"
+  else
+    BASE_DOCKER_COMPOSE_COMMAND+=" -f $NOSSL_CONF"
+  fi
 
   if [ -f $OVERRIDES_CONF ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
@@ -217,16 +230,30 @@ proxy_setup() {
     echo "Running dktl-proxy.."
     # Make sure no old instance is using the name.
     docker rm dktl-proxy >/dev/null 2>&1
-    if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
+
+    TRAEFIK_CMD="docker run -d \
+      -p 8080:8080 -p 80:80 -p 443:443 \
       -v '/var/run/docker.sock:/var/run/docker.sock' \
       --name 'dktl-proxy' \
-      traefik:v2.0 \
-      --log.level=INFO --api.insecure=true --providers.docker=true \
-      --providers.docker.exposedbydefault=false --entrypoints.web.address=:80 \
-      --entrypoints.websecure.address=:443 \
+      traefik:v2.0"
+
+    TRAEFIK_OPTS=" --log.level=INFO \
+      --providers.docker=true --providers.docker.exposedbydefault=false \
+      --entrypoints.web.address=:80 \
+      --entrypoints.websecure.address=:443"
+
+    if [ $DKTL_SSL ]; then
+      TRAEFIK_OPTS+=" --certificatesresolvers.letsencrypt.acme.tlschallenge=true \
+      --certificatesResolvers.letsencrypt.acme.email=$DKTL_SSL_MAIL \
+      --certificatesResolvers.letsencrypt.acme.storage=acme.json"
+    fi
+
+    if ! "$TRAEFIK_CMD" "$TRAEFIK_OPTS" \
       >/dev/null; \
     then
       echo -n "Failed to start the dktl-proxy container..."
+    else
+      echo -n "dktl-proxy started successfully..."
     fi
 
   fi
