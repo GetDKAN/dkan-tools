@@ -4,5 +4,5 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.passHostHeader=true"
-      - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
+      - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROJECT_DOMAIN}`)"
       - "traefik.http.routers.${DKTL_SLUG}-web.entrypoints=web"

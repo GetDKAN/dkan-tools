@@ -154,13 +154,20 @@ set_slug() {
 }
 
 # Set the following variables for use with docker-compose commands:
-# DKTL_PROXY_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
+# DKTL_PROJECT_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
 docker_vars_init() {
-  if [ -z $WEB_DOMAIN ]; then
-    WEB_DOMAIN="localtest.me"
+  if [ -z $DKTL_BASE_DOMAIN ]; then
+    DKTL_BASE_DOMAIN="localtest.me"
   fi
-  if [ -z $DKTL_PROXY_DOMAIN ]; then
-    export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+
+  if [ -z $DKTL_PROJECT_DOMAIN ]; then
+    export DKTL_PROJECT_DOMAIN="$DKTL_SLUG.$DKTL_BASE_DOMAIN"
+  fi
+
+  if [ "$DKTL_SSL" = true ]; then
+    export DKTL_PROJECT_URL="https://$DKTL_SLUG.$DKTL_BASE_DOMAIN"
+  else
+    export DKTL_PROJECT_URL="http://$DKTL_SLUG.$DKTL_BASE_DOMAIN"
   fi
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
@@ -266,7 +273,8 @@ docker_command_intercept() {
     $BASE_DOCKER_COMPOSE_COMMAND "${@:2}"
     exit 0
   elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
-    echo "http://$DKTL_PROXY_DOMAIN"
+
+    echo $DKTL_PROJECT_URL
     exit 0
   elif [ "$1" = "down" ]; then
     dc_down

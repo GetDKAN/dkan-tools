@@ -18,7 +18,7 @@ class Util
 
     public static function getDktlProxyDomain()
     {
-        if ($proxy = getenv("DKTL_PROXY_DOMAIN")) {
+        if ($proxy = getenv("DKTL_PROJECT_DOMAIN")) {
             return $proxy;
         } else {
             return '';
@@ -37,10 +37,7 @@ class Util
 
     public static function getUri()
     {
-        $domain = getenv("DKTL_PROXY_DOMAIN");
-        if ($domain) {
-            $domain = "http://" . $domain;
-        }
+        $domain = getenv("DKTL_PROJECT_URL");
         return $domain;
     }
 

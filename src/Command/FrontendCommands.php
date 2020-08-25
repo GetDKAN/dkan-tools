@@ -212,7 +212,7 @@ class FrontendCommands extends Tasks
         ->dir("docroot/frontend")
         ->run();
 
-        return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
+        return $this->taskExec('CYPRESS_baseUrl="$DKTL_PROJECT_URL" npx cypress run')
             ->dir("docroot/frontend")
             ->run();
     }

@@ -13,7 +13,8 @@ services:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
       - DKTL_DOCKER=1
-      - DKTL_PROXY_DOMAIN
+      - DKTL_PROJECT_DOMAIN
+      - DKTL_PROJECT_URL
 
   # DB node
   db:
@@ -39,7 +40,8 @@ services:
       - NODE_ENV=development
       - DKTL_MODE=HOST
       - DKTL_DOCKER=1
-      - DKTL_PROXY_DOMAIN
+      - DKTL_PROJECT_DOMAIN
+      - DKTL_PROJECT_URL
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_PROFILE
@@ -47,7 +49,7 @@ services:
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - XDEBUG_DKTL=1
     links:
-      - "web:${DKTL_PROXY_DOMAIN}"
+      - "web:${DKTL_PROJECT_DOMAIN}"
       # Link web to dkan for backward compatibility.
       - "web:dkan"
     ports:
