@@ -2,7 +2,6 @@
 
 namespace DkanTools\Command;
 
-
 use DkanTools\DrupalProjectTrait;
 use DkanTools\Util\Util;
 use Robo\Tasks;
@@ -114,5 +113,4 @@ class MakeCommands extends Tasks
         }
         return $result;
     }
-
 }
