@@ -13,7 +13,7 @@ class InitCommands extends \Robo\Tasks
      * Initialize DKAN project directory.
      *
      * This command will result in a project directory with all needed files
-     * and dirctories for development, including a composer.json (but NOT
+     * and directories for development, including a composer.json (but NOT
      * including any Composer dependencies.)
      *
      * @option str drupal
@@ -24,7 +24,7 @@ class InitCommands extends \Robo\Tasks
     */
     public function init($opts = ['drupal' => '9.0.0', 'dkan' => null])
     {
-        // Validate version is semantic and at least the minium set
+        // Validate version is semantic and at least the minimum set
         // in DrupalProjectTrait.
         if (!$this->drupalProjectValidateVersion($opts['drupal'])) {
             exit;
@@ -220,7 +220,7 @@ class InitCommands extends \Robo\Tasks
     }
 
     /**
-     * Add DKAN as a depdency to the project's composer.json.
+     * Add DKAN as a dependency to the project's composer.json.
      *
      * @param string|null $version
      *   Version of DKAN to pull in, expressed as Composer constraint.

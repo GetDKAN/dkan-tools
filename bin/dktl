@@ -81,7 +81,7 @@ set_mode() {
   elif [ "$DKTL_MODE" = "HOST" ]; then
     DKTL_MODE="HOST"
   else
-    echo "Incorrect DKTL_MODE set to ${DKTL_MODE}. Appropriate values are 'DOCKER'and 'HOST'."
+    echo "Incorrect DKTL_MODE set to ${DKTL_MODE}. Appropriate values are 'DOCKER' and 'HOST'."
     exit 1
   fi
 }

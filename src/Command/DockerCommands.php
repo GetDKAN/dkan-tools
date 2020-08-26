@@ -7,7 +7,7 @@ use Robo\Task;
 
 /**
  * These functions are not meant to be run, simply to provide documentation for
- * the docker comands supplied by dktl.sh.
+ * the docker commands supplied by dktl.sh.
  *
  * @see http://robo.li/
  */

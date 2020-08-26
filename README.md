@@ -18,7 +18,7 @@ That's it! All other dependencies are included in the Docker containers that dka
 
 It is also possible to run most DKAN Tools commands using a local webserver, database and PHP setup, but this practice is **less supported**.
 
-To use the `dktl` commands outside of the docker evironments you will need to run `export DKTL_MODE="HOST"`
+To use the `dktl` commands outside of the docker environments you will need to run `export DKTL_MODE="HOST"`
 
 ---
 
@@ -43,7 +43,7 @@ name. traefik is ran as singleton service named `dktl-proxy`.
 
 dktl-proxy will server your website from a constructed domain in the form of
 "{{dktl-slug}}.localtest.me", where dktl-slug is the per project string
-identifing the current enviroment. If your project directory is dkan, the
+identifying the current environment. If your project directory is dkan, the
 project will be served at `//dkan.localtest.me`
 
 ## DKAN Quick-Start Demo
@@ -109,7 +109,7 @@ dktl down
 ```
 
 This will keep files downloaded during the make phase, as well as any changes
-made to them. But any databose will be removed and all content lost.
+made to them. But any database will be removed and all content lost.
 
 ## Adding DKAN to an existing Drupal Site
 
@@ -213,7 +213,7 @@ DKAN uses a slightly modified [semantic](https://www.drupal.org/docs/8/understan
 **Major.Minor.Patch**
 
 - *Major* indicates compatibility
-- *Minor* indicates backwards compatilble new features or upgrades
+- *Minor* indicates backwards compatible new features or upgrades
 - *Patch* indicates a release for security updates and bug fixes
 
 Please note *you can not use* ``drush up`` *with DKAN*. This is because
@@ -225,7 +225,7 @@ If you are maintaining your site with [DKAN Tools](https://github.com/getdkan/dk
 
 `dktl make --tag=<tag version>`
 
-Or update the version number in your compser.json file and run `composer update`:
+Or update the version number in your composer.json file and run `composer update`:
 
 ```
 "require": {
