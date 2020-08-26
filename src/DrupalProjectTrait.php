@@ -10,7 +10,7 @@ use DkanTools\Util\Util;
 trait DrupalProjectTrait
 {
     /**
-     * Define min acceptible Drupal version.
+     * Define min acceptable Drupal version.
      *
      * @var string
      */
@@ -77,7 +77,7 @@ trait DrupalProjectTrait
      * Validate the Drupal version provided.
      *
      * @param string $version
-     *   Drupal semnatic version (e.g. "8.9.2", "9")
+     *   Drupal semantic version (e.g. "8.9.2", "9")
      * @return bool
      *
      * @todo Use some more standard composer validation here.

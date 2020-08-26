@@ -186,7 +186,7 @@ class FrontendCommands extends Tasks
             $this->io()->success('Enabled DKAN frontend module.');
         }
 
-        // Override GATSBY_API_URL with our own proxed domain.
+        // Override GATSBY_API_URL with our own proxied domain.
         $task = $this
             ->taskExec('npm run build')
             ->dir("src/frontend");

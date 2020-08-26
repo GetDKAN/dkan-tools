@@ -14,7 +14,7 @@ class RestoreCommands extends \Robo\Tasks
     /**
      * Restore files and database.
      *
-     * A command that creates a DKAN site from a db dump and files. The restire
+     * A command that creates a DKAN site from a db dump and files. The restore
      * command supports files compressed in zip, .gz and .tar.gz formats, and
      * will accept URLs using the http, https or s3 protocols.
      *
@@ -27,7 +27,7 @@ class RestoreCommands extends \Robo\Tasks
      * included at the same level as files/. These files will be copied to a
      * new "/private" dir created in your project root.
      *
-     * It is reccomended that you set the options for this in command in
+     * It is recommended that you set the options for this in command in
      * dktl.yml (see README for more information).
      *
      * @todo Give feedback when no options provided.

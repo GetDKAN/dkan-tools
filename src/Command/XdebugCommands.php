@@ -28,17 +28,17 @@ class XdebugCommands extends \Robo\Tasks
      * DKAN Tools' containers, but you may need to set it again if using your
      * own.
      *
-     * Adding /src/docker/etc to your project .gitignore is reccomended.
+     * Adding /src/docker/etc to your project .gitignore is recommended.
      */
     public function xdebugStart()
     {
         $this->xdebugCheck();
-        
+
         $platform = getenv("PLATFORM");
         $sourceFile = ($platform == 'Darwin') ? 'xdebug-macos.ini' : 'xdebug-linux.ini';
         $dktlRoot = Util::getDktlDirectory();
         $this->io()->text("Creating new xdebug.ini file for {$platform} platform.");
-        
+
         $f = 'src/docker/etc/php/xdebug.ini';
         if (file_exists($f)) {
             throw new \Exception("File {$f} already exists.");
