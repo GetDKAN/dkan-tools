@@ -5,8 +5,8 @@
 ################################################################################
 
 ## Supported env variables:
-# DKTL_SSL=false
-# DKTL_SSL_MAIL="null@example.com"
+# DKTL_SSL: Enable HTTPS acroos (all) environements. default to false.
+DKTL_SSL=${DKTL_SSL:-false}
 
 # Primary workflow for dktl command. Executed on last line of script.
 main() {
@@ -164,7 +164,7 @@ docker_vars_init() {
     export DKTL_PROJECT_DOMAIN="$DKTL_SLUG.$DKTL_BASE_DOMAIN"
   fi
 
-  if [ "$DKTL_SSL" = true ]; then
+  if [ "$DKTL_SSL" == true ]; then
     export DKTL_PROJECT_URL="https://$DKTL_SLUG.$DKTL_BASE_DOMAIN"
   else
     export DKTL_PROJECT_URL="http://$DKTL_SLUG.$DKTL_BASE_DOMAIN"
@@ -181,7 +181,7 @@ docker_vars_init() {
     --project-name "${DKTL_SLUG}" \
     --project-directory $DKTL_PROJECT_DIRECTORY"
 
-  if [ "$DKTL_SSL" = true ]; then
+  if [ "$DKTL_SSL" == true ]; then
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $SSL_CONF"
   else
     BASE_DOCKER_COMPOSE_COMMAND+=" -f $NOSSL_CONF"
@@ -249,12 +249,6 @@ proxy_setup() {
       --providers.docker=true --providers.docker.exposedbydefault=false \
       --entrypoints.web.address=:80 \
       --entrypoints.websecure.address=:443"
-
-    if [ "$DKTL_SSL" = true ]; then
-      TRAEFIK_OPTS+=" --certificatesresolvers.letsencrypt.acme.tlschallenge=true \
-      --certificatesResolvers.letsencrypt.acme.email=$DKTL_SSL_MAIL \
-      --certificatesResolvers.letsencrypt.acme.storage=acme.json"
-    fi
 
     if ! $TRAEFIK_CMD $TRAEFIK_OPTS >/dev/null; \
     then
