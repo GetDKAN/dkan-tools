@@ -22,7 +22,7 @@ class InitCommands extends \Robo\Tasks
      *   DKAN version (expressed as composer constraint). Use 2.x-dev for current
      *   bleeding edge.
     */
-    public function init($opts = ['drupal' => '9.0.0', 'dkan' => null])
+    public function init($opts = ['drupal' => '9.0.0', 'dkan' => null, 'dkan-local' => false])
     {
         // Validate version is semantic and at least the minimum set
         // in DrupalProjectTrait.
@@ -32,6 +32,9 @@ class InitCommands extends \Robo\Tasks
         $this->initDrupal($opts['drupal']);
         $this->initConfig();
         $this->initSrc();
+        if ($opts['dkan-local']) {
+            $this->initLocalDkan();
+        }
         $this->initDkan($opts['dkan']);
     }
 
@@ -232,6 +235,13 @@ class InitCommands extends \Robo\Tasks
         $this->taskComposerRequire()
             ->dependency('getdkan/dkan', $version)
             ->option('--no-update')
+            ->run();
+    }
+
+    public function initLocalDkan()
+    {
+        $this->taskComposerConfig()
+            ->repository('getdkan', 'dkan', 'path')
             ->run();
     }
 }
