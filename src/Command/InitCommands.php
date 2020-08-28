@@ -21,6 +21,10 @@ class InitCommands extends \Robo\Tasks
      * @option str dkan
      *   DKAN version (expressed as composer constraint). Use 2.x-dev for current
      *   bleeding edge.
+     * @option bool dkan-local
+     *   Use DKAN from a "dkan" folder in your project root instead of composer.
+     *   You may encounter problems if you are using a development branch and
+     *   don't pass "--dkan dev-yourbranch" as well.
     */
     public function init($opts = ['drupal' => '9.0.0', 'dkan' => null, 'dkan-local' => false])
     {
@@ -238,7 +242,10 @@ class InitCommands extends \Robo\Tasks
             ->run();
     }
 
-    public function initLocalDkan()
+    /**
+     * Add composer repository for /dkan folder in project.
+     */
+    private function initLocalDkan()
     {
         $this->taskComposerConfig()
             ->repository('getdkan', 'dkan', 'path')
