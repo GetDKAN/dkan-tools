@@ -241,7 +241,8 @@ class InitCommands extends \Robo\Tasks
     public function initLocalDkan()
     {
         $this->taskComposerConfig()
-            ->repository('getdkan', 'dkan', 'path')
+            ->arg('repositories.getdkan')
+            ->arg('{"type": "path", "url": "dkan", "symlink": false}')
             ->run();
     }
 }
