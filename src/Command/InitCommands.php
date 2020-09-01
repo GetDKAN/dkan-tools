@@ -35,6 +35,7 @@ class InitCommands extends \Robo\Tasks
         }
         $this->initConfig();
         $this->initSrc();
+        $this->initDrupal($opts['drupal']);
         if ($opts['dkan-local']) {
             $this->initLocalDkan();
             $version = $this->localDkanVersion();
@@ -42,7 +43,6 @@ class InitCommands extends \Robo\Tasks
         if (isset($version)) {
             $opts['dkan'] = $version;
         }
-        $this->initDrupal($opts['drupal']);
         $this->initDkan($opts['dkan']);
     }
 
@@ -243,6 +243,7 @@ class InitCommands extends \Robo\Tasks
      */
     private function initLocalDkan()
     {
+        $this->io()->section('Adding local DKAN repository in /dkan.');
         $this->taskComposerConfig()
             ->repository('getdkan', 'dkan', 'path')
             ->run();
