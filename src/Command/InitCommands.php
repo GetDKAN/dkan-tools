@@ -23,8 +23,8 @@ class InitCommands extends \Robo\Tasks
      *   bleeding edge.
      * @option bool dkan-local
      *   Use DKAN from a "dkan" folder in your project root instead of composer.
-     *   You may encounter problems if you are using a development branch and
-     *   don't pass "--dkan dev-yourbranch" as well.
+     *   If no version constraint is provided via the --dkan option, dktl will
+     *   attempt to generate one based on the current git branch in "dkan".
     */
     public function init($opts = ['drupal' => '9.0.0', 'dkan' => null, 'dkan-local' => false])
     {
@@ -33,12 +33,16 @@ class InitCommands extends \Robo\Tasks
         if (!$this->drupalProjectValidateVersion($opts['drupal'])) {
             exit;
         }
-        $this->initDrupal($opts['drupal']);
         $this->initConfig();
         $this->initSrc();
         if ($opts['dkan-local']) {
             $this->initLocalDkan();
+            $version = $this->localDkanVersion();
         }
+        if (isset($version)) {
+            $opts['dkan'] = $version;
+        }
+        $this->initDrupal($opts['drupal']);
         $this->initDkan($opts['dkan']);
     }
 
@@ -48,16 +52,13 @@ class InitCommands extends \Robo\Tasks
     private function initConfig()
     {
         $this->io()->section('Initializing dktl configuration');
-        if (file_exists('dktl.yml') && file_exists('src')) {
-            $this->io()->note("This project has already been initialized.");
-            exit;
-        }
-
         if (file_exists('dktl.yml')) {
-            $this->io()->warning('The dktl.yml file already exists in this directory; skipping.');
-        } else {
-            $this->createDktlYmlFile();
+            $this->io()->note('The dktl.yml file already exists in this directory; skipping.');
+            return;
         }
+        $f = Util::getProjectDirectory() . '/dktl.yml';
+        $result = $this->taskExec('touch')->arg($f)->run();
+        $this->directoryAndFileCreationCheck($result, $f);
     }
 
     /**
@@ -65,17 +66,13 @@ class InitCommands extends \Robo\Tasks
      */
     private function initSrc()
     {
-        $this->io()->section('Initializing src directory');
-        if (file_exists('src')) {
-            $this->io()->warning('The src directory already exists in this directory; skipping.');
-            exit;
+        $this->io()->section('Initializing project code directory in /src');
+        if (is_dir('src')) {
+            $this->io()->note("A /src directory already exists; skipping.");
+            return;
         }
 
-        $this->_mkdir('src');
-        $this->_mkdir('docroot');
-
         $directories = ['docker', 'modules', 'themes', 'site', 'test', 'script', 'command'];
-
         foreach ($directories as $directory) {
             $dir = "src/{$directory}";
             $result = $this->_mkdir($dir);
@@ -101,13 +98,6 @@ class InitCommands extends \Robo\Tasks
             ->textFromFile("$dktlRoot/assets/command/SiteCommands.php")
             ->run();
 
-        $this->directoryAndFileCreationCheck($result, $f);
-    }
-
-    private function createDktlYmlFile()
-    {
-        $f = Util::getProjectDirectory() . '/dktl.yml';
-        $result = $this->taskExec('touch')->arg($f)->run();
         $this->directoryAndFileCreationCheck($result, $f);
     }
 
@@ -205,13 +195,15 @@ class InitCommands extends \Robo\Tasks
     }
 
     /**
-     * Create a new Drupal project in the current directory.
+     * Create a new Drupal project in the current directory. If one exists, it
+     * will be overwritten.
      *
      * @param mixed $drupalVersion
      *   Drupal version to use, expressed as Composer constraint.
      */
     public function initDrupal($drupalVersion)
     {
+        $this->io()->section('Creating new Drupal project.');
         Util::prepareTmp();
 
         // Composer's create-project requires an empty folder, so run it in
@@ -222,6 +214,9 @@ class InitCommands extends \Robo\Tasks
         // Modify project's scaffold and installation paths to `docroot`, then
         // install Drupal in it.
         $this->drupalProjectSetDocrootPath();
+        if (!is_dir('docroot')) {
+            $this->_mkdir('docroot');
+        }
 
         Util::cleanupTmp();
     }
@@ -236,6 +231,7 @@ class InitCommands extends \Robo\Tasks
      */
     public function initDkan(string $version = null)
     {
+        $this->io()->section('Adding DKAN project dependency.');
         $this->taskComposerRequire()
             ->dependency('getdkan/dkan', $version)
             ->option('--no-update')
@@ -250,5 +246,25 @@ class InitCommands extends \Robo\Tasks
         $this->taskComposerConfig()
             ->repository('getdkan', 'dkan', 'path')
             ->run();
+    }
+
+    /**
+     * Get branch of local DKAN clone.
+     */
+    private function localDkanVersion()
+    {
+        if (!is_dir('dkan')) {
+            throw new \Exception('No local dkan folder in project root.');
+        }
+        $result = $this->taskGitStack()
+            ->dir('dkan')
+            ->exec("rev-parse --abbrev-ref HEAD")
+            ->printOutput(false)
+            ->run();
+        
+        if ($result->getExitCode() === 0) {
+            $branch = $result->getMessage();
+            return is_numeric(substr($branch, 0, 1)) ? "${branch}-dev" :  "dev-${branch}";
+        }
     }
 }
