@@ -11,8 +11,10 @@ nav:
     - 'Starting a new project': 'newproject.md'
     - 'Add DKAN to an existing site': 'add_dkan.md'
     - 'File structure of a DKAN-Tools-based project': 'structure.md'
+    - 'Decoupled frontend': 'frontend.md'
     - 'Database and file backups': 'backups.md'
-    - 'Site Maintenance': 'tasks.md'
+    - 'Site Maintenance': 'maintenance.md'
+    - 'patching.md'
     - 'Custom commands': 'extend.md'
     - 'troubleshooting.md'
 markdown_extensions:
