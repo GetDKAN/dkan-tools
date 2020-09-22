@@ -188,7 +188,7 @@ class DkanCommands extends \Robo\Tasks
             ->exec("dktl make --prefer-source")
             ->exec("dktl install")
             ->exec("dktl install:sample")
-            ->exec("dktl frontend:get --ref=master")
+            ->exec("git clone https://github.com/getdkan/data-catalog-app src/frontend")
             ->exec("dktl frontend:install")
             ->exec("dktl frontend:build")
             ->exec("dktl drush user:password admin admin")
