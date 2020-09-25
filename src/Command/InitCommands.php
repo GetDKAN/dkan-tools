@@ -40,7 +40,7 @@ class InitCommands extends \Robo\Tasks
             $this->initLocalDkan();
             $version = $this->localDkanVersion();
         }
-        if (isset($version)) {
+        if (isset($version) && !$opts['dkan']) {
             $opts['dkan'] = $version;
         }
         $this->initDkan($opts['dkan']);
