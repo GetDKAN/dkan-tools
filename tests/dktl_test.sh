@@ -46,8 +46,7 @@ testDktlInitDrupalVersionMoreThanMaximum()
 
 testDktlInit() {
     result=`dktl init`
-    echo $result
-    assertContains "${result}" 'composer project created.'
+    assertContains "${result}" 'Composer project created'
     
     result=`ls`
     assertContains "${result}" "dktl.yml"
