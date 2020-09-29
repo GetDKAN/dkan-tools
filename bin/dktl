@@ -13,6 +13,7 @@ main() {
 
   set_project_directory "$@"
   set_slug
+  set_traefik
   
   if [ "$DKTL_MODE" = "DOCKER" ]; then
     dktl_docker_run "$@"
@@ -26,17 +27,17 @@ dktl_run() {
     # Check whether dkan-tools' dependencies have been initialized.
     if [ -z "$(ls -lha $DKTL_DIRECTORY | grep vendor)" ]; then
       echo "Composer Install"
-      composer install --working-dir=$DKTL_DIRECTORY    
+      composer install --working-dir=$DKTL_DIRECTORY
     fi
 
     # Finally, execute the php app.
     case $1 in
         # Pass through arguments for these. See: https://bit.ly/30IlWGk
         drush | phpunit | *test* )
-            php $DKTL_DIRECTORY/bin/app.php $1 -- "${@:2}"
+            php "$DKTL_DIRECTORY"/bin/app.php $1 -- "${@:2}"
             ;;
         *)
-            php $DKTL_DIRECTORY/bin/app.php $1 "${@:2}"
+            php "$DKTL_DIRECTORY"/bin/app.php $1 "${@:2}"
             ;;
     esac
 
@@ -53,7 +54,7 @@ dktl_docker_run() {
   # Proxy-pass to docker and save exit status. The command will re-
   # run in host mode inside the cli container, so dktl_run will still
   # ultimately be run whichever mode dktl is set to. 
-  $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli dktl "$1" "${@:2}"
+  dc_base exec $EXEC_OPTS cli dktl "$1" "${@:2}"
   exit_status=$?
 
   dktl_docker_cleanup "$@"
@@ -131,9 +132,10 @@ set_directory() {
   if [[ -L $(which dktl) ]]; then
     # readlink command needs -f to work properly in linux
     if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
-    DKTL_DIRECTORY=$(readlink $RL_OPT $DKTL_DIRECTORY)
+    DKTL_DIRECTORY=$(readlink $RL_OPT "$DKTL_DIRECTORY")
   fi
-  DKTL_DIRECTORY=$(dirname $(dirname $DKTL_DIRECTORY))
+  DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
+  DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
   export DKTL_DIRECTORY
 }
 
@@ -149,6 +151,13 @@ set_slug() {
   fi
 }
 
+set_traefik() {
+  if [ -z "$DKTL_TRAEFIK" ]; then
+    DKTL_TRAEFIK='dktl-proxy'
+    export DKTL_TRAEFIK
+  fi
+}
+
 # Set the following variables for use with docker-compose commands:
 # DKTL_PROXY_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
 docker_vars_init() {
@@ -161,14 +170,6 @@ docker_vars_init() {
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
-  BASE_DOCKER_COMPOSE_COMMAND="docker-compose \
-    --file $COMMON_CONF \
-    --project-name "${DKTL_SLUG}" \
-    --project-directory $DKTL_PROJECT_DIRECTORY"
-
-  if [ -f $OVERRIDES_CONF ]; then
-    BASE_DOCKER_COMPOSE_COMMAND+=" -f $OVERRIDES_CONF"
-  fi
 
   # Check for interactive shell if DKTL_NO_PTY is not set
   if [ ! -z "$DKTL_NO_PTY" ]; then
@@ -180,22 +181,36 @@ docker_vars_init() {
   fi
 }
 
+dc_base() {
+  dc=( docker-compose \
+    --file "$COMMON_CONF" \
+    --project-name $DKTL_SLUG \
+    --project-directory "$DKTL_PROJECT_DIRECTORY" )
+
+  if [ -f "$OVERRIDES_CONF" ]; then
+    dc+=( --file "$OVERRIDES_CONF" )
+  fi
+
+  dc+=( "$@" )
+  "${dc[@]}"
+}
+
+
 # Set up subdomain with traefic proxy.
 proxy_connect () {
   network="${DKTL_SLUG}_default"
-  if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
-    echo "Connected dktl-proxy to \"${network}\" network."
+  if docker network connect "$network" $DKTL_TRAEFIK >/dev/null 2>&1; then
+    echo "Connected $DKTL_TRAEFIK to \"${network}\" network."
   fi
 }
 
 dc_up () {
   # Check containers state, Run is missing, make sure dktl-proxy is connected
   # to the same network.
-  containers=$($BASE_DOCKER_COMPOSE_COMMAND ps -q)
+  containers=$(dc_base ps -q)
   if [ -z "$containers" ]; then
     echo "Starting docker containers."
-    $BASE_DOCKER_COMPOSE_COMMAND up -d
-
+    dc_base up -d
     proxy_connect
   fi
 }
@@ -203,30 +218,30 @@ dc_up () {
 dc_down() {
   network="${DKTL_SLUG}_default"
 
-  if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
-    echo "Disconnected dktl-proxy from \"${network}\" network."
+  if docker network disconnect "$network" $DKTL_TRAEFIK >/dev/null 2>&1; then
+    echo "Disconnected $DKTL_TRAEFIK from \"${network}\" network."
   fi
 
-  $BASE_DOCKER_COMPOSE_COMMAND down -v "${@:2}"
+  dc_base down -v "${@:2}"
 }
 
 # Make sure the proxy container is up.
 proxy_setup() {
-  proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
+  proxy_service_ps=$(docker ps -f name="$DKTL_TRAEFIK" --format '{{.Names}}' 2>/dev/null)
   if [[ -z $proxy_service_ps ]]; then
-    echo "Running dktl-proxy.."
+    echo "Running $DKTL_TRAEFIK.."
     # Make sure no old instance is using the name.
-    docker rm dktl-proxy >/dev/null 2>&1
+    docker rm $DKTL_TRAEFIK >/dev/null 2>&1
     if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
       -v '/var/run/docker.sock:/var/run/docker.sock' \
-      --name 'dktl-proxy' \
+      --name "$DKTL_TRAEFIK" \
       traefik:v2.0 \
       --log.level=INFO --api.insecure=true --providers.docker=true \
       --providers.docker.exposedbydefault=false --entrypoints.web.address=:80 \
       --entrypoints.websecure.address=:443 \
       >/dev/null; \
     then
-      echo -n "Failed to start the dktl-proxy container..."
+      echo -n "Failed to start the $DKTL_TRAEFIK container..."
     fi
 
   fi
@@ -236,7 +251,7 @@ proxy_setup() {
 docker_command_intercept() {
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     dc_up
-    $BASE_DOCKER_COMPOSE_COMMAND "${@:2}"
+    dc_base "${@:2}"
     exit 0
   elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
     echo "http://$DKTL_PROXY_DOMAIN"
@@ -247,23 +262,23 @@ docker_command_intercept() {
   elif [ "$1" = "docker:proxy-connect" ] || [ "$1" = "proxy:connect" ]; then
     proxy_connect
     # Restart container to refresh config.
-    $BASE_DOCKER_COMPOSE_COMMAND restart
+    dc_base restart
     exit 0
   elif [ "$1" = "docker:proxy-kill" ] || [ "$1" = "proxy:kill" ]; then
-    echo "Removing dktl-proxy ..."
-    docker stop dktl-proxy >/dev/null 2>&1
-    docker rm dktl-proxy >/dev/null 2>&1
+    echo "Removing $DKTL_TRAEFIK ..."
+    docker stop $DKTL_TRAEFIK >/dev/null 2>&1
+    docker rm $DKTL_TRAEFIK >/dev/null 2>&1
     exit 0
   fi
 }
 
 # The containers are running, set DKTL inside the cli container.
 dktl_set_alias() {
-  ALIAS="$($BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli which dktl)"
+  ALIAS="$(dc_base exec $EXEC_OPTS cli which dktl)"
   if [ -z "$ALIAS" ]; then
-    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli \
+    dc_base exec $EXEC_OPTS cli \
       chmod 777 /usr/local/dkan-tools/bin/dktl
-    $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli \
+    dc_base exec $EXEC_OPTS cli \
       ln -s /usr/local/dkan-tools/bin/dktl /usr/local/bin/dktl
   fi
 }
@@ -271,20 +286,20 @@ dktl_set_alias() {
 dktl_docker_cleanup() {
   # Reset web and cli containers if xdebug.
   if [ $? -eq 0 ] && [[ $1 == "xdebug"* ]]; then
-    $BASE_DOCKER_COMPOSE_COMMAND restart web
-    $BASE_DOCKER_COMPOSE_COMMAND restart cli
+    dc_base restart web
+    dc_base restart cli
   fi
 
   # Proxy connect if we just ran make.
   if [ $? -eq 0 ] && [[ $1 == "init"* ]]; then
     proxy_connect
-    $BASE_DOCKER_COMPOSE_COMMAND restart web
+    dc_base restart web
   fi
 
   if [ -z "$DKTL_CHOWN" ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:
     if [ -n "$(find "$DKTL_PROJECT_DIRECTORY" -user root -print -quit)" ]; then
-        $BASE_DOCKER_COMPOSE_COMMAND exec $EXEC_OPTS cli chown -R `id -u`:`id -g` /var/www
+        dc_base exec $EXEC_OPTS cli chown -R `id -u`:`id -g` /var/www
     fi
   fi
 }

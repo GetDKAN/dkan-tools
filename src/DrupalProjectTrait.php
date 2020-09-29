@@ -26,16 +26,17 @@ trait DrupalProjectTrait
 
     private function drupalProjectCreate(string $version)
     {
+        $projectSource = "drupal/recommended-project:{$version}";
         $createFiles = $this->taskComposerCreateProject()
-            ->source("drupal/recommended-project:{$version}")
+            ->source($projectSource)
             ->target(Util::TMP_DIR)
             ->noInstall()
             ->run();
         if ($createFiles->getExitCode() != 0) {
-            $this->io()->error('could not run composer create-project.');
+            $this->io()->error('Could not run composer create-project.');
             exit;
         }
-        $this->io()->success('composer project created.');
+        $this->io()->success("Composer project created from {$projectSource}.");
     }
 
     /**
@@ -54,7 +55,7 @@ trait DrupalProjectTrait
             $this->io()->error('could not move composer files.');
             exit;
         }
-        $this->io()->success('composer.json and composer.lock moved to project root.');
+        $this->io()->success('composer.json moved to project root.');
     }
 
     /**
@@ -62,15 +63,16 @@ trait DrupalProjectTrait
      */
     private function drupalProjectSetDocrootPath()
     {
-        $regexps = "s#web/#" . self::$drupalDocroot . "/#g";
+        $docroot = self::$drupalDocroot;
+        $regexps = "s#web/#" . $docroot . "/#g";
         $installationPaths = $this->taskExec("sed -i -E '{$regexps}'")
             ->arg('composer.json')
             ->run();
         if ($installationPaths->getExitCode() != 0) {
-            $this->io()->error('could not Unable to modifying composer.json paths.');
+            $this->io()->error('Unable to modify composer.json paths.');
             exit;
         }
-        $this->io()->success('composer installation paths modified.');
+        $this->io()->success("Composer installation paths modified to {$docroot}.");
     }
 
     /**
