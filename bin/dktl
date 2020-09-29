@@ -13,6 +13,7 @@ main() {
 
   set_project_directory "$@"
   set_slug
+  set_traefik
   
   if [ "$DKTL_MODE" = "DOCKER" ]; then
     dktl_docker_run "$@"
@@ -150,6 +151,13 @@ set_slug() {
   fi
 }
 
+set_traefik() {
+  if [ -z "$DKTL_TRAEFIK" ]; then
+    DKTL_TRAEFIK='dktl-proxy'
+    export DKTL_TRAEFIK
+  fi
+}
+
 # Set the following variables for use with docker-compose commands:
 # DKTL_PROXY_DOMAIN, BASE_DOCKER_COMPOSE_COMMAND, EXEC_OPTS
 docker_vars_init() {
@@ -191,8 +199,8 @@ dc_base() {
 # Set up subdomain with traefic proxy.
 proxy_connect () {
   network="${DKTL_SLUG}_default"
-  if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
-    echo "Connected dktl-proxy to \"${network}\" network."
+  if docker network connect "$network" $DKTL_TRAEFIK >/dev/null 2>&1; then
+    echo "Connected $DKTL_TRAEFIK to \"${network}\" network."
   fi
 }
 
@@ -210,8 +218,8 @@ dc_up () {
 dc_down() {
   network="${DKTL_SLUG}_default"
 
-  if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
-    echo "Disconnected dktl-proxy from \"${network}\" network."
+  if docker network disconnect "$network" $DKTL_TRAEFIK >/dev/null 2>&1; then
+    echo "Disconnected $DKTL_TRAEFIK from \"${network}\" network."
   fi
 
   dc_base down -v "${@:2}"
@@ -219,21 +227,21 @@ dc_down() {
 
 # Make sure the proxy container is up.
 proxy_setup() {
-  proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
+  proxy_service_ps=$(docker ps -f name="$DKTL_TRAEFIK" --format '{{.Names}}' 2>/dev/null)
   if [[ -z $proxy_service_ps ]]; then
-    echo "Running dktl-proxy.."
+    echo "Running $DKTL_TRAEFIK.."
     # Make sure no old instance is using the name.
-    docker rm dktl-proxy >/dev/null 2>&1
+    docker rm $DKTL_TRAEFIK >/dev/null 2>&1
     if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
       -v '/var/run/docker.sock:/var/run/docker.sock' \
-      --name 'dktl-proxy' \
+      --name "$DKTL_TRAEFIK" \
       traefik:v2.0 \
       --log.level=INFO --api.insecure=true --providers.docker=true \
       --providers.docker.exposedbydefault=false --entrypoints.web.address=:80 \
       --entrypoints.websecure.address=:443 \
       >/dev/null; \
     then
-      echo -n "Failed to start the dktl-proxy container..."
+      echo -n "Failed to start the $DKTL_TRAEFIK container..."
     fi
 
   fi
@@ -257,9 +265,9 @@ docker_command_intercept() {
     dc_base restart
     exit 0
   elif [ "$1" = "docker:proxy-kill" ] || [ "$1" = "proxy:kill" ]; then
-    echo "Removing dktl-proxy ..."
-    docker stop dktl-proxy >/dev/null 2>&1
-    docker rm dktl-proxy >/dev/null 2>&1
+    echo "Removing $DKTL_TRAEFIK ..."
+    docker stop $DKTL_TRAEFIK >/dev/null 2>&1
+    docker rm $DKTL_TRAEFIK >/dev/null 2>&1
     exit 0
   fi
 }
