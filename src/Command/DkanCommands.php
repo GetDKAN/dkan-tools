@@ -169,8 +169,37 @@ class DkanCommands extends \Robo\Tasks
             ->exec("dktl frontend:build")
             ->exec("dktl drush cr")
             ->run();
-        
+
         $this->io()->success("Your demo site is available at: " . Util::getUri());
+    }
+
+    /**
+     * Create a new dev project.
+     *
+     * Will have frontend and sample content. Run this immediately after dktl
+     * init.
+     *
+     * @aliases dev
+     */
+    public function dkanDev()
+    {
+        $this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl make --prefer-source")
+            ->exec("dktl install")
+            ->exec("dktl install:sample")
+            ->exec("git clone -b "
+                . FrontendCommands::FRONTEND_VCS_REF
+                . " "
+                . FrontendCommands::FRONTEND_VCS_URL
+                . " " . FrontendCommands::FRONTEND_DIR)
+            ->exec("dktl frontend:install")
+            ->exec("dktl frontend:build")
+            ->exec("dktl drush user:password admin admin")
+            ->exec("dktl drush cr")
+            ->run();
+
+        $this->io()->success("Your dev site is available at: " . Util::getUri());
     }
 
     private function dkanTestUser($name, $pass, $roll)
