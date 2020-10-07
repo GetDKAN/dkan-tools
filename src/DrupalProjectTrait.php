@@ -43,6 +43,14 @@ trait DrupalProjectTrait
      */
     private function drupalProjectMoveComposerFiles()
     {
+        if (file_exists(Util::getProjectDirectory() . "/composer.json")) {
+            $override = $this->confirm('composer.json already exists, replace?');
+            if (!$override) {
+                $this->io()->warning('Skipping composer.json');
+                return;
+            }
+        }
+
         $moveFiles = $this->taskFilesystemStack()
             ->rename(
                 Util::TMP_DIR . "/composer.json",
