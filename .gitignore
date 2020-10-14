@@ -5,3 +5,4 @@
 .idea
 /tests/shunit2
 /tests/testproject
+/docs-build

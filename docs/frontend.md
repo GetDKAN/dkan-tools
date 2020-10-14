@@ -1,0 +1,21 @@
+# Decoupled frontend
+
+### Download the DKAN frontend app to src/frontend.
+
+By default DKAN uses [data-catalog-app](https://github.com/GetDKAN/data-catalog-app) as the front end application. To download it simply run:
+
+```
+dktl frontend:get
+```
+
+If you would like to use a specific tag, branch or commit of data-catalog-app, you can add that change that manually on your DKAN composer.json file or run:
+
+```
+dktl frontend:get --ref=BranchName
+```
+
+To use an entirely different frontend application, pass the github URL:
+
+```
+dktl frontend:get --url=https://github.com/org/alternate-frontend
+```

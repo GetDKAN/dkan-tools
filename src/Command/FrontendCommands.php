@@ -22,7 +22,9 @@ class FrontendCommands extends Tasks
     *
     * "extra": {
     *     "dkan-frontend": {
-    *         "@civicactions/data-catalog-react":"0.2.0"
+    *       "type": "vcs",
+    *       "url": "https://github.com/GetDKAN/data-catalog-app",
+    *       "ref": "1.0.0"
     *     }
     * }
     *
