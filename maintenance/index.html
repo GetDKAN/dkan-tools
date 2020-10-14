@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Site Maintenance - DKAN Tools Documentation</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <link href="../css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Primary Maintenance Tasks", url: "#_top", children: [
+              {title: "Getting DKAN Updates", url: "#getting-dkan-updates" },
+              {title: "Adding modules to your project", url: "#adding-modules-to-your-project" },
+          ]},
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../patching/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../patching/" class="btn btn-xs btn-link">
+        Patching
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../backups/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../backups/" class="btn btn-xs btn-link">
+        Database and file backups
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="primary-maintenance-tasks">Primary Maintenance Tasks</h1>
+<p>A DKAN site does not differ substantially from <a href="https://www.drupal.org/docs/8/configuration-management">maintaining other Drupal
+sites</a>.</p>
+<p>By "maintenance" we mean three specific tasks</p>
+<ul>
+<li><strong>Upgrading</strong> DKAN to receive new features and bug-fixes</li>
+<li><strong>Adding</strong> additional modules or features</li>
+<li><strong>Overriding</strong> current modules or functionally</li>
+</ul>
+<h2 id="getting-dkan-updates">Getting DKAN Updates</h2>
+<p>DKAN uses a slightly modified <a href="https://www.drupal.org/docs/8/understanding-drupal-version-numbers">semantic</a> versioning system.</p>
+<p><strong>Major.Minor.Patch</strong></p>
+<ul>
+<li><em>Major</em> indicates compatibility</li>
+<li><em>Minor</em> indicates backwards compatible new features or upgrades</li>
+<li><em>Patch</em> indicates a release for security updates and bug fixes</li>
+</ul>
+<p>Please note <em>you can not use</em> <code>drush up</code> <em>with DKAN</em>. This is because
+DKAN is not packaged on Drupal.org.</p>
+<h3 id="basic-upgrades">Basic Upgrades</h3>
+<p>If you are maintaining your site with <a href="https://github.com/getdkan/dkan-tools">DKAN Tools</a>, upgrading is as simple as running</p>
+<pre><code class="bash">dktl composer require 'getdkan/dkan:2.1.0'
+````
+
+
+Or edit the version number in your composer.json file and run `composer update`:
+
+
+```bash
+&quot;require&quot;: {
+    &quot;getdkan/dkan&quot;: &quot;2.0.0&quot;
+}
+</code></pre>
+
+<h3 id="upgrading-dkan-from-7x-1x-to-8x-2x">Upgrading DKAN from 7.x-1.x to 8.x-2.x</h3>
+<p>The easiest method will be to stand up a fresh Drupal 8 DKAN site and harvest the datasets from your Drupal 7 DKAN site.</p>
+<p>A more detailed upgrade path will be documented soon.</p>
+<h2 id="adding-modules-to-your-project">Adding modules to your project</h2>
+<pre><code class="bash">dktl composer require 'drupal/group:1.2'
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../patching/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../patching/" class="btn btn-xs btn-link">
+        Patching
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../backups/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../backups/" class="btn btn-xs btn-link">
+        Database and file backups
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+      <p>
+        <a href="https://github.com/GetDKAN/dkan-tools/edit/master/docs/maintenance.md"><i class="fa fa-github"></i>
+Edit on GitHub</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>

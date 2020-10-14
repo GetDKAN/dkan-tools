@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>File structure of a DKAN-Tools-based project - DKAN Tools Documentation</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <link href="../css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "File structure of a DKAN-Tools-based project", url: "#_top", children: [
+              {title: "The src/site folder", url: "#the-srcsite-folder" },
+              {title: "The src/test folder (custom tests)", url: "#the-srctest-folder-custom-tests" },
+          ]},
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../frontend/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../frontend/" class="btn btn-xs btn-link">
+        Decoupled frontend
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../add_dkan/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../add_dkan/" class="btn btn-xs btn-link">
+        Add DKAN to an existing site
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="file-structure-of-a-dkan-tools-based-project">File structure of a DKAN-Tools-based project</h1>
+<p>One of the many reasons for using DKTL is to create a clear separation between the
+code specific to a particular DKAN site (i.e. "custom code") and the dependencies
+we pull in from other sources (primarily, DKAN core and Drupal core). Keep all of
+your custom code in the <em>src</em> directory and symlink the overrides to the appropriate
+directory inside docroot. This will make maintaining your DKAN site much easier.
+DKAN Tools will set up the symlinks for you.</p>
+<p>To accomplish this separation, DKAN Tools projects will have the following basic
+directory structure, created when we run <code>dktl init</code>.</p>
+<pre><code>├── backups           # Optional for local development, see the backups section below
+├── docroot           # Drupal core
+|   └── modules
+|       └── contrib
+|           └── dkan # The upstream DKAN core codebase
+|
+├── src               # Site-specific configuration, code and files.
+│   ├── modules       # Symlinked to docroot/modules/custom
+│   ├── script        # Deployment script and other misc utilities
+|   └── site          # Symlinked to docroot/sites/default
+│   │   └── files     # The main site files
+│   ├── test          # Custom tests
+|   └── themes        # Symlinked to docroot/themes/custom
+└── dktl.yml          # DKAN Tools configuration
+</code></pre>
+<h2 id="the-srcsite-folder">The src/site folder</h2>
+<p>Most configuration in Drupal sites is placed in the <em>/sites/default</em> directory.</p>
+<p>The <em>/src/site</em> folder will replace <em>/docroot/sites/default</em> once Drupal is installed. <em>/src/site</em> should then contain all of the configuration that will be in <em>/docroot/sites/default</em>.</p>
+<p>DKTL should have already provided some things in <em>/src/site</em>: <em>settings.php</em> contains some generalized code that is meant to load any other setting files present, as long as they follow the <em>settings.</em>\&lt;something><em>.php</em> pattern. All of the special settings that you previously had in <em>settings.php</em> or other drupal configuration files should live in <em>settings.custom.php</em> or a similarly-named file in <em>/src/site</em>.</p>
+<h2 id="the-srctest-folder-custom-tests">The src/test folder (custom tests)</h2>
+<p>DKAN Tools supports custom <a href="https://www.cypress.io/">Cypress</a> tests found in the <em>src/test/cypress</em> directory.</p>
+<p>To run custom tests:</p>
+<pre><code class="bash">dktl test:cypress
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../frontend/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../frontend/" class="btn btn-xs btn-link">
+        Decoupled frontend
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../add_dkan/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../add_dkan/" class="btn btn-xs btn-link">
+        Add DKAN to an existing site
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+      <p>
+        <a href="https://github.com/GetDKAN/dkan-tools/edit/master/docs/structure.md"><i class="fa fa-github"></i>
+Edit on GitHub</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>

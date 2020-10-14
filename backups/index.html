@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Database and file backups - DKAN Tools Documentation</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <link href="../css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Database and file backups", url: "#_top", children: [
+              {title: "Restoring a database dump or site files", url: "#restoring-a-database-dump-or-site-files" },
+              {title: "Configuring DKTL commands", url: "#configuring-dktl-commands" },
+              {title: "Create and grab a database dump excluding tables", url: "#create-and-grab-a-database-dump-excluding-tables" },
+          ]},
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../maintenance/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../maintenance/" class="btn btn-xs btn-link">
+        Site Maintenance
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../frontend/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../frontend/" class="btn btn-xs btn-link">
+        Decoupled frontend
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="database-and-file-backups">Database and file backups</h1>
+<h2 id="restoring-a-database-dump-or-site-files">Restoring a database dump or site files</h2>
+<p>DKAN Tools' <code>restore</code> commands can restore from a local or remote dump of the database, as well as restore a files archive. This simplest way to do this is:</p>
+<pre><code class="bash">dktl dkan:restore --db_url=&lt;path_to_db&gt; --files_url=&lt;path_to_files&gt;
+</code></pre>
+
+<p>As described below, these options can be stored in a configuration file so that you can type simply <code>dktl restore</code>.</p>
+<p>You may also restore from a local database backup, as long as it is placed in a folder under the project root called <em>/backups</em>. Type <code>dktl db:restore</code> with no argument, and the backup in <em>/backups</em> will be restored if there is only one, or you will be allowed to select from a list if there are several.</p>
+<h2 id="configuring-dktl-commands">Configuring DKTL commands</h2>
+<p>You will probably want to set up some default arguments for certain commands, especially the urls for the <code>restore</code> command. This is what the dkan.yml file is for. You can provide options for any DKTL command in dkan.yml. For instance:</p>
+<pre><code class="yaml">command:
+  restore:
+    options:
+      db_url: &quot;s3://my-backups-bucket/my-db.sql.gz&quot;
+      files_url: &quot;s3://my-backups-bucket/my-files.tar.gz&quot;
+</code></pre>
+
+<p>If you include this in your dktl.yml file, typing <code>dktl restore</code> without any arguments will load these two options.</p>
+<h2 id="create-and-grab-a-database-dump-excluding-tables">Create and grab a database dump excluding tables</h2>
+<p>You can create a database dump excluding tables related to cache, devel, webform submissions and DKAN datastore. Running the command <code>dktl site:grab-database @alias</code> will create the database backup for the drush alias passed as argument.</p>
+<p>This command needs to be run with DKTL_MODE set to "HOST". So you'll need to run <code>export DKTL_MODE="HOST"</code> and after the command finishes, you should set it back to its old value or just unset the variable by running <code>unset DKTL_MODE</code>.</p>
+<p>If you want to import this dump into your local development site, then you can move the file <em>excluded_tables.sql</em> into the directory <em>backups</em> in the root of your project, then you'll be able to import it by running <code>dktl restore:db excluded_tables.sql</code>.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../maintenance/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../maintenance/" class="btn btn-xs btn-link">
+        Site Maintenance
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../frontend/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../frontend/" class="btn btn-xs btn-link">
+        Decoupled frontend
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+      <p>
+        <a href="https://github.com/GetDKAN/dkan-tools/edit/master/docs/backups.md"><i class="fa fa-github"></i>
+Edit on GitHub</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>

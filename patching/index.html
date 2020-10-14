@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Patching - DKAN Tools Documentation</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <link href="../css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Patching", url: "#_top", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../extend/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../extend/" class="btn btn-xs btn-link">
+        Custom commands
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../maintenance/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../maintenance/" class="btn btn-xs btn-link">
+        Site Maintenance
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="patching">Patching</h1>
+<p>If it is necessary or expedient to overwrite files in DKAN or Drupal core, it is recommended that you create a <em>/src/patches</em> directory where you can store local <a href="https://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git/">patch</a>
+files with the changes. A patch will make it possible to re-apply these changes once a newer version of DKAN or Drupal is applied to your project.</p>
+<p>Update your project composer.json</p>
+<pre><code>&quot;require&quot;: {
+    &quot;cweagans/composer-patches&quot;: &quot;~1.0&quot;
+},
+&quot;extra&quot;: {
+        &quot;enable-patching&quot;: true,
+        &quot;patches&quot;: {
+            &quot;drupal/core&quot;: {
+                &quot;1234&quot;: &quot;https://www.drupal.org/files/issues/1234-thing-to-fix.patch&quot;
+            },
+            &quot;getdkan/dkan&quot;: {
+                &quot;000&quot;: &quot;https://patch-diff.githubusercontent.com/raw/GetDKAN/dkan/pull/000.patch&quot;,
+                &quot;bugfix info&quot;: &quot;src/patches/localfile.patch&quot;
+            }
+        }
+    }
+</code></pre>
+
+<p>then run:</p>
+<pre><code>dktl composer update
+dktl composer update --lock
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../extend/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../extend/" class="btn btn-xs btn-link">
+        Custom commands
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../maintenance/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../maintenance/" class="btn btn-xs btn-link">
+        Site Maintenance
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+      <p>
+        <a href="https://github.com/GetDKAN/dkan-tools/edit/master/docs/patching.md"><i class="fa fa-github"></i>
+Edit on GitHub</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>
