@@ -37,7 +37,7 @@ class DkanCommands extends \Robo\Tasks
             ->dir("docroot/modules/contrib/dkan")
             ->run();
 
-        return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
+        return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run --headless --browser chromium')
             ->dir("docroot/modules/contrib/dkan")
             ->run();
     }
