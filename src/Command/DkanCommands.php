@@ -28,7 +28,7 @@ class DkanCommands extends \Robo\Tasks
     /**
      * Run DKAN Cypress Tests.
      */
-    public function dkanTestCypress()
+    public function dkanTestCypress(array $args)
     {
         $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
         $this->dkanTestUser("testeditor", "testeditor", "administrator");
@@ -37,9 +37,14 @@ class DkanCommands extends \Robo\Tasks
             ->dir("docroot/modules/contrib/dkan")
             ->run();
 
-        return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run --headless --browser chromium')
-            ->dir("docroot/modules/contrib/dkan")
-            ->run();
+        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
+            ->dir("docroot/modules/contrib/dkan");
+
+        foreach ($args as $arg) {
+          $cypress->arg($arg);
+        }
+
+        return $cypress->run();
     }
 
     /**
