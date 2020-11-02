@@ -82,7 +82,6 @@ testDktlInstall() {
     result=`curl $url/user/login`
     assertContains "${result}" "Enter your DKAN username"
     result=`dktl install:sample`
-    echo "$result"
     assertContains "${result}" "Processed 33 items from the datastore_import"
 }
 
