@@ -41,13 +41,12 @@ testDktlInitDrupalVersionMoreThanMaximum()
 {
     result=`dktl init --drupal=77.7.7`
     assertContains "${result}" "Could not find package drupal/recommended-project with version 77.7.7."
-    # assertContains "${result}" "could not run composer create-project."
 }
 
 testDktlInit() {
     result=`dktl init`
     assertContains "${result}" 'Composer project created'
-    
+
     result=`ls`
     assertContains "${result}" "dktl.yml"
     assertContains "${result}" "src"
@@ -71,7 +70,7 @@ testDktlMake() {
     assertContains "${result}" "Installing drupal/core"
     assertContains "${result}" "Installing getdkan/dkan"
     result=`ls docroot/modules/contrib`
-    assertContains "${result}" "dkan"       
+    assertContains "${result}" "dkan"
 }
 
 testDktlInstall() {
@@ -83,7 +82,8 @@ testDktlInstall() {
     result=`curl $url/user/login`
     assertContains "${result}" "Enter your DKAN username"
     result=`dktl install:sample`
-    assertContains "${result}" "Processed 16 items from the datastore_import"
+    echo "$result"
+    assertContains "${result}" "Processed 33 items from the datastore_import"
 }
 
 testFrontEnd() {
@@ -109,10 +109,10 @@ testBringDown() {
     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_cli_1"
     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_web_1"
     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_web_1"
-    
+
     result=`docker volume ls --filter "name=${DKTL_TEST_PROJECT_NAME}"`
     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_composer"
-    
+
     result=`docker network ls --filter "name=${DKTL_TEST_PROJECT_NAME}"`
     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_default"
 }
