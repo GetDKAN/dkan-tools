@@ -4,7 +4,6 @@
         "consolidation/robo": "^2.0",
         "pear/archive_tar": "^1.4",
         "aws/aws-sdk-php": "^3.67",
-        "dealerdirect/phpcodesniffer-composer-installer": "*",
         "drupal/coder": "^8.3",
         "phpunit/phpunit": "^8.5"
     },
