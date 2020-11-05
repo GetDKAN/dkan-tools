@@ -21,5 +21,5 @@ if (getenv("DKTL_DOCKER") == "1") {
     /**
      * Enable local development services.
      */
-    $settings['container_yamls'][] = DRUPAL_ROOT . '/sites/development.services.yml';
+    $settings['container_yamls'][] = DRUPAL_ROOT . '/sites/default/development.services.yml';
 }

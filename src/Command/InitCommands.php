@@ -195,23 +195,6 @@ class InitCommands extends \Robo\Tasks
     }
 
     /**
-     * Copy development.services config.
-     */
-    public function copyDevServices()
-    {
-        $dktl_dir = Util::getDktlDirectory();
-        $project_dir = Util::getProjectDirectory();
-        $result = $this->taskExec(
-            "cp {$dktl_dir}/assets/site/development.services.yml {$project_dir}/docroot/sites/development.services.yml"
-        )->run();
-        if ($result && $result->getExitCode() === 0) {
-            $this->io()->success(
-                'Successfully copied development.services.yml to docroot/sites/default/'
-            );
-        }
-    }
-
-    /**
      * Create a new Drupal project in the current directory. If one exists, it
      * will be overwritten.
      *
