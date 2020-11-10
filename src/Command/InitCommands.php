@@ -262,7 +262,7 @@ class InitCommands extends \Robo\Tasks
             ->exec("rev-parse --abbrev-ref HEAD")
             ->printOutput(false)
             ->run();
-        
+
         if ($result->getExitCode() === 0) {
             $branch = $result->getMessage();
             return is_numeric(substr($branch, 0, 1)) ? "${branch}-dev" :  "dev-${branch}";
