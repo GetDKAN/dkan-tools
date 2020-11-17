@@ -165,7 +165,7 @@ docker_vars_init() {
     WEB_DOMAIN="localtest.me"
   fi
   if [ -z $DKTL_PROXY_DOMAIN ]; then
-    export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
+    export DKTL_PROXY_DOMAIN="${DKTL_SLUG}${DKTL_SUBDOMAIN:+.$DKTL_SUBDOMAIN}.$WEB_DOMAIN"
   fi
 
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
