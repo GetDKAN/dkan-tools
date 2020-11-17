@@ -29,11 +29,9 @@ If you are maintaining your site with [DKAN Tools](https://github.com/getdkan/dk
 
 ```bash
 dktl composer require 'getdkan/dkan:2.1.0'
-````
+```
 
-
-Or edit the version number in your composer.json file and run `composer update`:
-
+Or edit the version number in your composer.json file:
 
 ```bash
 "require": {
@@ -41,6 +39,7 @@ Or edit the version number in your composer.json file and run `composer update`:
 }
 ```
 
+ and run `composer update`
 
 ### Upgrading DKAN from 7.x-1.x to 8.x-2.x
 

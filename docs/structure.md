@@ -10,7 +10,7 @@ DKAN Tools will set up the symlinks for you.
 To accomplish this separation, DKAN Tools projects will have the following basic
 directory structure, created when we run `dktl init`.
 
-    ├── backups           # Optional for local development, see the backups section below
+    ├── backups           # Optional for local development, see the DB backups section
     ├── docroot           # Drupal core
     |   └── modules
     |       └── contrib
