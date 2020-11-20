@@ -21,4 +21,6 @@ if (getenv("DKTL_DOCKER") == "1") {
     $conf['environment_indicator_overwritten_text_color'] = '#ffffff';
     $conf['environment_indicator_overwritten_position'] = 'top';
     $conf['environment_indicator_overwritten_fixed'] = true;
+
+    $conf['google_fonts_api_key'] = getenv('GOOGLE_FONTS_API_KEY');
 }
