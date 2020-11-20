@@ -58,6 +58,7 @@ services:
       - AWS_PROFILE
       - PROXY_DOMAIN
       - PLATFORM
+      - GOOGLE_FONTS_API_KEY
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - XDEBUG_DKTL=1
     env_file:
