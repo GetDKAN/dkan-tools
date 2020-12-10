@@ -8,7 +8,7 @@ DKAN Tools' `restore` commands can restore from a local or remote dump of the da
 dktl dkan:restore --db_url=<path_to_db> --files_url=<path_to_files>
 ```
 
-As described below, these options can be stored in a configuration file so that you can type simply `dktl restore`.
+As described below, these options can be stored in a configuration file so that you can simply type `dktl restore`.
 
 You may also restore from a local database backup, as long as it is placed in a folder under the project root called _/backups_. Type `dktl db:restore` with no argument, and the backup in _/backups_ will be restored if there is only one, or you will be allowed to select from a list if there are several.
 
