@@ -134,6 +134,7 @@ set_directory() {
     DKTL_DIRECTORY=$(readlink $RL_OPT "$DKTL_DIRECTORY")
   fi
   DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
+  DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
   export DKTL_DIRECTORY
 }
 
