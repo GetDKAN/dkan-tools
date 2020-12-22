@@ -7,7 +7,6 @@ use Robo\Tasks;
 
 class InstallCommands extends Tasks
 {
-    const DRUSH = "../vendor/bin/drush";
     /**
      * Perform Drupal/DKAN database installation
      *
@@ -17,11 +16,11 @@ class InstallCommands extends Tasks
     public function install($opts = ['existing-config' => false])
     {
         if ($opts['existing-config']) {
-            $result = $this->taskExec('drush si -y --existing-config')
+            $this->taskExec('dktl drush si -y --existing-config')
                 ->dir(Util::getProjectDocroot())
                 ->run();
         } else {
-            $result = $this->standardInstallation();
+            $this->standardInstallation();
         }
 
         // Workaround for https://www.drupal.org/project/drupal/issues/3091285.
@@ -39,10 +38,10 @@ class InstallCommands extends Tasks
     {
         $this->taskExecStack()
             ->stopOnFail()
-            ->exec(self::DRUSH . ' site:install standard --site-name "DKAN" -y')
-            ->exec(self::DRUSH . " en dkan config_update_ui -y")
-            ->exec(self::DRUSH . " config-set system.performance css.preprocess 0 -y")
-            ->exec(self::DRUSH . " config-set system.performance js.preprocess 0 -y")
+            ->exec('dktl drush site:install standard --site-name "DKAN" -y')
+            ->exec("dktl drush en dkan config_update_ui -y")
+            ->exec("dktl drush config-set system.performance css.preprocess 0 -y")
+            ->exec("dktl drush config-set system.performance js.preprocess 0 -y")
             ->dir(Util::getProjectDocroot())
             ->run();
     }
@@ -54,11 +53,11 @@ class InstallCommands extends Tasks
     {
         $this->taskExecStack()
             ->stopOnFail()
-            ->exec(self::DRUSH . ' en sample_content -y')
-            ->exec(self::DRUSH . ' dkan:sample-content:create')
-            ->exec(self::DRUSH . ' queue:run datastore_import')
-            ->exec(self::DRUSH . ' dkan:metastore-search:rebuild-tracker')
-            ->exec(self::DRUSH . ' sapi-i')
+            ->exec('dktl drush en sample_content -y')
+            ->exec('dktl drush  dkan:sample-content:create')
+            ->exec('dktl drush  queue:run datastore_import')
+            ->exec('dktl drush  dkan:metastore-search:rebuild-tracker')
+            ->exec('dktl drush  sapi-i')
             ->dir(Util::getProjectDocroot())
             ->run();
     }
