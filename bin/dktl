@@ -133,8 +133,11 @@ set_directory() {
     if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
     DKTL_DIRECTORY=$(readlink $RL_OPT "$DKTL_DIRECTORY")
   fi
-  DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
-  DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
+
+  # Currently DKTL_DIRECTORY contains <path/to/dktl/root>/bin/dktl, strip the
+  # /bin/dktl to get the root dktl directory.
+  DKTL_DIRECTORY="${DKTL_DIRECTORY%/bin/dktl}"
+
   export DKTL_DIRECTORY
 }
 
