@@ -53,7 +53,10 @@ class MakeCommands extends Tasks
                 $composerInstall->option($opt);
             }
         }
-        $composerInstall->run();
+        $result = $composerInstall->run();
+        if ($result->getExitCode() != 0) {
+            return $result;
+        }
 
         // Symlink dirs from src into docroot.
         $this->makeSymlinks();
