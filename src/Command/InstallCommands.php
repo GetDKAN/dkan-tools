@@ -20,7 +20,7 @@ class InstallCommands extends Tasks
                 ->dir(Util::getProjectDocroot())
                 ->run();
         } else {
-            $this->standardInstallation();
+            $this->minimalInstallation();
         }
 
         // Workaround for https://www.drupal.org/project/drupal/issues/3091285.
@@ -32,13 +32,13 @@ class InstallCommands extends Tasks
     }
 
     /**
-     * Run standard Drupal site installation, and enable config_update_ui.
+     * Run minimal Drupal site installation, and enable config_update_ui.
      */
-    private function standardInstallation()
+    private function minimalInstallation()
     {
         $this->taskExecStack()
             ->stopOnFail()
-            ->exec('dktl drush site:install standard --site-name "DKAN" -y')
+            ->exec('dktl drush site:install minimal --site-name "DKAN" -y')
             ->exec("dktl drush en dkan config_update_ui -y")
             ->exec("dktl drush config-set system.performance css.preprocess 0 -y")
             ->exec("dktl drush config-set system.performance js.preprocess 0 -y")
