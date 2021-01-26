@@ -26,7 +26,7 @@ class InitCommands extends \Robo\Tasks
      *   If no version constraint is provided via the --dkan option, dktl will
      *   attempt to generate one based on the current git branch in "dkan".
     */
-    public function init($opts = ['drupal' => '9.0.0', 'dkan' => null, 'dkan-local' => false])
+    public function init($opts = ['drupal' => '9.1.0', 'dkan' => null, 'dkan-local' => false])
     {
         // Validate version is semantic and at least the minimum set
         // in DrupalProjectTrait.
