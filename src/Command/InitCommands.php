@@ -26,13 +26,8 @@ class InitCommands extends \Robo\Tasks
      *   If no version constraint is provided via the --dkan option, dktl will
      *   attempt to generate one based on the current git branch in "dkan".
     */
-    public function init($opts = ['drupal' => '9.0.0', 'dkan' => null, 'dkan-local' => false])
+    public function init($opts = ['drupal' => '~9', 'dkan' => null, 'dkan-local' => false])
     {
-        // Validate version is semantic and at least the minimum set
-        // in DrupalProjectTrait.
-        if (!$this->drupalProjectValidateVersion($opts['drupal'])) {
-            exit;
-        }
         $this->initConfig();
         $this->initSrc();
         $this->initDrupal($opts['drupal']);
@@ -44,6 +39,7 @@ class InitCommands extends \Robo\Tasks
             $opts['dkan'] = $version;
         }
         $this->initDkan($opts['dkan']);
+        $this->initDrush();
     }
 
     /**
@@ -226,14 +222,24 @@ class InitCommands extends \Robo\Tasks
      *
      * @param string|null $version
      *   Version of DKAN to pull in, expressed as Composer constraint.
-     *
-     * @return [type]
      */
     public function initDkan(string $version = null)
     {
         $this->io()->section('Adding DKAN project dependency.');
         $this->taskComposerRequire()
             ->dependency('getdkan/dkan', $version)
+            ->option('--no-update')
+            ->run();
+    }
+
+    /**
+     * Add DKAN as a dependency to the project's composer.json.
+     */
+    public function initDrush()
+    {
+        $this->io()->section('Adding Drush project dependency.');
+        $this->taskComposerRequire()
+            ->dependency('drush/drush', '^10')
             ->option('--no-update')
             ->run();
     }
