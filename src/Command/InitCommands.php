@@ -274,4 +274,64 @@ class InitCommands extends \Robo\Tasks
             return is_numeric(substr($branch, 0, 1)) ? "${branch}-dev" :  "dev-${branch}";
         }
     }
+
+    private function drupalProjectCreate(string $version)
+    {
+        $projectSource = "drupal/recommended-project:{$version}";
+        $createFiles = $this->taskComposerCreateProject()
+            ->source($projectSource)
+            ->target(Util::TMP_DIR)
+            ->noInstall()
+            ->run();
+        if ($createFiles->getExitCode() != 0) {
+            $this->io()->error('Could not run composer create-project.');
+            exit;
+        }
+        $this->io()->success("Composer project created from {$projectSource}.");
+    }
+
+       /**
+     * Move composer.json and .lock back to project dir.
+     */
+    private function drupalProjectMoveComposerFiles()
+    {
+        if (file_exists(Util::getProjectDirectory() . "/composer.json")) {
+            $override = $this->confirm('composer.json already exists, replace?');
+            if (!$override) {
+                $this->io()->warning('Skipping composer.json');
+                return;
+            }
+        }
+
+        $moveFiles = $this->taskFilesystemStack()
+            ->rename(
+                Util::TMP_DIR . "/composer.json",
+                Util::getProjectDirectory() . "/composer.json",
+                true
+            )
+            ->run();
+        if ($moveFiles->getExitCode() != 0) {
+            $this->io()->error('could not move composer files.');
+            exit;
+        }
+        $this->io()->success('composer.json moved to project root.');
+    }
+
+     
+    /**
+     * Rewrite composer.json with correct docroot.
+     */
+    private function drupalProjectSetDocrootPath()
+    {
+        $regexps = "s#web/#docroot/#g";
+        $installationPaths = $this->taskExec("sed -i -E '{$regexps}'")
+            ->arg('composer.json')
+            ->run();
+        if ($installationPaths->getExitCode() != 0) {
+            $this->io()->error('Unable to modify composer.json paths.');
+            exit;
+        }
+        $this->io()->success("Composer installation paths modified.");
+    }
+
 }
