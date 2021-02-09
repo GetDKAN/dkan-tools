@@ -3,11 +3,9 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
-use DkanTools\DrupalProjectTrait;
 
 class InitCommands extends \Robo\Tasks
 {
-    use DrupalProjectTrait;
 
     /**
      * Initialize DKAN project directory.
@@ -30,16 +28,7 @@ class InitCommands extends \Robo\Tasks
     {
         $this->initConfig();
         $this->initSrc();
-        $this->initDrupal($opts['drupal']);
-        if ($opts['dkan-local']) {
-            $this->initLocalDkan();
-            $version = $this->localDkanVersion();
-        }
-        if (isset($version) && !$opts['dkan']) {
-            $opts['dkan'] = $version;
-        }
-        $this->initDkan($opts['dkan']);
-        $this->initDrush();
+        $this->initDrupal($opts);
     }
 
     /**
@@ -194,26 +183,43 @@ class InitCommands extends \Robo\Tasks
      * Create a new Drupal project in the current directory. If one exists, it
      * will be overwritten.
      *
-     * @param mixed $drupalVersion
-     *   Drupal version to use, expressed as Composer constraint.
+     * @option str drupal
+     *   Drupal composer version (expressed as composer constraint).
+     * @option str dkan
+     *   DKAN version (expressed as composer constraint). Use 2.x-dev for current
+     *   bleeding edge.
+     * @option bool dkan-local
+     *   Use DKAN from a "dkan" folder in your project root instead of composer.
+     *   If no version constraint is provided via the --dkan option, dktl will
+     *   attempt to generate one based on the current git branch in "dkan".
      */
-    public function initDrupal($drupalVersion)
+    public function initDrupal($opts = ['drupal' => '~9', 'dkan' => null, 'dkan-local' => false])
     {
         $this->io()->section('Creating new Drupal project.');
         Util::prepareTmp();
 
         // Composer's create-project requires an empty folder, so run it in
         // Util::Tmp, then move the 2 composer files back into project root.
-        $this->drupalProjectCreate($drupalVersion);
-        $this->drupalProjectMoveComposerFiles();
-
+        $this->drupalProjectCreate($opts['drupal']);
+        
         // Modify project's scaffold and installation paths to `docroot`, then
         // install Drupal in it.
         $this->drupalProjectSetDocrootPath();
         if (!is_dir('docroot')) {
             $this->_mkdir('docroot');
         }
-
+        
+        if ($opts['dkan-local']) {
+            $this->initLocalDkan();
+            $version = $this->localDkanVersion();
+        }
+        if (isset($version) && !$opts['dkan']) {
+            $opts['dkan'] = $version;
+        }
+        $this->initDkan($opts['dkan']);
+        $this->initDrush();
+        
+        $this->drupalProjectMoveComposerFiles();
         Util::cleanupTmp();
     }
 
@@ -227,6 +233,7 @@ class InitCommands extends \Robo\Tasks
     {
         $this->io()->section('Adding DKAN project dependency.');
         $this->taskComposerRequire()
+            ->dir(Util::TMP_DIR)
             ->dependency('getdkan/dkan', $version)
             ->option('--no-update')
             ->run();
@@ -239,6 +246,7 @@ class InitCommands extends \Robo\Tasks
     {
         $this->io()->section('Adding Drush project dependency.');
         $this->taskComposerRequire()
+            ->dir(Util::TMP_DIR)
             ->dependency('drush/drush', '^10')
             ->option('--no-update')
             ->run();
@@ -251,7 +259,8 @@ class InitCommands extends \Robo\Tasks
     {
         $this->io()->section('Adding local DKAN repository in /dkan.');
         $this->taskComposerConfig()
-            ->repository('getdkan', 'dkan', 'path')
+            ->dir(Util::TMP_DIR)
+            ->repository("getdkan", Util::getProjectDirectory() . '/dkan', 'path')
             ->run();
     }
 
@@ -264,7 +273,7 @@ class InitCommands extends \Robo\Tasks
             throw new \Exception('No local dkan folder in project root.');
         }
         $result = $this->taskGitStack()
-            ->dir('dkan')
+            ->dir(Util::getProjectDirectory() . '/dkan')
             ->exec("rev-parse --abbrev-ref HEAD")
             ->printOutput(false)
             ->run();
@@ -325,6 +334,7 @@ class InitCommands extends \Robo\Tasks
     {
         $regexps = "s#web/#docroot/#g";
         $installationPaths = $this->taskExec("sed -i -E '{$regexps}'")
+            ->dir(Util::TMP_DIR)
             ->arg('composer.json')
             ->run();
         if ($installationPaths->getExitCode() != 0) {
@@ -333,5 +343,4 @@ class InitCommands extends \Robo\Tasks
         }
         $this->io()->success("Composer installation paths modified.");
     }
-
 }

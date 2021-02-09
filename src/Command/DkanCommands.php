@@ -41,7 +41,7 @@ class DkanCommands extends \Robo\Tasks
             ->dir("docroot/modules/contrib/dkan");
 
         foreach ($args as $arg) {
-          $cypress->arg($arg);
+            $cypress->arg($arg);
         }
 
         return $cypress->run();

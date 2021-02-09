@@ -2,7 +2,6 @@
 
 namespace DkanTools\Command;
 
-use DkanTools\DrupalProjectTrait;
 use DkanTools\Util\Util;
 use Robo\Tasks;
 use Symfony\Component\Filesystem\Filesystem;
@@ -14,7 +13,6 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class MakeCommands extends Tasks
 {
-    use DrupalProjectTrait;
 
     const DRUPAL_FOLDER_NAME = "docroot";
 
