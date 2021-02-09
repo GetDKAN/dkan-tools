@@ -26,11 +26,6 @@ testUninitialized() {
     assertContains "${result}" "DKTL is running outside of a DKTL project."
 }
 
-testDktlInitWithBadParameter() {
-    result=`dktl init --drupal=foobar`
-    assertContains "${result}" "[ERROR] version format not semantic.";
-}
-
 testDktlInitDrupalVersionLessThanMinimum()
 {
     result=`dktl init --drupal=8.7.1`;
