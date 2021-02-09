@@ -26,10 +26,15 @@ testUninitialized() {
     assertContains "${result}" "DKTL is running outside of a DKTL project."
 }
 
+testDktlInitWithBadParameter() {
+    result=`dktl init --drupal=foobar`
+    assertContains "${result}" "Could not parse version constraint";
+}
+
 testDktlInitDrupalVersionLessThanMinimum()
 {
     result=`dktl init --drupal=8.7.1`;
-    assertContains "${result}" "[ERROR] drupal version below minimal required."
+    assertContains "${result}" "Could not find package drupal/recommended-project with version 8.7.1"
 }
 
 testDktlInitDrupalVersionMoreThanMaximum()
