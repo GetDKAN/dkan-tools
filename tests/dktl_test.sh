@@ -28,7 +28,7 @@ testUninitialized() {
 
 testDktlInitWithBadParameter() {
     result=`dktl init --dkan=foobar`
-    assertContains "${result}" "Could not parse version constraint foobar"
+    assertContains "${result}" "Could not parse version constraint foodktl bar"
     rm -rf composer.* dktl.yml docrot src
 }
 
@@ -71,7 +71,7 @@ testDktlInstall() {
     result=`curl $url/user/login`
     assertContains "${result}" "Enter your DKAN username"
     result=`dktl install:sample`
-    assertContains "${result}" "Processed 30 items from the datastore_import"
+    assertContains "${result}" "Processed 10 items from the datastore_import"
 }
 
 testFrontEnd() {
