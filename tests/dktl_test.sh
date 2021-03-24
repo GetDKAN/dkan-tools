@@ -28,7 +28,7 @@ testUninitialized() {
 
 testDktlInitWithBadParameter() {
     result=`dktl init --dkan=foobar`
-    assertContains "${result}" "Could not parse version constraint fubar"
+    assertContains "${result}" "Could not parse version constraint foobar"
     rm -rf composer.* dktl.yml docrot src
 }
 

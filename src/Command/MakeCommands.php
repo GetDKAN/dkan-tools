@@ -47,7 +47,7 @@ class MakeCommands extends Tasks
 
         // Run composer install while passing the options.
         $composerInstall = $this->taskComposerInstall();
-        $composerOptions = ['prefer-source', 'prefer-dist', 'optimize-autoloader'];
+        $composerOptions = ['prefer-source', 'prefer-dist', 'optimize-autoloader', 'dev'];
         foreach ($composerOptions as $opt) {
             if ($opts[$opt]) {
                 $composerInstall->option($opt);
