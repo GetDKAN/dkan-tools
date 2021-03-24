@@ -28,7 +28,8 @@ testUninitialized() {
 
 testDktlInitWithBadParameter() {
     result=`dktl init --drupal=foobar`
-    assertContains "${result}" "[ERROR] version format not semantic.";
+    assertContains "${result}" "Could not parse version constraint fubar"
+    rm -rf composer.* dktl.yml docrot src
 }
 
 testDktlInit() {
