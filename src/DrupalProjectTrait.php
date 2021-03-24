@@ -24,12 +24,13 @@ trait DrupalProjectTrait
      */
     private static $drupalDocroot = 'docroot';
 
-    private function drupalProjectCreate(string $version)
+    private function drupalProjectCreate()
     {
-        $projectSource = "drupal/recommended-project:{$version}";
+        $projectSource = "getdkan/recommended-project:9.x-dev";
         $createFiles = $this->taskComposerCreateProject()
             ->source($projectSource)
             ->target(Util::TMP_DIR)
+            ->preferDist(true)
             ->noInstall()
             ->run();
         if ($createFiles->getExitCode() != 0) {
@@ -64,23 +65,6 @@ trait DrupalProjectTrait
             exit;
         }
         $this->io()->success('composer.json moved to project root.');
-    }
-
-    /**
-     * Rewrite composer.json with correct docroot.
-     */
-    private function drupalProjectSetDocrootPath()
-    {
-        $docroot = self::$drupalDocroot;
-        $regexps = "s#web/#" . $docroot . "/#g";
-        $installationPaths = $this->taskExec("sed -i -E '{$regexps}'")
-            ->arg('composer.json')
-            ->run();
-        if ($installationPaths->getExitCode() != 0) {
-            $this->io()->error('Unable to modify composer.json paths.');
-            exit;
-        }
-        $this->io()->success("Composer installation paths modified to {$docroot}.");
     }
 
     /**

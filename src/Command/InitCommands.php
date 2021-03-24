@@ -197,23 +197,19 @@ class InitCommands extends \Robo\Tasks
     /**
      * Create a new Drupal project in the current directory. If one exists, it
      * will be overwritten.
-     *
-     * @param mixed $drupalVersion
-     *   Drupal version to use, expressed as Composer constraint.
      */
-    public function initDrupal($drupalVersion)
+    public function initDrupal()
     {
         $this->io()->section('Creating new Drupal project.');
         Util::prepareTmp();
 
         // Composer's create-project requires an empty folder, so run it in
         // Util::Tmp, then move the 2 composer files back into project root.
-        $this->drupalProjectCreate($drupalVersion);
+        $this->drupalProjectCreate();
         $this->drupalProjectMoveComposerFiles();
 
         // Modify project's scaffold and installation paths to `docroot`, then
         // install Drupal in it.
-        $this->drupalProjectSetDocrootPath();
         if (!is_dir('docroot')) {
             $this->_mkdir('docroot');
         }
