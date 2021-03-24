@@ -27,20 +27,9 @@ testUninitialized() {
 }
 
 testDktlInitWithBadParameter() {
-    result=`dktl init --drupal=foobar`
-    assertContains "${result}" "[ERROR] version format not semantic.";
-}
-
-testDktlInitDrupalVersionLessThanMinimum()
-{
-    result=`dktl init --drupal=8.7.1`;
-    assertContains "${result}" "[ERROR] drupal version below minimal required."
-}
-
-testDktlInitDrupalVersionMoreThanMaximum()
-{
-    result=`dktl init --drupal=77.7.7`
-    assertContains "${result}" "Could not find package drupal/recommended-project with version 77.7.7."
+    result=`dktl init --dkan=foobar`
+    assertContains "${result}" "Could not parse version constraint foobar"
+    rm -rf composer.* dktl.yml docrot src
 }
 
 testDktlInit() {
@@ -82,7 +71,7 @@ testDktlInstall() {
     result=`curl $url/user/login`
     assertContains "${result}" "Enter your DKAN username"
     result=`dktl install:sample`
-    assertContains "${result}" "Processed 30 items from the datastore_import"
+    assertContains "${result}" "Processed 10 items from the datastore_import"
 }
 
 testFrontEnd() {
