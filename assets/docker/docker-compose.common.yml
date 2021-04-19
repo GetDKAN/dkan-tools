@@ -24,6 +24,7 @@ services:
       - "traefik.frontend.passHostHeader=true"
       - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
       - "traefik.http.routers.${DKTL_SLUG}-web.entrypoints=web"
+      - "traefik.docker.network=traefik_default"
 
   # DB node
   db:
