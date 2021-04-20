@@ -16,9 +16,6 @@ class CustomCommands extends \Robo\Tasks
      */
     public function customTestCypress(array $args)
     {
-        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
-        $this->dkanTestUser("testeditor", "testeditor", "administrator");
-
         $this->taskExec("npm install cypress")
             ->dir("docroot/modules/custom")
             ->run();
@@ -27,7 +24,7 @@ class CustomCommands extends \Robo\Tasks
             ->dir("docroot/modules/custom");
 
         foreach ($args as $arg) {
-          $cypress->arg($arg);
+            $cypress->arg($arg);
         }
 
         return $cypress->run();
@@ -68,5 +65,4 @@ class CustomCommands extends \Robo\Tasks
 
         return $phpunit_executable;
     }
-
 }
