@@ -85,28 +85,6 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
-     * Run DKAN PhpUnit Tests. Additional phpunit CLI options can be passed.
-     *
-     * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
-     * @param array $args Arguments to append to phpunit command.
-     */
-    public function dkanTestPhpunitCustom(array $args)
-    {
-        $proj_dir = Util::getProjectDirectory();
-        $phpunit_executable = $this->getPhpUnitExecutable();
-
-        $phpunitExec = $this->taskExec($phpunit_executable)
-            ->option('testsuite', 'DKAN Test Suite')
-            ->dir("{$proj_dir}/docroot/modules/custom");
-
-        foreach ($args as $arg) {
-            $phpunitExec->arg($arg);
-        }
-
-        return $phpunitExec->run();
-    }
-
-    /**
      * Run DKAN PhpUnit Tests and send a coverage report to CodeClimate.
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
