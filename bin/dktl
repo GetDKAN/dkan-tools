@@ -34,12 +34,13 @@ dktl_run() {
     case $1 in
         # Pass through arguments for these. See: https://bit.ly/30IlWGk
         drush | phpunit | *test* )
-	    echo "php $DKTL_DIRECTORY/bin/app.php $1 -- $argument_subtstring"
-	    php "$DKTL_DIRECTORY"/bin/app.php $1 -- "$argument_subtstring"
+	    echo "php $DKTL_DIRECTORY/bin/app.php $1 -- $2 $3"
+      echo $1 $2
+	    php "$DKTL_DIRECTORY"/bin/app.php $1 $2 $3
             ;;
 	*)
-	    echo "php $DKTL_DIRECTORY/bin/app.php $1 $argument_subtstring"
-	    php "$DKTL_DIRECTORY"/bin/app.php $1
+	    echo "php $DKTL_DIRECTORY/bin/app.php $1 $2"
+	    php "$DKTL_DIRECTORY"/bin/app.php $1 $2
             ;;
     esac
 }
@@ -221,7 +222,7 @@ dc_down() {
     echo "Disconnected dktl-proxy from \"${network}\" network."
   fi
 
-  dc_base down -v "${@#??}"
+  dc_base down -v "${@#}"
 }
 
 # Make sure the proxy container is up.
@@ -250,12 +251,12 @@ proxy_setup() {
 docker_command_intercept() {
   if [ "$1" = "docker:compose" ] || [ "$1" = "dc" ]; then
     dc_up
-    dc_base "${@#??}"
+    dc_base "$2"
     exit 0
   elif [ "$1" = "url" ] || [ "$1" = "docker:url" ]; then
     echo "http://$DKTL_PROXY_DOMAIN"
     exit 0
-  elif [ "$1" = "down" ]; then
+  elif [ "$2" = "down" ]; then
     dc_down
     exit 0
   elif [ "$1" = "docker:proxy-connect" ] || [ "$1" = "proxy:connect" ]; then
