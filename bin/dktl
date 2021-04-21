@@ -30,17 +30,22 @@ dktl_run() {
     fi
 
     # Finally, execute the php app.
-    argument_substring=`echo ${@}|cut -d ' ' -f2-|awk '{$1=$1};1'`
     case $1 in
         # Pass through arguments for these. See: https://bit.ly/30IlWGk
+        
         drush | phpunit | *test* )
-	    echo "php $DKTL_DIRECTORY/bin/app.php $1 -- $2 $3"
-      echo $1 $2
-	    php "$DKTL_DIRECTORY"/bin/app.php $1 $2 $3
+        if [ "$#" -le 1 ]; then
+          php "$DKTL_DIRECTORY"/bin/app.php $1
+        else
+          php "$DKTL_DIRECTORY"/bin/app.php $1 -- $2 $3 $4 $5
+        fi
             ;;
-	*)
-	    echo "php $DKTL_DIRECTORY/bin/app.php $1 $2"
-	    php "$DKTL_DIRECTORY"/bin/app.php $1 $2
+	      *)
+        if [ "$#" -le 1 ]; then
+          php "$DKTL_DIRECTORY"/bin/app.php $1
+        else  
+          php "$DKTL_DIRECTORY"/bin/app.php $1 $2 $3 $4 $5
+        fi
             ;;
     esac
 }
@@ -56,7 +61,11 @@ dktl_docker_run() {
   # Proxy-pass to docker and save exit status. The command will re-
   # run in host mode inside the cli container, so dktl_run will still
   # ultimately be run whichever mode dktl is set to.
-  dc_base exec "$EXEC_OPTS" cli dktl "$1" "$2"
+  if [ "$#" -le 1 ]; then
+    dc_base exec "$EXEC_OPTS" cli dktl "$1"
+  else 
+    dc_base exec "$EXEC_OPTS" cli dktl "$1" "$2" "$3" "$4" "$5"
+  fi
   exit_status=$?
 
   dktl_docker_cleanup "$@"
@@ -72,8 +81,7 @@ dktl_docker_run() {
 # supported)
 set_platform() {
   if [ -z "$PLATFORM" ]; then
-    PLATFORM=$(uname)
-    export PLATFORM
+    PLATFORM=$(uname); export PLATFORM
   fi
 }
 
@@ -105,7 +113,7 @@ check_dependencies() {
   fi
 }
 
-# Set DKTL_PROJECT_DIRECTORY. Needs "$@" because dktl init hsa different logic.
+# Set DKTL_PROJECT_DIRECTORY. Needs "$@" because dktl init has different logic.
 set_project_directory() {
   # Find project root so we can run from anywhere
   find_up () {
@@ -191,7 +199,6 @@ dc_base() {
   fi
 
   dc="$dc $@"
-#  "${dc[@]}"
   eval "$dc"
 }
 
