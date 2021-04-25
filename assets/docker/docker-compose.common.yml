@@ -34,6 +34,19 @@ services:
     # MYSQL Credentials in mysql.env
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
+    environment:
+      # https://github.com/wodby/mariadb#optimizer-search-depth
+      MYSQL_OPTIMIZER_SEARCH_DEPTH: 8
+      # https://wodby.com/docs/stacks/mariadb/#calculating-the-optimal-size-of-innodb_buffer_pool_size
+      MYSQL_INNODB_BUFFER_POOL_SIZE: 568M
+      # Multi-byte UTF-8 support
+      # https://www.drupal.org/node/2754539
+      MYSQL_INNODB_FILE_FORMAT: barracuda
+      MYSQL_INNODB_LARGE_PREFIX: 1
+      # Needed for long Drush commands like harvest.
+      MYSQL_WAIT_TIMEOUT: 28800
+      # Needed for huge harvest reports write operations.
+      MYSQL_MAX_ALLOWED_PACKET: 1024M
     volumes:
        # MySQL configuration overrides
        - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
