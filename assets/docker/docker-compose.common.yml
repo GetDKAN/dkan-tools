@@ -41,8 +41,6 @@ services:
        # MySQL configuration overrides
        - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
     labels:
-      - "traefik.frontend.rule=Host:db.ci.civicactions.net"
-      - "traefik.backend=backend-db-${DKTL_SLUG}"
       - "traefik.docker.network=web"
     networks:
       - proxy
