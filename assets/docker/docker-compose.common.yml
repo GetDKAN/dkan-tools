@@ -86,3 +86,8 @@ services:
       
 volumes:
   composer:
+  
+networks:
+  proxy:
+    external:
+      name: web
