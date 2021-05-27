@@ -24,6 +24,7 @@ services:
       - "traefik.frontend.passHostHeader=true"
       - "traefik.http.routers.${DKTL_SLUG}-web.rule=Host(`${DKTL_PROXY_DOMAIN}`)"
       - "traefik.http.routers.${DKTL_SLUG}-web.entrypoints=web"
+      - "traefik.docker.network=web"
 
   # DB node
   db:
@@ -37,6 +38,8 @@ services:
     volumes:
        # MySQL configuration overrides
        - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
+    labels:
+      - "traefik.docker.network=web"
 
   # CLI node
   # Used for all console commands and tools.
@@ -70,6 +73,7 @@ services:
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws
       - composer:/root/.composer
-
+    labels:
+      - "traefik.docker.network=web"
 volumes:
   composer:
