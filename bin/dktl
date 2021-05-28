@@ -194,7 +194,7 @@ dc_base() {
 # Set up subdomain with traefic proxy.
 proxy_connect () {
   network="${DKTL_SLUG}_default"
-  if docker network connect "$network" dktl-proxy >/dev/null 2>&1; then
+  if docker network connect "$network" proxy >/dev/null 2>&1; then
     echo "Connected dktl-proxy to \"${network}\" network."
   fi
 }
