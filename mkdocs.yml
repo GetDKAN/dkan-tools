@@ -16,7 +16,7 @@ nav:
     - 'Site Maintenance': 'maintenance.md'
     - 'patching.md'
     - 'Custom commands': 'extend.md'
-    - 'Modifying the Docker containers': 'docker_config.md
+    - 'Modifying the Docker containers': 'docker_config.md'
     - 'troubleshooting.md'
 markdown_extensions:
     - admonition
