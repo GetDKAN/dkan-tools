@@ -77,6 +77,7 @@ class MakeCommands extends Tasks
             ['target' => 'src/site',    'link' => '/sites/default'],
             ['target' => 'src/modules', 'link' => '/modules/custom'],
             ['target' => 'src/themes',  'link' => '/themes/custom'],
+            ['target' => 'src/libraries',  'link' => '/libraries'],
             ['target' => 'src/schema',  'link' => '/schema'],
         ];
         foreach ($targetsAndLinks as $targetAndLink) {

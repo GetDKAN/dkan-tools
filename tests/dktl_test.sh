@@ -47,6 +47,7 @@ testDktlInit() {
     result=`ls src`
     assertContains "${result}" "command"
     assertContains "${result}" "docker"
+    assertContains "${result}" "libraries"
     assertContains "${result}" "modules"
     assertContains "${result}" "script"
     assertContains "${result}" "site"
