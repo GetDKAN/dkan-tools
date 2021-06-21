@@ -9,27 +9,27 @@
     
     
     
-    <link rel="shortcut icon" href="../img/favicon.ico">
+    <link rel="shortcut icon" href="./img/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <title>Custom commands - DKAN Tools Documentation</title>
-    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
-    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
-    <link href="../css/base.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/highlight.css">
-    <link href="../css/custom.css" rel="stylesheet">
+    <link href="./css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="./css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="./css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/highlight.css">
+    <link href="css/custom.css" rel="stylesheet">
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
 
-    <script src="../js/jquery-3.2.1.min.js"></script>
-    <script src="../js/bootstrap-3.3.7.min.js"></script>
-    <script src="../js/highlight.pack.js"></script>
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./js/bootstrap-3.3.7.min.js"></script>
+    <script src="./js/highlight.pack.js"></script>
     
     <base target="_top">
     <script>
-      var base_url = '..';
+      var base_url = '.';
       var is_top_frame = false;
         
         var pageToc = [
@@ -39,7 +39,7 @@
         ];
 
     </script>
-    <script src="../js/base.js"></script> 
+    <script src="./js/base.js"></script> 
 </head>
 
 <body>
@@ -61,19 +61,19 @@ if (is_top_frame) { $('body').addClass('wm-top-page'); }
   <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
     
     <div class="wm-article-nav pull-right">
-      <a href="../troubleshooting/" class="btn btn-xs btn-default pull-right">
+      <a href="docker_config.html" class="btn btn-xs btn-default pull-right">
         Next
         <i class="fa fa-chevron-right" aria-hidden="true"></i>
       </a>
-      <a href="../troubleshooting/" class="btn btn-xs btn-link">
-        Troubleshooting
+      <a href="docker_config.html" class="btn btn-xs btn-link">
+        Modifying the Docker containers
       </a>
     </div>
     
     <div class="wm-article-nav">
-      <a href="../patching/" class="btn btn-xs btn-default pull-left">
+      <a href="patching.html" class="btn btn-xs btn-default pull-left">
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
-        Previous</a><a href="../patching/" class="btn btn-xs btn-link">
+        Previous</a><a href="patching.html" class="btn btn-xs btn-link">
         Patching
       </a>
     </div>
@@ -84,7 +84,7 @@ if (is_top_frame) { $('body').addClass('wm-top-page'); }
 
     <h1 id="custom-commands">Custom Commands</h1>
 <p>Projects to can define their own commands. To create a custom command, add a file named <code>CustomCommands.php</code> and add it to <code>src/command/</code>, create a new class in the file with a similar structure to this one:</p>
-<pre><code class="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 namespace DkanTools\Custom;
 
 /**
@@ -103,7 +103,6 @@ class CustomCommands extends \Robo\Tasks
     }
 }
 </code></pre>
-
 <p>The critical parts of the example are:</p>
 <ol>
 <li>The namespace</li>
@@ -115,9 +114,8 @@ class CustomCommands extends \Robo\Tasks
 <h3 id="disabling-chown">Disabling <code>chown</code></h3>
 <p>DKTL, by default, performs most of its tasks inside of a docker container. The result is that any files created by scripts running inside the container will appear to be owned by "root" on the host machine, which often leads to permission issues when trying to use these files. To avoid this DKTL attempts to give ownership of all project files to the user running DKTL when it detects that files have changed, using the <code>chown</code> command via <code>sudo</code>. In some circumstances, such as environments where <code>sudo</code> is not available, you may not want this behavior. This can be controlled by setting a true/false environment variable, <code>DKTL_CHOWN</code>.</p>
 <p>To disable the <code>chown</code> behavior, create the environment variable with this command:</p>
-<pre><code class="bash">export DKTL_CHOWN=&quot;FALSE&quot;
+<pre><code class="language-bash">export DKTL_CHOWN=&quot;FALSE&quot;
 </code></pre>
-
 <h3 id="configuration-brought-into-the-containers-from-the-host-machine">Configuration Brought into the Containers from the Host Machine.</h3>
 <p>Unless you are running in "HOST" mode, DKTL runs inside of docker containers. Some configuration from your host machine can be useful inside of the containers: ssh configuration, external services authentication tokens, etc.</p>
 <p>DKTL recognized this and by default makes some configurations available to the containers by default. If any of these directories exist in your current user's profile, they will be available in the container:
@@ -136,19 +134,19 @@ class CustomCommands extends \Robo\Tasks
   <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
     
     <div class="wm-article-nav pull-right">
-      <a href="../troubleshooting/" class="btn btn-xs btn-default pull-right">
+      <a href="docker_config.html" class="btn btn-xs btn-default pull-right">
         Next
         <i class="fa fa-chevron-right" aria-hidden="true"></i>
       </a>
-      <a href="../troubleshooting/" class="btn btn-xs btn-link">
-        Troubleshooting
+      <a href="docker_config.html" class="btn btn-xs btn-link">
+        Modifying the Docker containers
       </a>
     </div>
     
     <div class="wm-article-nav">
-      <a href="../patching/" class="btn btn-xs btn-default pull-left">
+      <a href="patching.html" class="btn btn-xs btn-default pull-left">
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
-        Previous</a><a href="../patching/" class="btn btn-xs btn-link">
+        Previous</a><a href="patching.html" class="btn btn-xs btn-link">
         Patching
       </a>
     </div>

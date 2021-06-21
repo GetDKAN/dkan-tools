@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="./img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Modifying the Docker containers - DKAN Tools Documentation</title>
+    <link href="./css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="./css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="./css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/highlight.css">
+    <link href="css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./js/bootstrap-3.3.7.min.js"></script>
+    <script src="./js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '.';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Modifying the Docker containers", url: "#_top", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="./js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="troubleshooting.html" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="troubleshooting.html" class="btn btn-xs btn-link">
+        Troubleshooting
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="extend.html" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="extend.html" class="btn btn-xs btn-link">
+        Custom commands
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="modifying-the-docker-containers">Modifying the Docker containers</h1>
+<p>By default, dkan-tools will run docker containers with everything needed for a DKAN site to run.</p>
+<p>Sometimes we need to modify those docker containers.</p>
+<p>A common example of these kinds of modification is adding an environment variable to the web, or cli containers.</p>
+<p>dkan-tools provides a mechanism to do just this.</p>
+<p>The configuration that dkan-tools uses to start the docker containers is in <code>assets/docker</code> in the dkan-tools repo.</p>
+<p>To make changes to that configuration, you can add a file named <code>docker-compose.overrides.yml</code> to the <code>src/docker</code> directory <strong>in your project</strong>.</p>
+<p>Any valid docker-compose configuration can be added to that file and it will be merged with the default configuration from <code>assets/docker/docker-compose.common.yml</code> before the containers are created.</p>
+<div class="admonition note">
+<p class="admonition-title">Seeing your configuration</p>
+<p>After adding your file and making configuration changes you will have to remove and recreate your containers, you can do this by running <code>dktl dc kill &amp;&amp; dktl dc rm &amp;&amp; dktl</code></p>
+</div>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="troubleshooting.html" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="troubleshooting.html" class="btn btn-xs btn-link">
+        Troubleshooting
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="extend.html" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="extend.html" class="btn btn-xs btn-link">
+        Custom commands
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+      <p>
+        <a href="https://github.com/GetDKAN/dkan-tools/edit/master/docs/docker_config.md"><i class="fa fa-github"></i>
+Edit on GitHub</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>
