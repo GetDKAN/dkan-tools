@@ -12,7 +12,6 @@ DKAN Tools was designed with a [Docker](https://www.docker.com/)-based local dev
 
 That's it! All other dependencies are included in the Docker containers that dkan-tools will create.
 
-
 ## Basic usage
 
 Once you are working in an initialized project folder, you can type `dktl` at any time to see a list of all available commands.
