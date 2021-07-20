@@ -193,7 +193,7 @@ dc_base() {
 
 # Set up subdomain with traefic proxy.
 proxy_connect () {
-  if [ ! -z "$DKTL_NO_PROXY" ]; then
+  if [ -z "$DKTL_NO_PROXY" ]; then
     network="${DKTL_SLUG}_default"
     if docker network connect "$network" proxy >/dev/null 2>&1; then
       echo "Connected dktl-proxy to \"${network}\" network."
@@ -215,7 +215,7 @@ dc_up () {
 dc_down() {
   network="${DKTL_SLUG}_default"
 
-  if [ ! -z "$DKTL_NO_PROXY" ]; then
+  if [ -z "$DKTL_NO_PROXY" ]; then
     if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
       echo "Disconnected dktl-proxy from \"${network}\" network."
     fi
@@ -226,7 +226,7 @@ dc_down() {
 
 # Make sure the proxy container is up.
 proxy_setup() {
-  if [ ! -z "$DKTL_NO_PROXY" ]; then
+  if [ -z "$DKTL_NO_PROXY" ]; then
     proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
     if [[ -z $proxy_service_ps ]]; then
       echo "Running dktl-proxy.."
