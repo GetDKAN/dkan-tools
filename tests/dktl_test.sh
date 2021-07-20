@@ -106,6 +106,16 @@ testBringDown() {
     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_default"
 }
 
+testDktlInitProxy() {
+    dktl proxy:kill
+    result=`dktl url`
+    assertContains "${result}" "Running dktl-proxy.."
+    dktl proxy:kill
+    result=`DKTL_NO_PROXY=1 dktl url`
+    assertNotContains "${result}" "proxy"
+}
+
+
 oneTimeTearDown() {
     containers=`docker ps --filter name="${DKTL_TEST_PROJECT_NAME}*" -aq`
     echo $containers
