@@ -117,6 +117,7 @@ testDktlInitProxy() {
 
 
 oneTimeTearDown() {
+    cd "${DKTL_TEST_DIR}"
     containers=`docker ps --filter name="${DKTL_TEST_PROJECT_NAME}*" -aq`
     echo $containers
     if [ ! -z "$containers" ]; then
