@@ -193,9 +193,11 @@ dc_base() {
 
 # Set up subdomain with traefic proxy.
 proxy_connect () {
-  network="${DKTL_SLUG}_default"
-  if docker network connect "$network" proxy >/dev/null 2>&1; then
-    echo "Connected dktl-proxy to \"${network}\" network."
+  if [ ! -z "$DKTL_NO_PROXY" ]; then
+    network="${DKTL_SLUG}_default"
+    if docker network connect "$network" proxy >/dev/null 2>&1; then
+      echo "Connected dktl-proxy to \"${network}\" network."
+    fi
   fi
 }
 
@@ -213,8 +215,10 @@ dc_up () {
 dc_down() {
   network="${DKTL_SLUG}_default"
 
-  if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
-    echo "Disconnected dktl-proxy from \"${network}\" network."
+  if [ ! -z "$DKTL_NO_PROXY" ]; then
+    if docker network disconnect "$network" dktl-proxy >/dev/null 2>&1; then
+      echo "Disconnected dktl-proxy from \"${network}\" network."
+    fi
   fi
 
   dc_base down -v "${@:2}"
@@ -222,23 +226,24 @@ dc_down() {
 
 # Make sure the proxy container is up.
 proxy_setup() {
-  proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
-  if [[ -z $proxy_service_ps ]]; then
-    echo "Running dktl-proxy.."
-    # Make sure no old instance is using the name.
-    docker rm dktl-proxy >/dev/null 2>&1
-    if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
-      -v '/var/run/docker.sock:/var/run/docker.sock' \
-      --name 'dktl-proxy' \
-      traefik:v2.0 \
-      --log.level=INFO --api.insecure=true --providers.docker=true \
-      --providers.docker.exposedbydefault=false --entrypoints.web.address=:80 \
-      --entrypoints.websecure.address=:443 \
-      >/dev/null; \
-    then
-      echo -n "Failed to start the dktl-proxy container..."
+  if [ ! -z "$DKTL_NO_PROXY" ]; then
+    proxy_service_ps=$(docker ps -f 'name=dktl-proxy' --format '{{.Names}}' 2>/dev/null)
+    if [[ -z $proxy_service_ps ]]; then
+      echo "Running dktl-proxy.."
+      # Make sure no old instance is using the name.
+      docker rm dktl-proxy >/dev/null 2>&1
+      if ! docker run -d -p 8080:8080 -p 80:80 -p 433:433 \
+        -v '/var/run/docker.sock:/var/run/docker.sock' \
+        --name 'dktl-proxy' \
+        traefik:v2.0 \
+        --log.level=INFO --api.insecure=true --providers.docker=true \
+        --providers.docker.exposedbydefault=false --entrypoints.web.address=:80 \
+        --entrypoints.websecure.address=:443 \
+        >/dev/null; \
+      then
+        echo -n "Failed to start the dktl-proxy container..."
+      fi
     fi
-
   fi
 }
 
