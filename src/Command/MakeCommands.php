@@ -40,14 +40,14 @@ class MakeCommands extends Tasks
         'prefer-source' => false,
         'prefer-dist' => true,
         'optimize-autoloader' => false,
-        'dev' => true,
+        'no-dev' => false,
     ])
     {
         $this->io()->section("Running dktl make");
 
         // Run composer install while passing the options.
         $composerInstall = $this->taskComposerInstall();
-        $composerOptions = ['prefer-source', 'prefer-dist', 'optimize-autoloader', 'dev'];
+        $composerOptions = ['prefer-source', 'prefer-dist', 'optimize-autoloader', 'no-dev'];
         foreach ($composerOptions as $opt) {
             if ($opts[$opt]) {
                 $composerInstall->option($opt);
