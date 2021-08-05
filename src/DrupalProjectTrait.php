@@ -26,7 +26,7 @@ trait DrupalProjectTrait
 
     private function drupalProjectCreate()
     {
-        $projectSource = "getdkan/recommended-project:9.x-dev";
+        $projectSource = "getdkan/recommended-project:dev-drupal-9.2";
         $createFiles = $this->taskComposerCreateProject()
             ->source($projectSource)
             ->target(Util::TMP_DIR)
