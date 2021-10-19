@@ -112,11 +112,11 @@ set_project_directory() {
     echo "$path"
   }
 
-  DKTL_PROJECT_DIRECTORY=$(find_up dktl.yml)
-  if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
-    if [ "$1" = "init" ] || [ "$1" = "down" ]; then
-      DKTL_PROJECT_DIRECTORY=$(pwd)
-    else
+  if [ "$1" = "init" ] || [ "$1" = "down" ]; then
+    DKTL_PROJECT_DIRECTORY=$(pwd)
+  else
+    DKTL_PROJECT_DIRECTORY=$(find_up dktl.yml)
+    if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
       echo "DKTL is running outside of a DKTL project. Run dktl init in the project directory first."
       exit 1
     fi
