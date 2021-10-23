@@ -3,6 +3,7 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
+use DkanTools\Util\TestUserTrait;
 
 /**
  * This project's console commands configuration for Robo task runner.
@@ -11,13 +12,15 @@ use DkanTools\Util\Util;
  */
 class ProjectCommands extends \Robo\Tasks
 {
+    use TestUserTrait;
+
     /**
      * Run project cypress tests.
      */
     public function projectTestCypress(array $args)
     {
-        $this->projectTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
-        $this->projectTestUser("testeditor", "testeditor", "administrator");
+        $this->apiUser();
+        $this->editorUser();
 
         $this->taskExec("npm install cypress")
             ->dir("src/test")
@@ -74,15 +77,5 @@ class ProjectCommands extends \Robo\Tasks
         $output = [];
         exec("cd {$dkanDirPath} && git rev-parse --abbrev-ref HEAD", $output);
         return (isset($output[0]) && $output[0] == 'HEAD');
-    }
-
-
-    private function projectTestUser($name, $pass, $roll)
-    {
-        $this->taskExecStack()
-            ->stopOnFail()
-            ->exec("dktl drush user:create $name --password=$pass")
-            ->exec("dktl drush user-add-role $roll $name")
-            ->run();
     }
 }

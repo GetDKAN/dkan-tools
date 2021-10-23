@@ -3,6 +3,7 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
+use DkanTools\Util\TestUserTrait;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -12,6 +13,8 @@ use DkanTools\Util\Util;
  */
 class DkanCommands extends \Robo\Tasks
 {
+    use TestUserTrait;
+
     /**
      * Build DKAN docs with doxygen.
      */
@@ -30,8 +33,8 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestCypress(array $args)
     {
-        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
-        $this->dkanTestUser("testeditor", "testeditor", "administrator");
+        $this->apiUser();
+        $this->editorUser();
 
         $this->taskExec("npm install cypress")
             ->dir("docroot/modules/contrib/dkan")
@@ -207,12 +210,4 @@ class DkanCommands extends \Robo\Tasks
         $this->io()->success("Your dev site is available at: " . Util::getUri());
     }
 
-    private function dkanTestUser($name, $pass, $roll)
-    {
-        $this->taskExecStack()
-            ->stopOnFail()
-            ->exec("dktl drush user:create $name --password=$pass")
-            ->exec("dktl drush user-add-role $roll $name")
-            ->run();
-    }
 }
