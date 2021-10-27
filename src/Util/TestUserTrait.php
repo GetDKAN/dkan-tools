@@ -32,6 +32,6 @@ trait TestUserTrait
      */
     protected function editorUser()
     {
-        $this->create("testeditor", "D8Z3nXoifqspwZxo", "administrator");
+        $this->create("testeditor", "testeditor", "administrator");
     }
 }
