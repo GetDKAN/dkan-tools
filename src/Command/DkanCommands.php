@@ -36,9 +36,9 @@ class DkanCommands extends \Robo\Tasks
         $this->apiUser();
         $this->editorUser();
 
-        $this->taskExec("npm install cypress")
-            ->dir("docroot/modules/contrib/dkan")
-            ->run();
+        // $this->taskExec("npm install cypress")
+        //     ->dir("docroot/modules/contrib/dkan")
+        //     ->run();
 
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("docroot/modules/contrib/dkan");
