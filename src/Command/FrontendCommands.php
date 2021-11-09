@@ -245,9 +245,9 @@ class FrontendCommands extends Tasks
      */
     public function frontendTest()
     {
-        $this->taskExec("npm install cypress")
-        ->dir("docroot/frontend")
-        ->run();
+        // $this->taskExec("npm install cypress")
+        // ->dir("docroot/frontend")
+        // ->run();
 
         return $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("docroot/frontend")
