@@ -79,6 +79,7 @@ class MakeCommands extends Tasks
             ['target' => 'src/themes',  'link' => '/themes/custom'],
             ['target' => 'src/libraries',  'link' => '/libraries'],
             ['target' => 'src/schema',  'link' => '/schema'],
+	    ['target' => '../../usr/local/bin/node_modules',  'link' => '/../src/test/node_modules'],
         ];
         foreach ($targetsAndLinks as $targetAndLink) {
             $this->docrootSymlink(
