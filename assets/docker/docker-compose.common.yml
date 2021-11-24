@@ -28,15 +28,14 @@ services:
   # DB node
   db:
     hostname: db
-    image: wodby/mariadb:10.3-3.8.5
+    image: drydockcloud/drupal-acquia-mysql:latest
     ports:
       - "3306"
-    # MYSQL Credentials in mysql.env
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     volumes:
-       # MySQL configuration overrides
-       - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/mysql/conf.d/z_my.cnf"
+       - "${DKTL_DIRECTORY}/assets/docker/etc/mysql/my.cnf:/etc/my.cnf"
+       - mysql_data:/var/lib/mysql
 
   # CLI node
   # Used for all console commands and tools.
@@ -73,3 +72,4 @@ services:
 
 volumes:
   composer:
+  mysql_data:
