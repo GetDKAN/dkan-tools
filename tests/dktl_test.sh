@@ -33,7 +33,7 @@ testDktlInitWithBadParameter() {
 }
 
 testDktlInit() {
-    result=`dktl init --dkan=data-catalog-app-version-update`
+    result=`dktl init`
     assertContains "${result}" 'Composer project created'
 
     result=`ls`
