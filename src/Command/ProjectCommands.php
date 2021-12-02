@@ -22,12 +22,8 @@ class ProjectCommands extends \Robo\Tasks
         $this->apiUser();
         $this->editorUser();
 
-        //$this->taskExec("npm install cypress")
-        //    ->dir("src/test")
-        //    ->run();
-
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
-            ->dir("src/test");
+            ->dir("src/tests");
 
         foreach ($args as $arg) {
             $cypress->arg($arg);
