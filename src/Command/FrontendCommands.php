@@ -12,34 +12,35 @@ class FrontendCommands extends Tasks
 
     const FRONTEND_DIR = 'src/frontend';
     const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-app/';
-    const FRONTEND_VCS_REF = 'master';
+    const FRONTEND_VCS_REF = 'cypress-update-8.7.0';
     const FRONTEND_THEME = 'getdkan/dkan_js_frontend_bartik';
 
+
     /**
-    * Download the DKAN frontend app to src/frontend.
-    *
-    * If no url or ref are provided, DKAN Tools will probe DKAN's composer.json
-    * file, looking for the following configuration:
-    *
-    * "extra": {
-    *     "dkan-frontend": {
-    *       "type": "vcs",
-    *       "url": "https://github.com/GetDKAN/data-catalog-app",
-    *       "ref": "1.0.0"
-    *     }
-    * }
-    *
-    * If not found, the defaults set in self::FRONTEND_VCS_URL and
-    * self::FRONTEND_VCS_REF will be used.
-    *
-    * @option string type
-    *   The type of frontend package. "vcs" currently the only type supported.
-    * @option string url
-    *   URL for the frontend package. Currently only github URLs supported.
-    * @option string ref
-    *   Reference (tag, branch or commit) from the vcs system to use.
-    *
-    */
+     * Download the DKAN frontend app to src/frontend.
+     *
+     * If no url or ref are provided, DKAN Tools will probe DKAN's composer.json
+     * file, looking for the following configuration:
+     *
+     * "extra": {
+     *     "dkan-frontend": {
+     *       "type": "vcs",
+     *       "url": "https://github.com/GetDKAN/data-catalog-app",
+     *       "ref": "1.0.0"
+     *     }
+     * }
+     *
+     * If not found, the defaults set in self::FRONTEND_VCS_URL and
+     * self::FRONTEND_VCS_REF will be used.
+     *
+     * @option string type
+     *   The type of frontend package. "vcs" currently the only type supported.
+     * @option string url
+     *   URL for the frontend package. Currently only github URLs supported.
+     * @option string ref
+     *   Reference (tag, branch or commit) from the vcs system to use.
+     *
+     */
     public function frontendGet($opts = ['type' => 'vcs', 'url' => null, 'ref' => null])
     {
         if (file_exists(self::FRONTEND_DIR)) {
@@ -79,7 +80,7 @@ class FrontendCommands extends Tasks
         if ($opts['url'] && $opts['ref']) {
             return;
         }
-        $defaults = ['url' => self::FRONTEND_VCS_URL, 'ref' => self::FRONTEND_VCS_REF ];
+        $defaults = ['url' => self::FRONTEND_VCS_URL, 'ref' => self::FRONTEND_VCS_REF];
         $note = "Frontend config not found in DKAN composer.json. Reverting to "
             . "defaults from DKAN Tools";
 
@@ -130,13 +131,13 @@ class FrontendCommands extends Tasks
     }
 
     /**
-    * Create symlink for src/frontend.
-    */
+     * Create symlink for src/frontend.
+     */
     private function frontendLink()
     {
         $result = $this->taskExec('ln -s ../src/frontend frontend')
-          ->dir("docroot")
-          ->run();
+            ->dir("docroot")
+            ->run();
         if ($result && $result->getExitCode() === 0) {
             $this->io()->success(
                 'Successfully symlinked /src/frontend to docroot/frontend'
@@ -145,18 +146,18 @@ class FrontendCommands extends Tasks
     }
 
     /**
-    * Download frontend app if not present, and run npm install.
-    *
-    * The URL and branch/tag for the frontend app should be specified in the
-    * "extra" section of DKAN's composer.json. If you want to specify a
-    * different tag or branch, or different repo entirely, run "dktl
-    * frontend:get" first and specify the --ref and/or --url options.
-    *
-    * @param array $opts
-    *   Options array.
-    * @option theme
-    *   Whether or not to install default front-end theme. Defaults to true.
-    */
+     * Download frontend app if not present, and run npm install.
+     *
+     * The URL and branch/tag for the frontend app should be specified in the
+     * "extra" section of DKAN's composer.json. If you want to specify a
+     * different tag or branch, or different repo entirely, run "dktl
+     * frontend:get" first and specify the --ref and/or --url options.
+     *
+     * @param array $opts
+     *   Options array.
+     * @option theme
+     *   Whether or not to install default front-end theme. Defaults to true.
+     */
     public function frontendInstall($opts = ['theme' => true])
     {
         if (!file_exists(self::FRONTEND_DIR)) {
@@ -178,11 +179,11 @@ class FrontendCommands extends Tasks
             $this->io()->error('Could not install front-end node module');
             return $result;
         }
-        
+
         if ($opts['theme']) {
             $this->installTheme();
         }
-        
+
         $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
         $this->io()->success('Set front page.');
     }
@@ -225,7 +226,7 @@ class FrontendCommands extends Tasks
     {
         // Override GATSBY_API_URL with our own proxied domain.
         $task = $this
-            ->taskExec('npm run build')
+            ->taskExec('npm run build --force')
             ->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {

@@ -171,6 +171,11 @@ class DkanCommands extends \Robo\Tasks
             ->exec("dktl make")
             ->exec("dktl install")
             ->exec("dktl install:sample")
+            ->exec("git clone -b "
+                . FrontendCommands::FRONTEND_VCS_REF
+                . " "
+                . FrontendCommands::FRONTEND_VCS_URL
+                . " " . FrontendCommands::FRONTEND_DIR)
             ->exec("dktl frontend:install")
             ->exec("dktl frontend:build")
             ->exec("dktl drush cr")

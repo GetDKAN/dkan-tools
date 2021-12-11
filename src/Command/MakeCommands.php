@@ -77,7 +77,7 @@ class MakeCommands extends Tasks
             ['target' => 'src/libraries',  'link' => '/libraries'],
             ['target' => 'src/schema',  'link' => '/schema'],
             ['target' => '../../usr/local/bin/node_modules',  'link' => '/../src/test/node_modules'],
-            ['target' => '../../usr/local/bin/node_modules',  'link' => '/../src/frontend/node_modules'],
+            /*['target' => '../../usr/local/bin/node_modules',  'link' => '/../src/frontend/node_modules'],*/
             ['target' => '../../usr/local/bin/node_modules',  'link' => '/../dkan/test/node_modules'],
         ];
         foreach ($targetsAndLinks as $targetAndLink) {
