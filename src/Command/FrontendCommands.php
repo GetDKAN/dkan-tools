@@ -13,6 +13,7 @@ class FrontendCommands extends Tasks
     const FRONTEND_DIR = 'src/frontend';
     const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-app/';
     const FRONTEND_VCS_REF = 'master';
+    const FRONTEND_THEME = 'getdkan/dkan_js_frontend_bartik';
 
     /**
     * Download the DKAN frontend app to src/frontend.
@@ -150,9 +151,17 @@ class FrontendCommands extends Tasks
     * "extra" section of DKAN's composer.json. If you want to specify a
     * different tag or branch, or different repo entirely, run "dktl
     * frontend:get" first and specify the --ref and/or --url options.
+    *
+    * @param array $opts 
+    *   Options array.
+    * @option theme 
+    *   Composer requirement for theme to download and enable.
+    *   Pass --no-theme to skip theme installation. Defaults to
+    *   "getdkan/dkan_js_frontend_bartik".
     */
-    public function frontendInstall()
+    public function frontendInstall($opts = ['theme' => true])
     {
+        $this->installTheme($opts['theme']);
         if (!file_exists(self::FRONTEND_DIR)) {
             $this->frontendGet();
         }
@@ -167,23 +176,60 @@ class FrontendCommands extends Tasks
             return $result;
         }
         $this->io()->success('Front-end dependencies installed.');
-        $result = $this->taskExec("../vendor/bin/drush en -y dkan_js_frontend")->dir("docroot")->run();
+        $result = $this->taskExec("drush en -y dkan_js_frontend")->dir("docroot")->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error('Could not install front-end node module');
             return $result;
         }
         
-        $theme = 'dkan_js_frontend_bartik';
-        $result = $this->taskExec("drush theme:enable $theme")->dir("docroot")->run();
+
+        $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
+        $this->io()->success('Set front page.');
+    }
+
+    private function installTheme($theme)
+    {
+        if ($theme === true) {
+            $theme = self::FRONTEND_THEME;
+        }
+        if (!$theme) {
+            $this->io()->success("Skipping theme installation.");
+            return true;
+        }
+        $themeParts = explode(":", $theme);
+        $dependency = $themeParts[0];
+        $version = $themeParts[1] ?? null;
+        $result = $this->taskComposerRequire()
+            ->dependency($dependency, $version)
+            ->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error("Could not install theme for frontend. Try running \"dktl composer require getdkan/$theme\".");
+            $this->io()->error("Failed to download theme $theme.");
             return $result;
         }
 
-        $this->taskExec("drush config-set system.theme default $theme -y")->dir("docroot")->run();
-        $this->taskExec("../vendor/bin/drush config-set system.site page.front \"/home\" -y")->dir("docroot")->run();
-        $this->io()->success('Enabled DKAN frontend module and theme.');
+        $this->say(print_r($dependency, 1));
+        $themeNameParts = explode("/", $dependency);
+        $this->say(print_r($themeNameParts, 1));
+        $themeName = $themeNameParts[1] ?? $themeNameParts[0];
+        if (!$themeName) {
+            $this->io()->error("Could not parse theme name from composer dependency $dependency.");
+            return $result;
+        }
 
+        $result = $this->taskExec("drush theme:enable $themeName")->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error("Could not enable theme $themeName.");
+            return $result;
+        }
+
+        $this->taskExec("drush config-set system.theme default $theme -y")->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error("Could set default theme to $themeName.");
+            return $result;
+        }
+
+        $this->io()->success("Successfully installed and enabled front-end theme $themeName.");
+        return $result;
     }
 
     /**
@@ -202,7 +248,7 @@ class FrontendCommands extends Tasks
             $this->io()->error('Could not build the front-end.');
             return $result;
         }
-        $this->io()->success('front-end build.');
+        $this->io()->success('Frontend build successful.');
     }
 
     private function frontendModulePresent()
