@@ -79,16 +79,16 @@ testFrontEnd() {
     result=`dktl frontend:install`
     assertContains "${result}" "Successfully symlinked /src/frontend to docroot/frontend"
     assertContains "${result}" "Front-end dependencies installed."
+    assertContains "${result}" "Successfully installed and enabled front-end theme"
 
     result=`ls src/frontend`
     assertContains "${result}" "package.json"
 
     result=`dktl frontend:build`
-    assertContains "${result}" "Enabled DKAN frontend module."
     assertContains "${result}" "The project was built assuming it is hosted at /frontend/build/."
 
     result=`curl $url`
-    assertContains "${result}" '<div id="root"></div>'
+    assertContains "${result}" '<div id="root">'
 }
 
 testBringDown() {
