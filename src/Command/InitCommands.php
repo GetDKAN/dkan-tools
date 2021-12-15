@@ -302,5 +302,4 @@ class InitCommands extends \Robo\Tasks
         }
         $this->io()->success('composer.json moved to project root.');
     }
-
 }

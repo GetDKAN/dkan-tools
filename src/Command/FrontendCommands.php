@@ -152,16 +152,15 @@ class FrontendCommands extends Tasks
     * different tag or branch, or different repo entirely, run "dktl
     * frontend:get" first and specify the --ref and/or --url options.
     *
-    * @param array $opts 
+    * @param array $opts
     *   Options array.
-    * @option theme 
+    * @option theme
     *   Composer requirement for theme to download and enable.
     *   Pass --no-theme to skip theme installation. Defaults to
     *   "getdkan/dkan_js_frontend_bartik".
     */
     public function frontendInstall($opts = ['theme' => true])
     {
-        $this->installTheme($opts['theme']);
         if (!file_exists(self::FRONTEND_DIR)) {
             $this->frontendGet();
         }
@@ -182,7 +181,8 @@ class FrontendCommands extends Tasks
             return $result;
         }
         
-
+        $this->installTheme($opts['theme']);
+        
         $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
         $this->io()->success('Set front page.');
     }
@@ -207,9 +207,7 @@ class FrontendCommands extends Tasks
             return $result;
         }
 
-        $this->say(print_r($dependency, 1));
         $themeNameParts = explode("/", $dependency);
-        $this->say(print_r($themeNameParts, 1));
         $themeName = $themeNameParts[1] ?? $themeNameParts[0];
         if (!$themeName) {
             $this->io()->error("Could not parse theme name from composer dependency $dependency.");
