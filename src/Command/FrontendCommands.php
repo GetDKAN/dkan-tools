@@ -196,11 +196,9 @@ class FrontendCommands extends Tasks
             $this->io()->success("Skipping theme installation.");
             return true;
         }
-        $themeParts = explode(":", $theme);
-        $dependency = $themeParts[0];
-        $version = $themeParts[1] ?? null;
+        $dependency = explode(":", $theme);
         $result = $this->taskComposerRequire()
-            ->dependency($dependency, $version)
+            ->dependency($dependency[0], ($themeParts[1] ?? null))
             ->run();
         if ($result->getExitCode() != 0) {
             $this->io()->error("Failed to download theme $theme.");
