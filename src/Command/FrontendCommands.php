@@ -166,10 +166,10 @@ class FrontendCommands extends Tasks
         if (!file_exists("docroot/frontend")) {
             $this->frontendLink();
         }
-	$result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
-	    ->dir("src/frontend")
-	    ->run();
-	if ($result->getExitCode() != 0) {
+        $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
+            ->dir("src/frontend")
+            ->run();
+        if ($result->getExitCode() != 0) {
             $this->io()->error('Could not symlink package folder');
             return $result;
         }

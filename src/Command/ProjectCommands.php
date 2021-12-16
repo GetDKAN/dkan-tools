@@ -22,6 +22,14 @@ class ProjectCommands extends \Robo\Tasks
         $this->apiUser();
         $this->editorUser();
 
+        $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
+            ->dir("src/tests")
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not symlink package folder');
+            return $result;
+        }
+
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("src/tests");
 
