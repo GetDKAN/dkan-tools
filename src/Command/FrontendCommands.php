@@ -205,7 +205,7 @@ class FrontendCommands extends Tasks
             return $result;
         }
 
-        $themeNameParts = explode("/", $dependency);
+        $themeNameParts = explode("/", $dependency[0]);
         $themeName = $themeNameParts[1] ?? $themeNameParts[0];
 
         $result = $this->taskExec("drush theme:enable $themeName")->run();
@@ -214,7 +214,7 @@ class FrontendCommands extends Tasks
             return $result;
         }
 
-        $this->taskExec("drush config-set system.theme default $theme -y")->run();
+        $this->taskExec("drush config-set system.theme default $themeName -y")->run();
         $this->io()->success("Successfully installed and enabled front-end theme $themeName.");
         return $result;
     }
