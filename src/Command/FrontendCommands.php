@@ -180,7 +180,7 @@ class FrontendCommands extends Tasks
         }
         
         if ($opts['theme']) {
-            $this->installTheme($opts['theme']);
+            $this->installTheme();
         }
         
         $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
