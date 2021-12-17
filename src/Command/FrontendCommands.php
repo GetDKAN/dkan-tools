@@ -187,6 +187,13 @@ class FrontendCommands extends Tasks
         $this->io()->success('Set front page.');
     }
 
+    /**
+     * Install the given Drupal theme.
+     *
+     * @param bool|string $theme
+     *   False to skip theme install; true to install default theme; string for
+     *   a different composer dependency.
+     */
     private function installTheme($theme)
     {
         if ($theme === true) {
