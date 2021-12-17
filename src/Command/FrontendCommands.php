@@ -155,9 +155,7 @@ class FrontendCommands extends Tasks
     * @param array $opts
     *   Options array.
     * @option theme
-    *   Composer requirement for theme to download and enable.
-    *   Pass --no-theme to skip theme installation. Defaults to
-    *   "getdkan/dkan_js_frontend_bartik".
+    *   Whether or not to install default front-end theme. Defaults to true.
     */
     public function frontendInstall($opts = ['theme' => true])
     {
@@ -181,28 +179,20 @@ class FrontendCommands extends Tasks
             return $result;
         }
         
-        $this->installTheme($opts['theme']);
+        if ($opts['theme']) {
+            $this->installTheme($opts['theme']);
+        }
         
         $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
         $this->io()->success('Set front page.');
     }
 
     /**
-     * Install the given Drupal theme.
-     *
-     * @param bool|string $theme
-     *   False to skip theme install; true to install default theme; string for
-     *   a different composer dependency.
+     * Install the given Drupal theme defined in FRONTEND_THEME.
      */
-    private function installTheme($theme)
+    private function installTheme()
     {
-        if ($theme === true) {
-            $theme = self::FRONTEND_THEME;
-        }
-        if (!$theme) {
-            $this->io()->success("Skipping theme installation.");
-            return true;
-        }
+        $theme = self::FRONTEND_THEME;
         $dependency = explode(":", $theme);
         $result = $this->taskComposerRequire()
             ->dependency($dependency[0], ($themeParts[1] ?? null))
