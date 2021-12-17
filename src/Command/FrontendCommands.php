@@ -13,6 +13,7 @@ class FrontendCommands extends Tasks
     const FRONTEND_DIR = 'src/frontend';
     const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-app/';
     const FRONTEND_VCS_REF = 'master';
+    const FRONTEND_THEME = 'getdkan/dkan_js_frontend_bartik';
 
     /**
     * Download the DKAN frontend app to src/frontend.
@@ -150,8 +151,13 @@ class FrontendCommands extends Tasks
     * "extra" section of DKAN's composer.json. If you want to specify a
     * different tag or branch, or different repo entirely, run "dktl
     * frontend:get" first and specify the --ref and/or --url options.
+    *
+    * @param array $opts
+    *   Options array.
+    * @option theme
+    *   Whether or not to install default front-end theme. Defaults to true.
     */
-    public function frontendInstall()
+    public function frontendInstall($opts = ['theme' => true])
     {
         if (!file_exists(self::FRONTEND_DIR)) {
             $this->frontendGet();
@@ -167,6 +173,47 @@ class FrontendCommands extends Tasks
             return $result;
         }
         $this->io()->success('Front-end dependencies installed.');
+        $result = $this->taskExec("drush en -y dkan_js_frontend")->dir("docroot")->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not install front-end node module');
+            return $result;
+        }
+        
+        if ($opts['theme']) {
+            $this->installTheme();
+        }
+        
+        $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
+        $this->io()->success('Set front page.');
+    }
+
+    /**
+     * Install the given Drupal theme defined in FRONTEND_THEME.
+     */
+    private function installTheme()
+    {
+        $theme = self::FRONTEND_THEME;
+        $dependency = explode(":", $theme);
+        $result = $this->taskComposerRequire()
+            ->dependency($dependency[0], ($themeParts[1] ?? null))
+            ->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error("Failed to download theme $theme.");
+            return $result;
+        }
+
+        $themeNameParts = explode("/", $dependency[0]);
+        $themeName = $themeNameParts[1] ?? $themeNameParts[0];
+
+        $result = $this->taskExec("drush theme:enable $themeName")->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error("Could not enable theme $themeName.");
+            return $result;
+        }
+
+        $this->taskExec("drush config-set system.theme default $themeName -y")->run();
+        $this->io()->success("Successfully installed and enabled front-end theme $themeName.");
+        return $result;
     }
 
     /**
@@ -176,18 +223,6 @@ class FrontendCommands extends Tasks
      */
     public function frontendBuild()
     {
-        if (!$this->frontendModulePresent()) {
-            $result = $this->taskExec("../vendor/bin/drush en -y frontend")->dir("docroot")->run();
-            if ($result->getExitCode() != 0) {
-                $this->io()->error('Could not install front-end node module');
-                return $result;
-            }
-            $this->taskExec("../vendor/bin/drush config-set system.site page.front \"/home\" -y")
-                ->dir("docroot")
-                ->run();
-            $this->io()->success('Enabled DKAN frontend module.');
-        }
-
         // Override GATSBY_API_URL with our own proxied domain.
         $task = $this
             ->taskExec('npm run build')
@@ -197,7 +232,7 @@ class FrontendCommands extends Tasks
             $this->io()->error('Could not build the front-end.');
             return $result;
         }
-        $this->io()->success('front-end build.');
+        $this->io()->success('Frontend build successful.');
     }
 
     private function frontendModulePresent()

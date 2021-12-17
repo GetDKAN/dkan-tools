@@ -3,12 +3,9 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
-use DkanTools\DrupalProjectTrait;
 
 class InitCommands extends \Robo\Tasks
 {
-    use DrupalProjectTrait;
-
     /**
      * Initialize DKAN project directory.
      *
@@ -258,5 +255,51 @@ class InitCommands extends \Robo\Tasks
             $branch = $result->getMessage();
             return is_numeric(substr($branch, 0, 1)) ? "${branch}-dev" :  "dev-${branch}";
         }
+    }
+
+    /**
+     * Create the project composer.json based on template.
+     */
+    private function drupalProjectCreate()
+    {
+        $projectSource = "getdkan/recommended-project:9.x-dev";
+        $createFiles = $this->taskComposerCreateProject()
+            ->source($projectSource)
+            ->target(Util::TMP_DIR)
+            ->preferDist(true)
+            ->noInstall()
+            ->run();
+        if ($createFiles->getExitCode() != 0) {
+            $this->io()->error('Could not run composer create-project.');
+            exit;
+        }
+        $this->io()->success("Composer project created from {$projectSource}.");
+    }
+
+    /**
+     * Move composer.json and .lock back to project dir.
+     */
+    private function drupalProjectMoveComposerFiles()
+    {
+        if (file_exists(Util::getProjectDirectory() . "/composer.json")) {
+            $override = $this->confirm('composer.json already exists, replace?');
+            if (!$override) {
+                $this->io()->warning('Skipping composer.json');
+                return;
+            }
+        }
+
+        $moveFiles = $this->taskFilesystemStack()
+            ->rename(
+                Util::TMP_DIR . "/composer.json",
+                Util::getProjectDirectory() . "/composer.json",
+                true
+            )
+            ->run();
+        if ($moveFiles->getExitCode() != 0) {
+            $this->io()->error('could not move composer files.');
+            exit;
+        }
+        $this->io()->success('composer.json moved to project root.');
     }
 }

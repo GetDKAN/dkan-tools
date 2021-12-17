@@ -2,7 +2,6 @@
 
 namespace DkanTools\Command;
 
-use DkanTools\DrupalProjectTrait;
 use DkanTools\Util\Util;
 use Robo\Tasks;
 use Symfony\Component\Filesystem\Filesystem;
@@ -14,8 +13,6 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class MakeCommands extends Tasks
 {
-    use DrupalProjectTrait;
-
     const DRUPAL_FOLDER_NAME = "docroot";
 
     /**
@@ -83,7 +80,7 @@ class MakeCommands extends Tasks
         foreach ($targetsAndLinks as $targetAndLink) {
             $this->docrootSymlink(
                 $targetAndLink['target'],
-                self::$drupalDocroot . $targetAndLink['link']
+                self::DRUPAL_FOLDER_NAME . $targetAndLink['link']
             );
         }
     }
@@ -97,10 +94,10 @@ class MakeCommands extends Tasks
         $link_dirname = $link_parts['dirname'];
         $target_path_relative_to_link = (new Filesystem())->makePathRelative($target, $link_dirname);
 
-        if (!file_exists($target) || !file_exists(self::$drupalDocroot)) {
+        if (!file_exists($target) || !file_exists(self::DRUPAL_FOLDER_NAME)) {
             $this->io()->warning(
                 "Skipping linking $target. Folders $target and '" .
-                self::$drupalDocroot . "' must both be present to create link."
+                self::DRUPAL_FOLDER_NAME . "' must both be present to create link."
             );
             return;
         }
