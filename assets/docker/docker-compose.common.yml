@@ -69,6 +69,8 @@ services:
       - ~/.ssh:/root/.ssh
       - ~/.aws:/root/.aws
       - composer:/root/.composer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   composer:
