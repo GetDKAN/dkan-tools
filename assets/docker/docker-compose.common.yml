@@ -19,6 +19,7 @@ services:
       - PROXY_DOMAIN
       - DKTL_DOCKER=1
       - no_proxy=localhost
+      - XDEBUG_MODE=coverage
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.passHostHeader=true"
@@ -55,6 +56,7 @@ services:
       - PLATFORM
       - XDEBUG_CONFIG=idekey=PHPSTORM
       - XDEBUG_DKTL=1
+      - XDEBUG_MODE=coverage
     links:
       - "web:${DKTL_PROXY_DOMAIN}"
       # Link web to dkan for backward compatibility.
