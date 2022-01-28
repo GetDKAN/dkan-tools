@@ -30,6 +30,16 @@ class ProjectCommands extends \Robo\Tasks
             return $result;
         }
 
+        $task = $this
+            ->taskExec('npm install --force')
+            ->dir("src/tests");
+        $result = $task->run();
+        if ($result->getExitCode() != 0) {
+            $this->io()->error('Could not insall test dependencies.');
+            return $result;
+        }
+        $this->io()->success('Installation of test dependencies successful.');
+
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("src/tests");
 
