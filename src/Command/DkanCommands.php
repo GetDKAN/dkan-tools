@@ -70,6 +70,7 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunit(array $args)
     {
+        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
         $proj_dir = Util::getProjectDirectory();
         $phpunit_executable = $this->getPhpUnitExecutable();
 
@@ -89,6 +90,7 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
+        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
         $proj_dir = Util::getProjectDirectory();
         $dkanDir = "{$proj_dir}/docroot/modules/contrib/dkan";
 
