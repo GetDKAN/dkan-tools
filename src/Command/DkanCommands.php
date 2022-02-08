@@ -3,6 +3,7 @@
 namespace DkanTools\Command;
 
 use DkanTools\Util\Util;
+use DkanTools\Util\TestUserTrait;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -12,6 +13,8 @@ use DkanTools\Util\Util;
  */
 class DkanCommands extends \Robo\Tasks
 {
+    use TestUserTrait;
+
     /**
      * Build DKAN docs with doxygen.
      */
@@ -30,12 +33,8 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestCypress(array $args)
     {
-        $this->dkanTestUser("testuser", "2jqzOAnXS9mmcLasy", "api_user");
-        $this->dkanTestUser("testeditor", "testeditor", "administrator");
-
-        $this->taskExec("npm install cypress")
-            ->dir("docroot/modules/contrib/dkan")
-            ->run();
+        $this->apiUser();
+        $this->editorUser();
 
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("docroot/modules/contrib/dkan");
@@ -172,6 +171,11 @@ class DkanCommands extends \Robo\Tasks
             ->exec("dktl make")
             ->exec("dktl install")
             ->exec("dktl install:sample")
+            ->exec("git clone -b "
+                . FrontendCommands::FRONTEND_VCS_REF
+                . " "
+                . FrontendCommands::FRONTEND_VCS_URL
+                . " " . FrontendCommands::FRONTEND_DIR)
             ->exec("dktl frontend:install")
             ->exec("dktl frontend:build")
             ->exec("dktl drush cr")
@@ -207,14 +211,5 @@ class DkanCommands extends \Robo\Tasks
             ->run();
 
         $this->io()->success("Your dev site is available at: " . Util::getUri());
-    }
-
-    private function dkanTestUser($name, $pass, $roll)
-    {
-        $this->taskExecStack()
-            ->stopOnFail()
-            ->exec("dktl drush user:create $name --password=$pass")
-            ->exec("dktl drush user-add-role $roll $name")
-            ->run();
     }
 }
