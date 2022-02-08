@@ -188,7 +188,6 @@ class FrontendCommands extends Tasks
             $this->io()->error('Could not install front-end node module');
             return $result;
         }
-
     }
 
     /**
