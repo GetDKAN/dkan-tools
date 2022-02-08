@@ -166,13 +166,36 @@ class FrontendCommands extends Tasks
         if (!file_exists("docroot/frontend")) {
             $this->frontendLink();
         }
-        $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
-            ->dir("src/frontend")
-            ->run();
+        $this->cypressLink();
+        $this->npmInstall();
+        $this->moduleInstall();
+
+        if ($opts['theme']) {
+            $this->installTheme();
+        }
+
+        $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
+        $this->io()->success('Set front page.');
+    }
+
+    /**
+     * Install DKAN frontend Drupal module.
+     */
+    private function moduleInstall()
+    {
+        $result = $this->taskExec("drush en -y dkan_js_frontend")->dir("docroot")->run();
         if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not symlink package folder');
+            $this->io()->error('Could not install front-end node module');
             return $result;
         }
+
+    }
+
+    /**
+     * Install frontend npm dependencies.
+     */
+    private function npmInstall()
+    {
         $result = $this->taskExec("npm install")
             ->dir("src/frontend")
             ->run();
@@ -181,18 +204,24 @@ class FrontendCommands extends Tasks
             return $result;
         }
         $this->io()->success('Front-end dependencies installed.');
-        $result = $this->taskExec("drush en -y dkan_js_frontend")->dir("docroot")->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not install front-end node module');
+    }
+
+    /**
+     * Symlink in global cypress installation.
+     */
+    private function cypressLink()
+    {
+        $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
+            ->dir("src/frontend")
+            ->run();
+        if ($result && $result->getExitCode() === 0) {
+            $this->io()->success(
+                'Successfully symlinked global cypress into frontend folder.'
+            );
+        } else {
+            $this->io()->error('Could not symlink package folder');
             return $result;
         }
-
-        if ($opts['theme']) {
-            $this->installTheme();
-        }
-
-        $this->taskExec("drush config-set system.site page.front \"/home\" -y")->run();
-        $this->io()->success('Set front page.');
     }
 
     /**
