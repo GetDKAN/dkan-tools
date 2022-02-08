@@ -3,8 +3,7 @@
     "require": {
         "consolidation/robo": "^3.0.0",
         "pear/archive_tar": "^1.4",
-        "aws/aws-sdk-php": "^3.67",
-        "drupal/coder": "^8.3"
+        "aws/aws-sdk-php": "^3.67"
     },
     "autoload": {
         "psr-4": {
