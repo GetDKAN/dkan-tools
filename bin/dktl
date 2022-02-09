@@ -294,10 +294,7 @@ dktl_docker_cleanup() {
   if [ -z "$DKTL_CHOWN" ] || [ "$DKTL_CHOWN" = "TRUE" ]; then
     # Docker creates files that appear as owned by root on host. Fix:
     if [ -n "$(find "$DKTL_PROJECT_DIRECTORY" -user root -print -quit)" ]; then
-      # Change ownership of all files to the current user.
-      dc_base exec $EXEC_OPTS cli chown -R `id -u`:`id -g` /var/www
-      # Ensure sites/default/files directory is still readable & writeable
-      dc_base exec $EXEC_OPTS cli chmod 766 /var/www/docroot/sites/default/files
+        dc_base exec $EXEC_OPTS cli chown -R `id -u`:`id -g` /var/www
     fi
   fi
 }
