@@ -78,6 +78,7 @@ testDktlInstall() {
 testFrontEnd() {
     result=`dktl frontend:install`
     assertContains "${result}" "Successfully symlinked /src/frontend to docroot/frontend"
+    assertContains "${result}" "Successfully symlinked global cypress into frontend folder"
     assertContains "${result}" "Front-end dependencies installed."
     assertContains "${result}" "Successfully installed and enabled front-end theme"
 

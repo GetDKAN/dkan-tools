@@ -23,8 +23,13 @@ class InstallCommands extends Tasks
             $this->standardInstallation();
         }
 
-        // Workaround for https://www.drupal.org/project/drupal/issues/3091285.
-        $result = $this->taskExec('chmod u+w sites/default')
+        $result = $this->taskExecStack()
+            // Ensure resources directories exists and are writable.
+            ->exec('mkdir -p sites/default/files/uploaded_resources')
+            ->exec('mkdir -p sites/default/files/resources')
+            ->exec('chmod -R 777 sites/default/files')
+            // Workaround for https://www.drupal.org/project/drupal/issues/3091285.
+            ->exec('chmod u+w sites/default')
             ->dir(Util::getProjectDocroot())
             ->run();
 
