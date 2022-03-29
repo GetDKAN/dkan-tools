@@ -43,7 +43,7 @@ class XdebugCommands extends \Robo\Tasks
         }
 
         $result = $this->taskWriteToFile($f)
-            ->textFromFile("$dktlRoot/assets/docker/etc/php/xdbeug.ini")
+            ->textFromFile("$dktlRoot/assets/docker/etc/php/xdebug.ini")
             ->run();
 
         Util::directoryAndFileCreationCheck($result, $f, $this->io());
