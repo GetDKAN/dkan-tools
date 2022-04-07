@@ -10,11 +10,11 @@ trait TestUserTrait
     /**
      * Private create user.
      */
-    private function create($name, $pass, $roll)
+    private function create($name, $pass, $roll, $mail)
     {
         $this->taskExecStack()
             ->stopOnFail()
-            ->exec("dktl drush user:create $name --password=$pass")
+            ->exec("dktl drush user:create $name --password=$pass --mail=$mail")
             ->exec("dktl drush user-add-role $roll $name")
             ->run();
     }
@@ -24,7 +24,7 @@ trait TestUserTrait
      */
     protected function apiUser()
     {
-        $this->create("testuser", "2jqzOAnXS9mmcLasy", "api_user");
+        $this->create("testuser", "2jqzOAnXS9mmcLasy", "api_user", "testuser@mail.com");
     }
 
     /**
@@ -32,6 +32,6 @@ trait TestUserTrait
      */
     protected function editorUser()
     {
-        $this->create("testeditor", "testeditor", "administrator");
+        $this->create("testeditor", "testeditor", "administrator", "testeditor@mail.com");
     }
 }
