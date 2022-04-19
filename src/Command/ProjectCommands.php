@@ -19,8 +19,17 @@ class ProjectCommands extends \Robo\Tasks
      */
     public function projectTestCypress(array $args)
     {
-        $this->apiUser();
-        $this->editorUser();
+
+        if (is_dir('src/modules/test_accounts/')) {
+            $this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl drush en test_accounts -y")
+            ->exec("dktl drush test-users:create")
+            ->run();
+        }else{
+            $this->apiUser();
+            $this->editorUser();
+        }
 
         $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
             ->dir("src/tests")
