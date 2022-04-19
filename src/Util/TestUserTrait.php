@@ -2,36 +2,71 @@
 
 namespace DkanTools\Util;
 
+use DkanTools\Util\Util;
+
 /**
  * Test User Trait.
  */
 trait TestUserTrait
 {
+
     /**
      * Private create user.
      */
-    private function create($name, $pass, $roll)
+    private function createTestUsers()
     {
-        $this->taskExecStack()
+        $people = $this->getUsers();
+        foreach ($people as $person) {
+            $name =$person->name;
+            $mail =$person->mail;
+            $role =$person->role;
+            $this->taskExecStack()
             ->stopOnFail()
-            ->exec("dktl drush user:create $name --password=$pass")
-            ->exec("dktl drush user-add-role $roll $name")
+            ->exec("dktl drush user:create $name --password=$name --mail=$mail")
+            ->exec("dktl drush user-add-role $role $name")
             ->run();
+        }
     }
 
     /**
-     * Protected create api user.
+     * Get user.
      */
-    protected function apiUser()
-    {
-        $this->create("testuser", "2jqzOAnXS9mmcLasy", "api_user");
+    protected function getUser($name) {
+        if ($this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl drush user:information $name")
+            ->run()->wasSuccessful()) {
+          return true;
+        }else{
+            return false;
+        }
     }
 
     /**
-     * Protected create editor.
+     * Get user list.
      */
-    protected function editorUser()
-    {
-        $this->create("testeditor", "testeditor", "administrator");
+    protected function getUsers() {
+        $dktlRoot = Util::getDktlDirectory();
+        $list = file_exists( "testUsers.json") ? "testUsers.json" : $dktlRoot . '/testUsers.json';
+        $json = file_get_contents($list);
+        $user = json_decode($json);
+        return $user;
     }
+
+    /**
+     * Protected delete user.
+     */
+    public function deleteTestUsers() {
+    $people = $this->getUsers();
+    foreach ($people as $person) {
+        $name = $person->name;
+        $user = $this->getUser($name);
+      if ($user) {
+         $this->taskExecStack()
+            ->stopOnFail()
+            ->exec("dktl drush user:cancel --delete-content $name -y")
+            ->run();
+      }
+    }
+  }
 }

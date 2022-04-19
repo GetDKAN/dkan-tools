@@ -1,0 +1,12 @@
+[
+  {
+    "name": "testuser",
+    "mail": "testuser@test.com",
+    "role": "api_user"
+  },
+  {
+    "name": "testeditor",
+    "email": "testeditor@test.com",
+    "role": "administrator"
+  }
+]

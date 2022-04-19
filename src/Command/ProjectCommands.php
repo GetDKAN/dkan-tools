@@ -20,16 +20,7 @@ class ProjectCommands extends \Robo\Tasks
     public function projectTestCypress(array $args)
     {
 
-        if (is_dir('src/modules/test_accounts/')) {
-            $this->taskExecStack()
-            ->stopOnFail()
-            ->exec("dktl drush en test_accounts -y")
-            ->exec("dktl drush test-users:create")
-            ->run();
-        }else{
-            $this->apiUser();
-            $this->editorUser();
-        }
+        $this->createTestUsers();
 
         $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
             ->dir("src/tests")
@@ -48,8 +39,8 @@ class ProjectCommands extends \Robo\Tasks
             return $result;
         }
         $this->io()->success('Installation of test dependencies successful.');
-
-        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
+        $config = file_exists( "src/tests/cypress.json") ? '--config-file src/tests/cypress.json' : '';
+        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run {$config}')
             ->dir("src/tests");
 
         foreach ($args as $arg) {
@@ -58,6 +49,16 @@ class ProjectCommands extends \Robo\Tasks
 
         return $cypress->run();
     }
+
+    /**
+     * Delete Test users.
+     */
+    public function projectDeleteTestUsers(array $args)
+    {
+
+        $this->deleteTestUsers();
+    }
+
 
     /**
      * Run Site PhpUnit Tests. Additional phpunit CLI options can be passed.
