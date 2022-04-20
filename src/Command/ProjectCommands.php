@@ -60,6 +60,15 @@ class ProjectCommands extends \Robo\Tasks
         $this->deleteTestUsers();
     }
 
+     /**
+     * Create Test users.
+     */
+    public function projectCreateTestUsers(array $args)
+    {
+
+        $this->createTestUsers();
+    }
+
 
     /**
      * Run Site PhpUnit Tests. Additional phpunit CLI options can be passed.
