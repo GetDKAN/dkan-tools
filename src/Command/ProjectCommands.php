@@ -47,7 +47,8 @@ class ProjectCommands extends \Robo\Tasks
             $cypress->arg($arg);
         }
 
-        return $cypress->run();
+        $cypress->run();
+        return $this->deleteTestUsers();
     }
 
     /**
