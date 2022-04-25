@@ -2,17 +2,15 @@
 
 namespace DkanTools\Command;
 
-use DkanTools\Util\Util;
-use DkanTools\Util\TestUserTrait;
+use Robo\Tasks;
 
 /**
  * This project's console commands configuration for Robo task runner.
  *
  * @see http://robo.li/
  */
-class ProjectCommands extends \Robo\Tasks
+class ProjectCommands extends Tasks
 {
-    use TestUserTrait;
 
     /**
      * Run project cypress tests.
@@ -39,8 +37,8 @@ class ProjectCommands extends \Robo\Tasks
             return $result;
         }
         $this->io()->success('Installation of test dependencies successful.');
-        $config = file_exists( "src/tests/cypress.json") ? '--config-file src/tests/cypress.json' : '';
-        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run {$config}')
+        $config = file_exists("src/tests/cypress.json") ? '--config-file src/tests/cypress.json' : '';
+        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config)
             ->dir("src/tests");
 
         foreach ($args as $arg) {
@@ -60,7 +58,7 @@ class ProjectCommands extends \Robo\Tasks
         $this->deleteTestUsers();
     }
 
-     /**
+    /**
      * Create Test users.
      */
     public function projectCreateTestUsers(array $args)
@@ -69,12 +67,12 @@ class ProjectCommands extends \Robo\Tasks
         $this->createTestUsers();
     }
 
-
     /**
      * Run Site PhpUnit Tests. Additional phpunit CLI options can be passed.
      *
-     * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
-     * @param array $args Arguments to append to phpunit command.
+     * @see   https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
+     * @param array $args
+     *   Arguments to append to phpunit command.
      */
     public function projectTestPhpunit(array $args)
     {
@@ -92,6 +90,9 @@ class ProjectCommands extends \Robo\Tasks
         return $phpunitExec->run();
     }
 
+    /**
+     *
+     */
     private function getPhpUnitExecutable()
     {
         $proj_dir = Util::getProjectDirectory();
@@ -106,6 +107,9 @@ class ProjectCommands extends \Robo\Tasks
         return $phpunit_executable;
     }
 
+    /**
+     *
+     */
     private function inGitDetachedState($dkanDirPath)
     {
         $output = [];
