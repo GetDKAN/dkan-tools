@@ -1,12 +1,12 @@
 [
   {
-    "name": "testuser",
-    "mail": "testuser@test.com",
+    "name": "testapiuser",
+    "mail": "testapiuser@test.com",
     "role": "api_user"
   },
   {
-    "name": "testeditor",
-    "email": "testeditor@test.com",
+    "name": "testadmin",
+    "mail": "testadmin@test.com",
     "role": "administrator"
   }
 ]

@@ -33,8 +33,12 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestCypress(array $args)
     {
-        $this->apiUser();
-        $this->editorUser();
+        $this->createTestUsers();
+
+        $this->taskExec("npm cache verify && cypress install")
+        //$this->taskExec("npm cache clean --force && npm cache verify && npm install")
+          ->dir("docroot/modules/contrib/dkan")
+          ->run();
 
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("docroot/modules/contrib/dkan");
@@ -43,7 +47,8 @@ class DkanCommands extends \Robo\Tasks
           $cypress->arg($arg);
         }
 
-        return $cypress->run();
+        $cypress->run();
+        return $this->deleteTestUsers();
     }
 
     /**
