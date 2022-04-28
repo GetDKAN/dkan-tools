@@ -56,14 +56,15 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestDredd()
     {
-        $this->apiUser();
+        $this->createTestUsers();
         $this->taskExec("npm install dredd")
             ->dir("docroot/modules/contrib/dkan")
             ->run();
 
-        return $this->taskExec("npx dredd --hookfiles=./dredd-hooks.js")
+        $this->taskExec("npx dredd --hookfiles=./dredd-hooks.js")
             ->dir("docroot/modules/contrib/dkan/dredd")
             ->run();
+        return $this->deleteTestUsers();
     }
 
     /**
@@ -74,7 +75,7 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunit(array $args)
     {
-        $this->apiUser();
+        $this->createTestUsers();
         $proj_dir = Util::getProjectDirectory();
         $phpunit_executable = $this->getPhpUnitExecutable();
 
@@ -86,7 +87,8 @@ class DkanCommands extends \Robo\Tasks
             $phpunitExec->arg($arg);
         }
 
-        return $phpunitExec->run();
+        $phpunitExec->run();
+        return $this->deleteTestUsers();
     }
 
     /**
@@ -94,7 +96,7 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
-        $this->apiUser();
+        $this->createTestUsers();
         $proj_dir = Util::getProjectDirectory();
         $dkanDir = "{$proj_dir}/docroot/modules/contrib/dkan";
 
@@ -124,6 +126,7 @@ class DkanCommands extends \Robo\Tasks
             ->dir($dkanDir)
             ->silent(true)
             ->run();
+        $this->deleteTestUsers();
         return $result;
     }
 
