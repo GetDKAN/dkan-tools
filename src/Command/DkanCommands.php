@@ -30,16 +30,22 @@ class DkanCommands extends \Robo\Tasks
 
     /**
      * Create QA users.
+     *
+     * @command dkan:qa-users-create
+     * @aliases qauc
      */
-    public function dkanQaCreate()
+    public function dkanQaUsersCreate()
     {
         return $this->createTestUsers();
     }
 
     /**
      * Remove QA users.
+     *
+     * @command dkan:qa-users-delete
+     * @aliases qaud
      */
-    public function dkanQaRemove()
+    public function dkanQaUsersDelete()
     {
         return $this->deleteTestUsers();
     }

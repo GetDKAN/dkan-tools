@@ -3,6 +3,7 @@
 namespace DkanTools\Command;
 
 use Robo\Tasks;
+use DkanTools\Util\TestUserTrait;
 
 /**
  * This project's console commands configuration for Robo task runner.
@@ -11,6 +12,7 @@ use Robo\Tasks;
  */
 class ProjectCommands extends Tasks
 {
+    use TestUserTrait;
 
     /**
      * Run project cypress tests.
@@ -47,24 +49,6 @@ class ProjectCommands extends Tasks
 
         $cypress->run();
         return $this->deleteTestUsers();
-    }
-
-    /**
-     * Delete Test users.
-     */
-    public function projectDeleteTestUsers(array $args)
-    {
-
-        $this->deleteTestUsers();
-    }
-
-    /**
-     * Create Test users.
-     */
-    public function projectCreateTestUsers(array $args)
-    {
-
-        $this->createTestUsers();
     }
 
     /**
