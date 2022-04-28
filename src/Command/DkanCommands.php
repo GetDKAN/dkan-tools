@@ -29,6 +29,22 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
+     * Create QA users.
+     */
+    public function dkanQaCreate()
+    {
+        return $this->createTestUsers();
+    }
+
+    /**
+     * Remove QA users.
+     */
+    public function dkanQaRemove()
+    {
+        return $this->deleteTestUsers();
+    }
+
+    /**
      * Run DKAN Cypress Tests.
      */
     public function dkanTestCypress(array $args)
@@ -36,7 +52,6 @@ class DkanCommands extends \Robo\Tasks
         $this->createTestUsers();
 
         $this->taskExec("npm cache verify && cypress install")
-        //$this->taskExec("npm cache clean --force && npm cache verify && npm install")
           ->dir("docroot/modules/contrib/dkan")
           ->run();
 
