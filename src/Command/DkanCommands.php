@@ -57,7 +57,7 @@ class DkanCommands extends \Robo\Tasks
     {
         $this->createTestUsers();
 
-        $this->taskExec("npm cache verify && cypress install")
+        $this->taskExec("npm cache verify && npm install")
           ->dir("docroot/modules/contrib/dkan")
           ->run();
 

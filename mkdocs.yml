@@ -17,6 +17,7 @@ nav:
     - 'patching.md'
     - 'Custom commands': 'extend.md'
     - 'Modifying the Docker containers': 'docker_config.md'
+    - 'Test users': 'testusers.md'
     - 'troubleshooting.md'
 markdown_extensions:
     - admonition
