@@ -149,7 +149,7 @@ class DkanCommands extends \Robo\Tasks
             "./cc-test-reporter after-build -r {$code_climate_reporter_id} --coverage-input-type clover --exit-code $?"
         )
             ->dir($dkanDir)
-            ->silent(TRUE)
+            ->silent(true)
             ->run();
         $this->deleteTestUsers();
         return $result;

@@ -32,9 +32,9 @@ trait TestUserTrait
     protected function userExists($name)
     {
         if ($this->taskExecStack()->stopOnFail()->exec("dktl drush user:information $name")->run()->wasSuccessful()) {
-            return TRUE;
+            return true;
         } else {
-            return FALSE;
+            return false;
         }
     }
 
