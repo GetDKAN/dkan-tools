@@ -2,8 +2,11 @@
 
 namespace DkanTools\Command;
 
-use Robo\Tasks;
 use DkanTools\Util\TestUserTrait;
+
+use Robo\Tasks;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 /**
  * This project's console commands configuration for Robo task runner.
@@ -15,44 +18,85 @@ class ProjectCommands extends Tasks
     use TestUserTrait;
 
     /**
-     * Run project cypress tests.
+     * Path to project cypress tests.
+     *
+     * @var string
      */
-    public function projectTestCypress(array $args)
-    {
+    protected const TESTS_DIR = 'src/tests';
 
+    /**
+     * Run project cypress tests.
+     *
+     * @param array $args
+     *   Cypress command arguments.
+     */
+    public function projectTestCypress(array $args): void
+    {
+        // Prepare environment to run cypress.
+        $this->symlinkOrInstallCypress();
+        $this->installNpmDependencies();
         $this->createTestUsers();
 
-        $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
-            ->dir("src/frontend")
+        // Run Cypress.
+        $this->io()->say('Running cypress...');
+        $config_option = file_exists(self::TESTS_DIR . '/cypress.json') ? ' --config-file cypress.json' : '';
+        $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config_option)
+            ->dir(self::TESTS_DIR)
+            ->args($args)
             ->run();
-        if ($result && $result->getExitCode() === 0) {
-            $this->io()->success(
-                'Successfully symlinked global cypress into frontend folder.'
-            );
-        } else {
-            $this->io()->error('Could not symlink package folder');
-            return $result;
-        }
 
-        $task = $this
-            ->taskExec('npm install --force')
-            ->dir("src/tests");
-        $result = $task->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not insall test dependencies.');
-            return $result;
-        }
-        $this->io()->success('Installation of test dependencies successful.');
-        $config = file_exists("src/tests/cypress.json") ? ' --config-file src/tests/cypress.json' : '';
-        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config)
-            ->dir("src/tests");
+        // Clean up environment.
+        $this->deleteTestUsers();
+    }
 
-        foreach ($args as $arg) {
-            $cypress->arg($arg);
+    /**
+     * Attempt to symlink Cypress command.
+     *
+     * @throws \RuntimeException
+     *   On failure.
+     */
+    protected function symlinkOrInstallCypress(): void
+    {
+        $this->io()->say("Determining if cypress is installed in it's standard location...");
+        $cypress_path = '/usr/local/bin/node_modules/cypress';
+        if (is_dir($cypress_path)) {
+            $this->io()->say('Cypress installed in standard location; symlinking cypress package folder...');
+            // Symlink cypress package folder.
+            $result = $this->taskExec('npm link ' . $cypress_path)
+                ->dir(self::TESTS_DIR)
+                ->run();
+            // Handle errors.
+            if ($result->getExitCode() !== 0) {
+                throw new \RuntimeException('Failed to symlink cypress package folder');
+            }
         }
+        else {
+            $this->io()->warning('Cypress installation not found in standard location; Attempting to install cypress locally...');
+            $result = $this->taskExec('npm install cypress')
+                ->dir(self::TESTS_DIR)
+                ->run();
+            if ($result->getExitCode() !== 0) {
+                throw new \RuntimeException('Failed to install cypress');
+            }
+            $this->io()->success('Successfully installed cypress!');
+        }
+    }
 
-        $cypress->run();
-        return $this->deleteTestUsers();
+    /**
+     * Attempt to install npm test dependencies.
+     *
+     * @throws \RuntimeException
+     *   On failure.
+     */
+    protected function installNpmDependencies(): void
+    {
+        $this->io()->say('Installing test dependencies...');
+        $result = $this->taskExec('npm install --force')
+            ->dir(self::TESTS_DIR)
+            ->run();
+        if ($result->getExitCode() !== 0) {
+            throw new \RuntimeException('Failed to install test dependencies');
+        }
     }
 
     /**

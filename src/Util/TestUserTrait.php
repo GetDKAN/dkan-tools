@@ -13,6 +13,7 @@ trait TestUserTrait
      */
     private function createTestUsers()
     {
+        $this->io()->say('Creating test users...');
         $people = $this->getUsers();
         foreach ($people as $person) {
             $name = $person->name;
@@ -27,9 +28,15 @@ trait TestUserTrait
     }
 
     /**
-     * Get user.
+     * Determine whether a user exists with the given username.
+     *
+     * @param $name
+     *   Username to search for.
+     *
+     * @return bool
+     *   Flag representing whether user exists.
      */
-    protected function userExists($name)
+    protected function userExists(string $name): bool
     {
         if ($this->taskExecStack()->stopOnFail()->exec("dktl drush user:information $name")->run()->wasSuccessful()) {
             return true;
@@ -55,6 +62,7 @@ trait TestUserTrait
      */
     public function deleteTestUsers()
     {
+        $this->io()->say('Deleting test users...');
         $people = $this->getUsers();
         foreach ($people as $person) {
             $name = $person->name;
