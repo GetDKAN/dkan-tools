@@ -43,16 +43,12 @@ class ProjectCommands extends Tasks
             return $result;
         }
         $this->io()->success('Installation of test dependencies successful.');
-        $config = file_exists("src/tests/cypress.json") ? ' --config-file src/tests/cypress.json' : '';
-        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config)
+
+        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("src/tests");
 
-        foreach ($args as $arg) {
-            $cypress->arg($arg);
-        }
-
         $cypress->run();
-        return $this->deleteTestUsers();
+        $this->deleteTestUsers();
     }
 
     /**
