@@ -8,8 +8,10 @@ use DkanTools\Util\TestUserTrait;
 /**
  * This is project's console commands configuration for Robo task runner.
  *
+ * @param $arg
+ *   use 'frontend' to run frontend cypress tests.
+ *
  * @see http://robo.li/
- * @param $arg use 'frontend' to run frontend cypress tests.
  */
 class DkanCommands extends \Robo\Tasks
 {
@@ -29,21 +31,47 @@ class DkanCommands extends \Robo\Tasks
     }
 
     /**
+     * Create QA users.
+     *
+     * @command dkan:qa-users-create
+     * @aliases qauc
+     */
+    public function dkanQaUsersCreate()
+    {
+        return $this->createTestUsers();
+    }
+
+    /**
+     * Remove QA users.
+     *
+     * @command dkan:qa-users-delete
+     * @aliases qaud
+     */
+    public function dkanQaUsersDelete()
+    {
+        return $this->deleteTestUsers();
+    }
+
+    /**
      * Run DKAN Cypress Tests.
      */
     public function dkanTestCypress(array $args)
     {
-        $this->apiUser();
-        $this->editorUser();
+        $this->createTestUsers();
+
+        $this->taskExec("npm cache verify && npm install")
+            ->dir("docroot/modules/contrib/dkan")
+            ->run();
 
         $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
             ->dir("docroot/modules/contrib/dkan");
 
         foreach ($args as $arg) {
-          $cypress->arg($arg);
+            $cypress->arg($arg);
         }
 
-        return $cypress->run();
+        $cypress->run();
+        $this->deleteTestUsers();
     }
 
     /**
@@ -51,25 +79,28 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestDredd()
     {
-        $this->apiUser();
+        $this->createTestUsers();
         $this->taskExec("npm install dredd")
             ->dir("docroot/modules/contrib/dkan")
             ->run();
 
-        return $this->taskExec("npx dredd --hookfiles=./dredd-hooks.js")
+        $this->taskExec("npx dredd --hookfiles=./dredd-hooks.js")
             ->dir("docroot/modules/contrib/dkan/dredd")
             ->run();
+        $this->deleteTestUsers();
     }
 
     /**
      * Run DKAN PhpUnit Tests. Additional phpunit CLI options can be passed.
      *
+     * @param array $args
+     *   Arguments to append to phpunit command.
+     *
      * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
-     * @param array $args Arguments to append to phpunit command.
      */
     public function dkanTestPhpunit(array $args)
     {
-        $this->apiUser();
+        $this->createTestUsers();
         $proj_dir = Util::getProjectDirectory();
         $phpunit_executable = $this->getPhpUnitExecutable();
 
@@ -81,7 +112,9 @@ class DkanCommands extends \Robo\Tasks
             $phpunitExec->arg($arg);
         }
 
-        return $phpunitExec->run();
+        $result = $phpunitExec->run();
+        $this->deleteTestUsers();
+        return $result;
     }
 
     /**
@@ -89,7 +122,7 @@ class DkanCommands extends \Robo\Tasks
      */
     public function dkanTestPhpunitCoverage($code_climate_reporter_id)
     {
-        $this->apiUser();
+        $this->createTestUsers();
         $proj_dir = Util::getProjectDirectory();
         $dkanDir = "{$proj_dir}/docroot/modules/contrib/dkan";
 
@@ -119,21 +152,30 @@ class DkanCommands extends \Robo\Tasks
             ->dir($dkanDir)
             ->silent(true)
             ->run();
+        $this->deleteTestUsers();
         return $result;
     }
 
+    /**
+     * Include CodeClimate report.
+     */
     private function installCodeClimateTestReporter($dkanDir)
     {
         if (!file_exists("{$dkanDir}/cc-test-reporter")) {
             $this->taskExec(
                 "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > "
-                . "./cc-test-reporter"
+                    . "./cc-test-reporter"
             )
                 ->dir($dkanDir)->run();
             $this->taskExec("chmod +x ./cc-test-reporter")->dir($dkanDir)->run();
         }
     }
 
+    /**
+     * Determine path to PHPUnit executable.
+     *
+     * @return string
+     */
     private function getPhpUnitExecutable()
     {
         $proj_dir = Util::getProjectDirectory();
@@ -148,13 +190,18 @@ class DkanCommands extends \Robo\Tasks
         return $phpunit_executable;
     }
 
+    /**
+     * Ensure current git branch is not in a detached state.
+     *
+     * @return bool
+     *   Flag for whether the current branch branch is detached.
+     */
     private function inGitDetachedState($dkanDirPath)
     {
         $output = [];
         exec("cd {$dkanDirPath} && git rev-parse --abbrev-ref HEAD", $output);
         return (isset($output[0]) && $output[0] == 'HEAD');
     }
-
 
     /**
      * Create a new demo project.

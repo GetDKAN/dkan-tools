@@ -7,31 +7,72 @@ namespace DkanTools\Util;
  */
 trait TestUserTrait
 {
+
     /**
      * Private create user.
      */
-    private function create($name, $pass, $roll)
+    private function createTestUsers()
     {
-        $this->taskExecStack()
-            ->stopOnFail()
-            ->exec("dktl drush user:create $name --password=$pass")
-            ->exec("dktl drush user-add-role $roll $name")
-            ->run();
+        $this->io()->say('Creating test users...');
+        $people = $this->getUsers();
+        foreach ($people as $person) {
+            $name = $person->name;
+            $mail = $person->mail;
+            $role = $person->role;
+            $this->taskExecStack()
+                ->stopOnFail()
+                ->exec("dktl drush user:create $name --password=$name --mail=$mail")
+                ->exec("dktl drush user-add-role $role $name")
+                ->run();
+        }
     }
 
     /**
-     * Protected create api user.
+     * Determine whether a user exists with the given username.
+     *
+     * @param $name
+     *   Username to search for.
+     *
+     * @return bool
+     *   Flag representing whether user exists.
      */
-    protected function apiUser()
+    protected function userExists(string $name): bool
     {
-        $this->create("testuser", "2jqzOAnXS9mmcLasy", "api_user");
+        if ($this->taskExecStack()->stopOnFail()->exec("dktl drush user:information $name")->run()->wasSuccessful()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Protected create editor.
+     * Get user list.
      */
-    protected function editorUser()
+    protected function getUsers()
     {
-        $this->create("testeditor", "testeditor", "administrator");
+        $dktlRoot = Util::getDktlDirectory();
+        $list = file_exists("testUsers.json") ? "testUsers.json" : $dktlRoot . '/testUsers.json';
+        $json = file_get_contents($list);
+        $user = json_decode($json);
+        return $user;
+    }
+
+    /**
+     * Protected delete user.
+     */
+    public function deleteTestUsers()
+    {
+        $this->io()->say('Deleting test users...');
+        $people = $this->getUsers();
+        foreach ($people as $person) {
+            $name = $person->name;
+            $user = $this->userExists($name);
+            if ($user) {
+                $this->taskExecStack()
+                    ->stopOnFail()
+                    ->exec("dktl drush user:cancel --delete-content $name -y")
+                    ->run();
+            }
+        }
     }
 }

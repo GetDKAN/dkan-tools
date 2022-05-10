@@ -2,59 +2,110 @@
 
 namespace DkanTools\Command;
 
-use DkanTools\Util\Util;
 use DkanTools\Util\TestUserTrait;
+
+use Robo\Tasks;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 /**
  * This project's console commands configuration for Robo task runner.
  *
  * @see http://robo.li/
  */
-class ProjectCommands extends \Robo\Tasks
+class ProjectCommands extends Tasks
 {
     use TestUserTrait;
 
     /**
-     * Run project cypress tests.
+     * Path to project cypress tests.
+     *
+     * @var string
      */
-    public function projectTestCypress(array $args)
+    protected const TESTS_DIR = 'src/tests';
+
+    /**
+     * Run project cypress tests.
+     *
+     * @param array $args
+     *   Cypress command arguments.
+     */
+    public function projectTestCypress(array $args): void
     {
-        $this->apiUser();
-        $this->editorUser();
+        // Prepare environment to run cypress.
+        $this->symlinkOrInstallCypress();
+        $this->installNpmDependencies();
+        $this->createTestUsers();
 
-        $result = $this->taskExec("npm link ../../../../usr/local/bin/node_modules/cypress")
-            ->dir("src/tests")
+        // Run Cypress.
+        $this->io()->say('Running cypress...');
+        $config_option = file_exists(self::TESTS_DIR . '/cypress.json') ? ' --config-file cypress.json' : '';
+        $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config_option)
+            ->dir(self::TESTS_DIR)
+            ->args($args)
             ->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not symlink package folder');
-            return $result;
+
+        // Clean up environment.
+        $this->deleteTestUsers();
+    }
+
+    /**
+     * Attempt to symlink Cypress command.
+     *
+     * @throws \RuntimeException
+     *   On failure.
+     */
+    protected function symlinkOrInstallCypress(): void
+    {
+        $this->io()->say("Determining if cypress is installed in it's standard location...");
+        $cypress_path = '/usr/local/bin/node_modules/cypress';
+        if (is_dir($cypress_path)) {
+            $this->io()->say('Cypress installed in standard location; symlinking cypress package folder...');
+            // Symlink cypress package folder.
+            $result = $this->taskExec('npm link ' . $cypress_path)
+                ->dir(self::TESTS_DIR)
+                ->run();
+            // Handle errors.
+            if ($result->getExitCode() !== 0) {
+                throw new \RuntimeException('Failed to symlink cypress package folder');
+            }
         }
-
-        $task = $this
-            ->taskExec('npm install --force')
-            ->dir("src/tests");
-        $result = $task->run();
-        if ($result->getExitCode() != 0) {
-            $this->io()->error('Could not insall test dependencies.');
-            return $result;
+        else {
+            $this->io()->warning('Cypress installation not found in standard location; Attempting to install cypress locally...');
+            $result = $this->taskExec('npm install cypress')
+                ->dir(self::TESTS_DIR)
+                ->run();
+            if ($result->getExitCode() !== 0) {
+                throw new \RuntimeException('Failed to install cypress');
+            }
+            $this->io()->success('Successfully installed cypress!');
         }
-        $this->io()->success('Installation of test dependencies successful.');
+    }
 
-        $cypress = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run')
-            ->dir("src/tests");
-
-        foreach ($args as $arg) {
-            $cypress->arg($arg);
+    /**
+     * Attempt to install npm test dependencies.
+     *
+     * @throws \RuntimeException
+     *   On failure.
+     */
+    protected function installNpmDependencies(): void
+    {
+        $this->io()->say('Installing test dependencies...');
+        $result = $this->taskExec('npm install --force')
+            ->dir(self::TESTS_DIR)
+            ->run();
+        if ($result->getExitCode() !== 0) {
+            throw new \RuntimeException('Failed to install test dependencies');
         }
-
-        return $cypress->run();
     }
 
     /**
      * Run Site PhpUnit Tests. Additional phpunit CLI options can be passed.
      *
+     * @param array $args
+     *   Arguments to append to phpunit command.
+     *
      * @see https://phpunit.de/manual/6.5/en/textui.html#textui.clioptions
-     * @param array $args Arguments to append to phpunit command.
      */
     public function projectTestPhpunit(array $args)
     {
@@ -72,6 +123,9 @@ class ProjectCommands extends \Robo\Tasks
         return $phpunitExec->run();
     }
 
+    /**
+     * Determine path to PHPUnit executable.
+     */
     private function getPhpUnitExecutable()
     {
         $proj_dir = Util::getProjectDirectory();
@@ -86,6 +140,12 @@ class ProjectCommands extends \Robo\Tasks
         return $phpunit_executable;
     }
 
+    /**
+     * Ensure current git branch is not in a detached state.
+     *
+     * @return bool
+     *   Flag for whether the current branch branch is detached.
+     */
     private function inGitDetachedState($dkanDirPath)
     {
         $output = [];
