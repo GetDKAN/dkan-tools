@@ -30,7 +30,7 @@ class ProjectCommands extends Tasks
      * @param array $args
      *   Cypress command arguments.
      */
-    public function projectTestCypress(array $args): void
+    public function projectTestCypress(array $args)
     {
         // Prepare environment to run cypress.
         $this->symlinkOrInstallCypress();
