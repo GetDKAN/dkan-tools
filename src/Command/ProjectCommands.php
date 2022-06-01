@@ -30,7 +30,7 @@ class ProjectCommands extends Tasks
      * @param array $args
      *   Cypress command arguments.
      */
-    public function projectTestCypress(array $args): void
+    public function projectTestCypress(array $args)
     {
         // Prepare environment to run cypress.
         $this->symlinkOrInstallCypress();
@@ -40,13 +40,15 @@ class ProjectCommands extends Tasks
         // Run Cypress.
         $this->io()->say('Running cypress...');
         $config_option = file_exists(self::TESTS_DIR . '/cypress.json') ? ' --config-file cypress.json' : '';
-        $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config_option)
+        $result = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress run' . $config_option)
             ->dir(self::TESTS_DIR)
             ->args($args)
             ->run();
 
         // Clean up environment.
         $this->deleteTestUsers();
+        
+        return $result;
     }
 
     /**
