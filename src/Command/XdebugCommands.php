@@ -34,10 +34,8 @@ class XdebugCommands extends \Robo\Tasks
     {
         $this->xdebugCheck();
 
-        $platform = getenv("PLATFORM");
-        $sourceFile = ($platform == 'Darwin') ? 'xdebug-macos.ini' : 'xdebug-linux.ini';
         $dktlRoot = Util::getDktlDirectory();
-        $this->io()->text("Creating new xdebug.ini file for {$platform} platform.");
+        $this->io()->text("Creating new xdebug.ini file.");
 
         $f = 'src/docker/etc/php/xdebug.ini';
         if (file_exists($f)) {
@@ -45,7 +43,7 @@ class XdebugCommands extends \Robo\Tasks
         }
 
         $result = $this->taskWriteToFile($f)
-            ->textFromFile("$dktlRoot/assets/docker/etc/php/$sourceFile")
+            ->textFromFile("$dktlRoot/assets/docker/etc/php/xdebug.ini")
             ->run();
 
         Util::directoryAndFileCreationCheck($result, $f, $this->io());
