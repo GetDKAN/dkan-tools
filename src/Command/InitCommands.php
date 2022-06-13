@@ -13,6 +13,8 @@ class InitCommands extends \Robo\Tasks
      * and directories for development, including a composer.json (but NOT
      * including any Composer dependencies.)
      *
+     * @option str drupal
+     *   Drupal composer version (expressed as composer constraint).
      * @option str dkan
      *   DKAN version (expressed as composer constraint). Use 2.x-dev for current
      *   bleeding edge.
@@ -23,10 +25,9 @@ class InitCommands extends \Robo\Tasks
     */
     public function init($opts = ['dkan' => null, 'dkan-local' => false])
     {
-        // Handled by Composer.
-        // $this->initConfig();
-        // $this->initSrc();
-        // $this->initDrupal();
+        $this->initConfig();
+        $this->initSrc();
+        $this->initDrupal();
         if ($opts['dkan-local']) {
             $this->initLocalDkan();
             $version = $this->localDkanVersion();
@@ -230,7 +231,7 @@ class InitCommands extends \Robo\Tasks
      */
     private function initLocalDkan()
     {
-        $this->io()->section('Adding local DKAN repository for /dkan.');
+        $this->io()->section('Adding local DKAN repository in /dkan.');
         $this->taskComposerConfig()
             ->repository('getdkan', 'dkan', 'path')
             ->run();

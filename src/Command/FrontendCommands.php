@@ -207,8 +207,6 @@ class FrontendCommands extends Tasks
 
     /**
      * Symlink in global cypress installation.
-     *
-     * @todo: make this go away. @danielgading
      */
     private function cypressLink()
     {
