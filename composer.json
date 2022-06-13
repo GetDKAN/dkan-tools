@@ -19,5 +19,8 @@
         "platform": {
             "php": "7.4"
         }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7"
     }
 }
