@@ -4,7 +4,17 @@
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+foreach ([
+  // Legacy-style autoload.
+  '/../vendor/autoload.php',
+  // Under vendor.
+  '/../../vendor/autoload.php',
+         ] as $path) {
+  $pathy = __DIR__ . $path;
+  if (file_exists($pathy)) {
+    require_once $pathy;
+  }
+}
 
 putenv("COMPOSER_MEMORY_LIMIT=-1");
 

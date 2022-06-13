@@ -13,7 +13,7 @@ main() {
 
   set_project_directory "$@"
   set_slug
-  
+
   if [ "$DKTL_MODE" = "DOCKER" ]; then
     dktl_docker_run "$@"
   elif [ "$DKTL_MODE" = "HOST" ]; then
@@ -52,20 +52,20 @@ dktl_docker_run() {
 
   # Proxy-pass to docker and save exit status. The command will re-
   # run in host mode inside the cli container, so dktl_run will still
-  # ultimately be run whichever mode dktl is set to. 
+  # ultimately be run whichever mode dktl is set to.
   dc_base exec $EXEC_OPTS cli dktl "$1" "${@:2}"
   exit_status=$?
 
   dktl_docker_cleanup "$@"
 
-  # if we encountered a non-zero exit status during the docker exec, 
+  # if we encountered a non-zero exit status during the docker exec,
   # pass it on.
   if [ $exit_status -ne 0 ]; then
     exit $exit_status
   fi
 }
 
-# Set DKTL_PLATFORM to which platform we're running on (linux and mac 
+# Set DKTL_PLATFORM to which platform we're running on (linux and mac
 # supported)
 set_platform() {
   if [ -z $PLATFORM ]; then
@@ -73,7 +73,7 @@ set_platform() {
   fi
 }
 
-# Set DKTL_MODE. Determine whether we want to run inside the docker container 
+# Set DKTL_MODE. Determine whether we want to run inside the docker container
 # or in the host machine.
 set_mode() {
   if [ -z $DKTL_MODE ] || [ "$DKTL_MODE" = "DOCKER" ]; then
@@ -103,22 +103,25 @@ check_dependencies() {
 
 # Set DKTL_PROJECT_DIRECTORY. Needs "$@" because dktl init hsa different logic.
 set_project_directory() {
-  # Find project root so we can run from anywhere
-  find_up () {
-    path=$(pwd)
-    while [[ "$path" != "" && ! -e "$path/$1" ]]; do
-      path=${path%/*}
-    done
-    echo "$path"
-  }
-
-  if [ "$1" = "init" ] || [ "$1" = "down" ]; then
+  if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
     DKTL_PROJECT_DIRECTORY=$(pwd)
-  else
-    DKTL_PROJECT_DIRECTORY=$(find_up dktl.yml)
-    if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
-      echo "DKTL is running outside of a DKTL project. Run dktl init in the project directory first."
-      exit 1
+    # Find project root so we can run from anywhere
+    find_up () {
+      path=$(pwd)
+      while [[ "$path" != "" && ! -e "$path/$1" ]]; do
+        path=${path%/*}
+      done
+      echo "$path"
+    }
+
+    if [ "$1" = "init" ] || [ "$1" = "down" ]; then
+      DKTL_PROJECT_DIRECTORY=$(pwd)
+    else
+      DKTL_PROJECT_DIRECTORY=$(find_up dktl.yml)
+      if [ -z "$DKTL_PROJECT_DIRECTORY" ]; then
+        echo "DKTL is running outside of a DKTL project. Run dktl init in the project directory first."
+        exit 1
+      fi
     fi
   fi
   export DKTL_PROJECT_DIRECTORY
@@ -126,17 +129,20 @@ set_project_directory() {
 
 # Set DKTL_DIRECTORY
 set_directory() {
-  DKTL_DIRECTORY=$(which dktl)
+  if [ -z "$DKTL_DIRECTORY" ]; then
+    DKTL_DIRECTORY=$(which dktl)
 
-  if [[ -L $(which dktl) ]]; then
-    # readlink command needs -f to work properly in linux
-    if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
-    DKTL_DIRECTORY=$(readlink $RL_OPT "$DKTL_DIRECTORY")
+    if [[ -L $(which dktl) ]]; then
+      # readlink command needs -f to work properly in linux
+      if [ "$PLATFORM" = "Linux" ]; then RL_OPT='-f'; fi;
+      DKTL_DIRECTORY=$(readlink $RL_OPT "$DKTL_DIRECTORY")
+    fi
+
+    # TODO: Figure out a way to modify the path without making assumptions.
+    # Currently DKTL_DIRECTORY contains <path/to/dktl/root>/bin/dktl, strip the
+    # /bin/dktl to get the root dktl directory.
+    DKTL_DIRECTORY="${DKTL_DIRECTORY%/bin/dktl}"
   fi
-
-  # Currently DKTL_DIRECTORY contains <path/to/dktl/root>/bin/dktl, strip the
-  # /bin/dktl to get the root dktl directory.
-  DKTL_DIRECTORY="${DKTL_DIRECTORY%/bin/dktl}"
 
   export DKTL_DIRECTORY
 }

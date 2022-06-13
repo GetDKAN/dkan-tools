@@ -25,14 +25,14 @@ class Util
         }
     }
 
-    public static function getProjectDirectory()
-    {
-        if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "init") {
-            $directory = exec("pwd");
-            return $directory;
-        }
-
-        return getenv("DKTL_PROJECT_DIRECTORY");
+    public static function getProjectDirectory() {
+      if ($proj_dir = getenv("DKTL_PROJECT_DIRECTORY")) {
+        return $proj_dir;
+      }
+      if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "init") {
+        $directory = exec("pwd");
+        return $directory;
+      }
     }
 
     public static function getUri()
@@ -80,7 +80,7 @@ class Util
         $headers = @get_headers($url);
         return (count(preg_grep('/^HTTP.*404/', $headers)) > 0) ? false : true;
     }
-    
+
     public static function directoryAndFileCreationCheck(\Robo\Result $result, $df, $io)
     {
         if ($result->getExitCode() == 0 && file_exists($df)) {
