@@ -262,7 +262,7 @@ class InitCommands extends \Robo\Tasks
      */
     private function drupalProjectCreate()
     {
-        $projectSource = "getdkan/recommended-project:add-prophecy";
+        $projectSource = "getdkan/recommended-project:dev-add-prophecy";
         $createFiles = $this->taskComposerCreateProject()
             ->source($projectSource)
             ->target(Util::TMP_DIR)
