@@ -31,6 +31,38 @@ The critical parts of the example are:
 
 Everything else (class names, function names) is flexible, and each public function inside of the class will show up as an available `dktl` command.
 
+## Custom Tests
+- Add a `phpunit.xml` file to `src/modules`, then add the paths of your tests to the Custom Test Suite directory section.
+- Run the tests with `dktl custom:test-phpunit --testsuite "Custom Test Suite"`
+
+_phpunit.xml_ sample
+
+```php
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.6/phpunit.xsd"
+    bootstrap="/var/www/vendor/weitzman/drupal-test-traits/src/bootstrap.php"
+    colors="true"
+    stopOnFailure="false"
+    stopOnError="false"
+    verbose="true">
+
+    <testsuites>
+        <testsuite name="Custom Test Suite">
+            <directory>my_module/tests/src/ExistingSite/TestName.php</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <!-- These variables may alternatively be set as environment variables. -->
+        <!-- E.g., `DRUPAL_VERSION=V8 ./vendor/bin/phpunit` -->
+        <env name="DRUPAL_VERSION" value="V8"/>
+        <env name="DTT_BASE_URL" value="http://web"/>
+        <env name="SIMPLETEST_BASE_URL" value="http://web"/>
+        <env name="SIMPLETEST_DB" value="mysql://drupal:123@db/drupal"/>
+    </php>
+</phpunit>
+```
 
 ## Advanced configuration
 
