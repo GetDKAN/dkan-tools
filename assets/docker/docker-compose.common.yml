@@ -41,7 +41,7 @@ services:
   # Used for all console commands and tools.
   cli:
     hostname: cli
-    image: getdkan/dkan-cli:v0.4.4
+    image: getdkan/dkan-cli:v0.4.5
     env_file:
       - "${DKTL_DIRECTORY}/assets/docker/mysql.env"
     environment:
