@@ -112,12 +112,9 @@ class ProjectCommands extends Tasks
      */
     public function projectTestPhpunit(array $args)
     {
-        $proj_dir = Util::getProjectDirectory();
         $phpunit_executable = $this->getPhpUnitExecutable();
 
-        $phpunitExec = $this->taskExec($phpunit_executable)
-            ->option('testsuite', 'Custom Test Suite')
-            ->dir("{$proj_dir}/docroot/modules/custom");
+        $phpunitExec = $this->taskExec($phpunit_executable);
 
         foreach ($args as $arg) {
             $phpunitExec->arg($arg);
@@ -131,9 +128,9 @@ class ProjectCommands extends Tasks
      */
     private function getPhpUnitExecutable()
     {
-        $proj_dir = Util::getProjectDirectory();
+        // $proj_dir = Util::getProjectDirectory();
 
-        $phpunit_executable = $phpunit_executable = "{$proj_dir}/vendor/bin/phpunit";
+        $phpunit_executable = $phpunit_executable = "vendor/bin/phpunit";
 
         if (!file_exists($phpunit_executable)) {
             $this->taskExec("dktl installphpunit")->run();
