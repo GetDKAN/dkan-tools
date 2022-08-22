@@ -26,12 +26,6 @@ testUninitialized() {
     assertContains "${result}" "DKTL is running outside of a DKTL project."
 }
 
-testDktlInitWithBadParameter() {
-    result=`dktl init --dkan=foobar`
-    assertContains "${result}" "Could not parse version constraint foobar"
-    rm -rf composer.* dktl.yml docrot src
-}
-
 testDktlInit() {
     result=`dktl init`
     assertContains "${result}" 'Composer project created'
