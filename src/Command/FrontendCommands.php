@@ -261,7 +261,7 @@ class FrontendCommands extends Tasks
     {
         // Override GATSBY_API_URL with our own proxied domain.
         $task = $this
-            ->taskExec('npm run build --force')
+            ->taskExec('npm run build')
             ->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
