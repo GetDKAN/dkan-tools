@@ -259,6 +259,13 @@ class FrontendCommands extends Tasks
      */
     public function frontendBuild()
     {
+        if (!file_exists(self::FRONTEND_DIR)) {
+            $this->frontendGet();
+        }
+        if (!file_exists("docroot/frontend")) {
+            $this->frontendLink();
+        }
+
         // Override GATSBY_API_URL with our own proxied domain.
         $task = $this
             ->taskExec('npm run build')
