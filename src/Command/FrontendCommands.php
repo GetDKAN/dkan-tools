@@ -261,9 +261,11 @@ class FrontendCommands extends Tasks
     {
         if (!file_exists(self::FRONTEND_DIR)) {
             $this->frontendGet();
+            $this->io()->success('Frontend directory found.');
         }
         if (!file_exists("docroot/frontend")) {
             $this->frontendLink();
+            $this->io()->success('Frontend directory symlinked.');
         }
 
         // Override GATSBY_API_URL with our own proxied domain.
