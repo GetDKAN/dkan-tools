@@ -259,18 +259,9 @@ class FrontendCommands extends Tasks
      */
     public function frontendBuild()
     {
-        if (!file_exists(self::FRONTEND_DIR)) {
-            $this->frontendGet();
-            $this->io()->success('Frontend directory found.');
-        }
-        if (!file_exists("docroot/frontend")) {
-            $this->frontendLink();
-            $this->io()->success('Frontend directory symlinked.');
-        }
-
         // Override GATSBY_API_URL with our own proxied domain.
         $task = $this
-            ->taskExec('npm run build')
+            ->taskExec('CI=false npm run build')
             ->dir("src/frontend");
         $result = $task->run();
         if ($result->getExitCode() != 0) {
