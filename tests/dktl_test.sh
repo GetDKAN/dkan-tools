@@ -92,33 +92,33 @@ testFrontEnd() {
     assertContains "${result}" '<div id="root">'
 }
 
-# testBringDown() {
-#     dktl down
+testBringDown() {
+    dktl down
 
-#     result=`docker ps --all --filter "name=${DKTL_TEST_PROJECT_NAME}"`
-#     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_cli_1"
-#     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_web_1"
-#     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_web_1"
+    result=`docker ps --all --filter "name=${DKTL_TEST_PROJECT_NAME}"`
+    assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_cli_1"
+    assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_web_1"
+    assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_web_1"
 
-#     result=`docker volume ls --filter "name=${DKTL_TEST_PROJECT_NAME}"`
-#     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_composer"
+    result=`docker volume ls --filter "name=${DKTL_TEST_PROJECT_NAME}"`
+    assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_composer"
 
-#     result=`docker network ls --filter "name=${DKTL_TEST_PROJECT_NAME}"`
-#     assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_default"
-# }
+    result=`docker network ls --filter "name=${DKTL_TEST_PROJECT_NAME}"`
+    assertNotContains "${result}" "${DKTL_TEST_PROJECT_NAME}_default"
+}
 
-# oneTimeTearDown() {
-#     containers=`docker ps --filter name="${DKTL_TEST_PROJECT_NAME}*" -aq`
-#     echo $containers
-#     if [ ! -z "$containers" ]; then
-#         echo "$containers" | xargs docker stop | xargs docker rm -v
-#         docker network disconnect "${DKTL_TEST_PROJECT_NAME}_default" dktl-proxy
-#         docker network rm "${DKTL_TEST_PROJECT_NAME}_default"
-#     fi
-#     if [ -d "${DKTL_TEST_PROJECT_DIR}" ]; then
-#         rm -rf $DKTL_TEST_PROJECT_DIR
-#     fi
-# }
+oneTimeTearDown() {
+    containers=`docker ps --filter name="${DKTL_TEST_PROJECT_NAME}*" -aq`
+    echo $containers
+    if [ ! -z "$containers" ]; then
+        echo "$containers" | xargs docker stop | xargs docker rm -v
+        docker network disconnect "${DKTL_TEST_PROJECT_NAME}_default" dktl-proxy
+        docker network rm "${DKTL_TEST_PROJECT_NAME}_default"
+    fi
+    if [ -d "${DKTL_TEST_PROJECT_DIR}" ]; then
+        rm -rf $DKTL_TEST_PROJECT_DIR
+    fi
+}
 
 # Load shUnit2.
 . ./shunit2/shunit2
