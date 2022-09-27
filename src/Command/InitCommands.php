@@ -217,7 +217,7 @@ class InitCommands extends \Robo\Tasks
      *
      * @return [type]
      */
-    public function initDkan(string $version = null)
+    public function initDkan(string $version = "dev-frontend-update")
     {
         $this->io()->section('Adding DKAN project dependency.');
         $this->taskComposerRequire()
