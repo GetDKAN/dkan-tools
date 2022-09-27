@@ -86,7 +86,7 @@ testFrontEnd() {
     assertContains "${result}" "package.json"
 
     result=`dktl frontend:build`
-    assertContains "${result}" "The project was built assuming it is hosted at /frontend/build/."
+    assertContains "${result}" "The project was built assuming it is hosted at /."
 
     result=`curl $url`
     assertContains "${result}" '<div id="root">'
