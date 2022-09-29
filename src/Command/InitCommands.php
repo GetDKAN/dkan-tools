@@ -23,7 +23,7 @@ class InitCommands extends \Robo\Tasks
      *   If no version constraint is provided via the --dkan option, dktl will
      *   attempt to generate one based on the current git branch in "dkan".
     */
-    public function init($opts = ['dkan' => '2.x-dev', 'dkan-local' => FALSE])
+    public function init($opts = ['dkan' => NULL, 'dkan-local' => FALSE])
     {
         $this->initConfig();
         $this->initSrc();
@@ -217,7 +217,7 @@ class InitCommands extends \Robo\Tasks
      *
      * @return [type]
      */
-    public function initDkan(string $version = "2.x-dev")
+    public function initDkan(string $version = NULL)
     {
         $this->io()->section('Adding DKAN project dependency.');
         $this->taskComposerRequire()
