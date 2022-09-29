@@ -12,7 +12,7 @@ class FrontendCommands extends Tasks
 
     const FRONTEND_DIR = 'src/frontend';
     const FRONTEND_VCS_URL = 'https://github.com/GetDKAN/data-catalog-app/';
-    const FRONTEND_VCS_REF = '1.1.0';
+    const FRONTEND_VCS_REF = 'master';
     const FRONTEND_THEME = 'getdkan/dkan_js_frontend_bartik';
 
 
