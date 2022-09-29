@@ -51,7 +51,10 @@ trait TestUserTrait
     protected function getUsers()
     {
         $dktlRoot = Util::getDktlDirectory();
-        $list = file_exists("testUsers.json") ? "testUsers.json" : $dktlRoot . '/testUsers.json';
+        $projectRoot = Util::getProjectDirectory();
+        $list = file_exists($projectRoot . "/testUsers.json")
+          ? $projectRoot . "/testUsers.json"
+          : $dktlRoot . '/testUsers.json';
         $json = file_get_contents($list);
         $user = json_decode($json);
         return $user;
