@@ -108,13 +108,6 @@ class ProjectCommands extends Tasks
             throw new \RuntimeException('Failed to verify cypress');
         }
 
-        $this->io()->say('Clearing Cypress cache...');
-        $clear = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" cypress cache clear')
-            ->dir(self::TESTS_DIR)
-            ->run();
-        if ($clear && $clear->getExitCode() !== 0) {
-            throw new \RuntimeException('Failed to clear cypress cache');
-        }
     }
 
     /**
