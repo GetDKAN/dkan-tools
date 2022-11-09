@@ -107,7 +107,6 @@ class ProjectCommands extends Tasks
         if ($verify && $verify->getExitCode() !== 0) {
             throw new \RuntimeException('Failed to verify cypress');
         }
-
     }
 
     /**
