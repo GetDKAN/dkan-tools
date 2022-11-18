@@ -2,6 +2,7 @@
 
 namespace DkanTools\Command;
 
+use DkanTools\Util\Util;
 use DkanTools\Util\TestUserTrait;
 
 use Robo\Tasks;
