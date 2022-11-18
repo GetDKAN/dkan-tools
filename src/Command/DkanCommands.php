@@ -70,8 +70,9 @@ class DkanCommands extends \Robo\Tasks
             $cypress->arg($arg);
         }
 
-        $cypress->run();
+        $result = $cypress->run();
         $this->deleteTestUsers();
+        return $result;
     }
 
     /**
@@ -112,8 +113,9 @@ class DkanCommands extends \Robo\Tasks
             $phpunitExec->arg($arg);
         }
 
-        $phpunitExec->run();
+        $result = $phpunitExec->run();
         $this->deleteTestUsers();
+        return $result;
     }
 
     /**

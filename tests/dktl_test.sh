@@ -93,6 +93,7 @@ testFrontEnd() {
 }
 
 testBringDown() {
+    wait
     dktl down
 
     result=`docker ps --all --filter "name=${DKTL_TEST_PROJECT_NAME}"`
