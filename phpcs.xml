@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PHP_CodeSniffer"
+         xsi:noNamespaceSchemaLocation="phpcs.xsd">
+  <description>The coding standard for DKAN Tools.</description>
+
+  <exclude-pattern>*/bin/dktl</exclude-pattern>
+  <exclude-pattern>*/assets</exclude-pattern>
+  <exclude-pattern>*/vendor</exclude-pattern>
+
+
+  <arg name="basepath" value="."/>
+  <arg name="colors"/>
+  <arg name="parallel" value="75"/>
+
+  <rule ref="PSR2"/>
+
+  <rule ref="Generic.Files.LineLength">
+    <exclude name="Generic.Files.LineLength.TooLong"/>
+  </rule>
+
+</ruleset>

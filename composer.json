@@ -5,6 +5,10 @@
         "pear/archive_tar": "^1.4",
         "aws/aws-sdk-php": "^3.67"
     },
+    "bin": [
+        "bin/dktl",
+        "bin/app.php"
+    ],
     "autoload": {
         "psr-4": {
             "DkanTools\\": "src",
@@ -15,5 +19,8 @@
         "platform": {
             "php": "7.4"
         }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7"
     }
 }

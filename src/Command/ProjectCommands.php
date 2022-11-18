@@ -72,8 +72,7 @@ class ProjectCommands extends Tasks
             if ($result->getExitCode() !== 0) {
                 throw new \RuntimeException('Failed to symlink cypress package folder');
             }
-        }
-        else {
+        } else {
             $this->io()->warning('Cypress installation not found in standard location; Attempting to install cypress locally...');
             $result = $this->taskExec('npm install cypress')
                 ->dir(self::TESTS_DIR)

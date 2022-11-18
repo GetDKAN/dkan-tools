@@ -9,6 +9,7 @@ namespace DkanTools\Util;
  */
 class Util
 {
+
     const TMP_DIR = "/tmp/dktl";
 
     public static function getDktlDirectory()
@@ -27,12 +28,13 @@ class Util
 
     public static function getProjectDirectory()
     {
+        if ($proj_dir = getenv("DKTL_PROJECT_DIRECTORY")) {
+            return $proj_dir;
+        }
         if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "init") {
             $directory = exec("pwd");
             return $directory;
         }
-
-        return getenv("DKTL_PROJECT_DIRECTORY");
     }
 
     public static function getUri()
@@ -80,7 +82,7 @@ class Util
         $headers = @get_headers($url);
         return (count(preg_grep('/^HTTP.*404/', $headers)) > 0) ? false : true;
     }
-    
+
     public static function directoryAndFileCreationCheck(\Robo\Result $result, $df, $io)
     {
         if ($result->getExitCode() == 0 && file_exists($df)) {
@@ -95,7 +97,11 @@ class Util
      */
     public static function generateHashSalt($count = 32)
     {
-        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(random_bytes($count)));
+        return str_replace(['+', '/', '='], [
+            '-',
+            '_',
+            '',
+        ], base64_encode(random_bytes($count)));
     }
 
     /**
@@ -106,7 +112,7 @@ class Util
     public static function ensureFilesExist(array $paths, $message)
     {
         foreach ($paths as $path) {
-            if (! file_exists($path)) {
+            if (!file_exists($path)) {
                 throw new \Exception("{$path} is missing.");
             }
         }
