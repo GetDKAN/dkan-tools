@@ -128,8 +128,6 @@ class ProjectCommands extends Tasks
      */
     private function getPhpUnitExecutable()
     {
-        // $proj_dir = Util::getProjectDirectory();
-
         $phpunit_executable = $phpunit_executable = "vendor/bin/phpunit";
 
         if (!file_exists($phpunit_executable)) {
