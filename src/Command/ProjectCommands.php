@@ -48,7 +48,7 @@ class ProjectCommands extends Tasks
 
         // Clean up environment.
         $this->deleteTestUsers();
-        
+
         return $result;
     }
 
@@ -99,6 +99,14 @@ class ProjectCommands extends Tasks
             ->run();
         if ($result->getExitCode() !== 0) {
             throw new \RuntimeException('Failed to install test dependencies');
+        }
+
+        $this->io()->say('Verifying Cypress...');
+        $verify = $this->taskExec('CYPRESS_baseUrl="http://$DKTL_PROXY_DOMAIN" npx cypress verify')
+            ->dir(self::TESTS_DIR)
+            ->run();
+        if ($verify && $verify->getExitCode() !== 0) {
+            throw new \RuntimeException('Failed to verify cypress');
         }
     }
 
